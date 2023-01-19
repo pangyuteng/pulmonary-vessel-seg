@@ -16,10 +16,11 @@
 
     <script type="text/javascript">
         var params = [];
-        //params["images"] = ["http://gtx.local:8000/series.nii.gz"];
-        //params["surfaces"] = ["http://gtx.local:8000/sample_image_text.vtk"];
-        params["images"] = ["http://gtx.local:8000/img.nii.gz"];
+        //params["images"] = ["http://gtx.local:8000/img.nii.gz"];
+        params["images"] = ["http://gtx.local:8000/lung_vessels.nii.gz"];
         params["surfaces"] = ["http://gtx.local:8000/lung_vessels.vtk"];
+        params["series.vtk"] = {color: [1, 0, 0], alpha: 0.5};
+        params["mainView"] = "surface";
     </script>
 
     <title>Debug Local</title>
