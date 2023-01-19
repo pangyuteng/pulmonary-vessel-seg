@@ -10,8 +10,12 @@ docker run -it -u $(id -u):$(id -g) \
     -w $PWD -v /mnt:/mnt \
     pangyuteng/dcm:latest bash
 
-python gen_vtk.py lung_vessels.nii.gz ../view/lung_vessels.vtk
-python gen_vtk.py ../view/series.nii.gz ../view/series.vtk
+cp ../tmp/segmentations/lung_vessels.nii.gz ../view
+cp ../../Papaya/tests/data/series.nii.gz ../view
+
+python gen_vtk.py ../view/series.nii.gz ../view/series.vtk && \
+python gen_vtk.py lung_vessels.nii.gz ../view/lung_vessels.vtk && \
+ls ../view/*.vtk -lh
 
 http://www.vmtk.org/tutorials/SurfaceForMeshing.html
 
