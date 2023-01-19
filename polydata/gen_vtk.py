@@ -25,7 +25,7 @@ def main(input_file,output_file):
     #vtkMarchingCubes->vtkPolyDataNormals->vtkPolyDataWriter
     print('smoothing polydata')
     smoothingIterations = 30
-    passBand = 0.1
+    passBand = 0.001
     featureAngle = 120.0
     smoother = vtk.vtkWindowedSincPolyDataFilter()
     smoother.SetInputConnection(dmc.GetOutputPort())
@@ -37,17 +37,12 @@ def main(input_file,output_file):
     smoother.NonManifoldSmoothingOn()
     smoother.NormalizeCoordinatesOn()
     smoother.Update()
-    #smoother.GetOutputPort()
 
-    reduction = 0.95
-    decimate = vtk.vtkDecimatePro()
-    decimate.SetInputData(smoother.GetOutput())
+    reduction = 0.9
+    decimate = vtk.vtkQuadricDecimation()
+    decimate.SetInputConnection(smoother.GetOutputPort())
     decimate.SetTargetReduction(reduction)
-    decimate.PreserveTopologyOn()
     decimate.Update()
-
-    #decimated = vtk.vtkPolyData()
-    #decimated.ShallowCopy(decimate.GetOutput())
 
     print('computing normal')
     normals = vtk.vtkPolyDataNormals()
