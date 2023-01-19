@@ -16,7 +16,7 @@ url: https://pubmed.ncbi.nlm.nih.gov/23014712
 repo: https://github.com/Connor323/Lung-Lobes-Segmentation-in-CT-Scans/blob/master/vessel_segment.py
 dockerized: https://github.com/pangyuteng/Lung-Lobes-Segmentation-in-CT-Scans
 ```
-asdfasdf
+
 + `methods/knopczynski-2016`
 ```
 Konopczyński, Tomasz, et al. "Automated multiscale 3D feature learning for vessels segmentation in Thorax CT images." 2016 IEEE Nuclear Science Symposium, Medical Imaging Conference and Room-Temperature Semiconductor Detector Workshop (NSS/MIC/RTSD). IEEE, 2016.
