@@ -10,10 +10,13 @@ docker run -it -u $(id -u):$(id -g) \
     -w $PWD -v /mnt:/mnt \
     pangyuteng/dcm:latest bash
 
-python gen_vtk.py lung_vessels.nii.gz lung_vessels.vtk
+python gen_vtk.py lung_vessels.nii.gz ../view/lung_vessels.vtk
+python gen_vtk.py ../view/series.nii.gz ../view/series.vtk
 
+http://www.vmtk.org/tutorials/SurfaceForMeshing.html
 
 https://www.google.com/search?q=pangyuteng+isosurface&oq=pangyuteng+isosurface&aqs=chrome.0.69i59j69i60.2198j0j7&sourceid=chrome&ie=UTF-8
 
 https://discourse.itk.org/t/save-and-write-a-vtk-polydata-file/2516/8
 
+https://github.com/pyushkevich/itksnap/blob/3ff1eb1d9e2318ac9820ace939e1551502efc8f4/Logic/Mesh/VTKMeshPipeline.cxx
