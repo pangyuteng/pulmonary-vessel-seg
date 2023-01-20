@@ -1,0 +1,123 @@
+ 
+</html>
+<html>
+<head>
+<script src="./lib/three.min.js"></script>
+<script src="./lib/STLLoader.js"></script>
+<script src="./lib/OrbitControls.js"></script>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+
+<style>
+    body {
+        background-color: rgb(20,20,20);
+        margin: 0;
+    }
+    .float-container {
+        border: 3px solid rgb(20,20,20);
+        padding: 20px;
+    }
+    .float-child {
+        /* width: 30%; */    
+        float: left;
+        padding: 20px;
+        border: 3px solid rgb(20,20,20);
+    }  
+    
+</style>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+<link rel="stylesheet" type="text/css" href="./lib/papaya.css" />
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+<script type="text/javascript" src="./lib/papaya.js"></script>
+
+<script>
+function STLViewer(model, elementID) {
+
+    var elem = document.getElementById(elementID)
+    var camera = new THREE.PerspectiveCamera(70, 
+    elem.clientWidth/elem.clientHeight, 1, 1000);
+
+    var renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    renderer.setSize(elem.clientWidth, elem.clientHeight);
+    elem.appendChild(renderer.domElement);
+
+    window.addEventListener('resize', function () {
+        renderer.setSize(elem.clientWidth, elem.clientHeight);
+        camera.aspect = elem.clientWidth/elem.clientHeight;
+        camera.updateProjectionMatrix();
+    }, false);
+
+
+    var controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.rotateSpeed = 0.05;
+    controls.dampingFactor = 0.1;
+    controls.enableZoom = true;
+    controls.autoRotate = true;
+    controls.autoRotateSpeed = 5;//.75;
+
+
+    var scene = new THREE.Scene();
+    scene.add(new THREE.HemisphereLight(0xffffff, 1.5));
+
+    (new THREE.STLLoader()).load(model, function (geometry) {
+        var material = new THREE.MeshPhongMaterial({ 
+            color: 0xff5533, 
+            specular: 100, 
+            shininess: 100 });
+        var mesh = new THREE.Mesh(geometry, material);
+        scene.add(mesh);
+
+        var middle = new THREE.Vector3();
+        geometry.computeBoundingBox();
+        geometry.boundingBox.getCenter(middle);
+        mesh.geometry.applyMatrix(new THREE.Matrix4().makeTranslation( 
+            -middle.x, -middle.y, -middle.z ) );
+        mesh.rotation.x = Math.PI / 2;
+        var largestDimension = Math.max(geometry.boundingBox.max.x,
+            geometry.boundingBox.max.y, 
+            geometry.boundingBox.max.z)
+        camera.position.z = largestDimension * 3;
+
+        var animate = function () {
+            requestAnimationFrame(animate);
+            controls.update();
+            renderer.render(scene, camera);
+        }; 
+
+        animate();
+    });
+}
+</script>
+<script type="text/javascript">
+    var params = [];
+    params["images"] = ["./img.nii.gz","./lung_vessels.nii.gz"];
+    params["img.nii.gz"] =  {"min": -1000, "max":1000}
+    params["lung_vessels.nii.gz"] = {lut: "Spectrum","min":0,"max":1.2, alpha:0.5};
+    params["mainView"] = "axial";
+    params["orthogonal"] = true; // set to false for 1 window only
+</script>
+</head>
+
+<body>
+
+<div class="float-container">
+    <div class="float-child">
+        <div style="width:512px;height:300px;">
+            <div class="papaya" data-params="params"></div>
+        </div>
+    </div>
+    <div class="float-child">
+        <div id="surface-rendering" style="width:512px;height:512px"></div>
+    </div>                
+</div>
+
+<script type="text/javascript">
+    window.onload = function() {
+        STLViewer("./lung_vessels.stl", "surface-rendering")
+    }
+</script>
+
+</body>
+</html>

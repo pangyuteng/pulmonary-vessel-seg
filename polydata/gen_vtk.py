@@ -22,9 +22,8 @@ def main(input_file,output_file):
     dmc.GenerateValues(1, 1, 1)
     dmc.Update()
 
-    #vtkMarchingCubes->vtkPolyDataNormals->vtkPolyDataWriter
     print('smoothing polydata')
-    smoothingIterations = 30
+    smoothingIterations = 1
     passBand = 0.001
     featureAngle = 120.0
     smoother = vtk.vtkWindowedSincPolyDataFilter()
@@ -56,10 +55,18 @@ def main(input_file,output_file):
     #mapper.SetScalarRange(0, lut.GetNumberOfColors())
     mapper.Update()
 
-    writer = vtk.vtkPolyDataWriter()
-    writer.SetFileName(output_file)
-    writer.SetInputData(mapper.GetInput())
-    writer.Write()
+    if output_file.endswith(".vtk"):
+        writer = vtk.vtkPolyDataWriter()
+        writer.SetFileName(output_file)
+        writer.SetInputData(mapper.GetInput())
+        writer.Write()
+    elif output_file.endswith(".stl"):
+        writer = vtk.vtkSTLWriter()
+        writer.SetFileName(output_file)
+        writer.SetInputData(mapper.GetInput())
+        writer.Write()
+    else:
+        raise NotImplementedError()
 
     print(input_file,output_file)
 
