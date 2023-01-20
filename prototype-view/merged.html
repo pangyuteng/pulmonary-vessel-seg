@@ -9,6 +9,7 @@
 
 <style>
     body {
+        color: rgb(200,200,200);
         background-color: rgb(20,20,20);
         margin: 0;
     }
@@ -92,30 +93,78 @@ function STLViewer(model, elementID) {
 </script>
 <script type="text/javascript">
     var params = [];
-    params["images"] = ["./img.nii.gz","./lung_vessels.nii.gz"];
-    params["img.nii.gz"] =  {"min": -1000, "max":1000}
-    params["lung_vessels.nii.gz"] = {lut: "Spectrum","min":0,"max":1.2, alpha:0.5};
+    params["images"] = ["./img-downsampled.nii.gz","./lung_vessels-downsampled.nii.gz"];
+    params["img-downsampled.nii.gz"] =  {"min": -1200, "max":200} // lung window -1200, 200
+    params["luts"] = [{"name": "CustomManual", "data":[
+        [0,0,0,0,],
+        [0.9,0,0,0,],
+        [1,1,0,0,],
+        ]
+    }];
+    params["lung_vessels-downsampled.nii.gz"] = {"lut": "CustomManual","min":0,"max":1,"alpha":0.5};
     params["mainView"] = "axial";
     params["orthogonal"] = true; // set to false for 1 window only
+    params["smoothDisplay"] = false;
+    params["showOrientation"] = true;
+    params["mainView"] = "axial";
+    params["radiological"] = true;
+    params["ignoreNiftiTransforms"] = true;
 </script>
+
+<script type="text/javascript">
+    var params2 = [];
+    params2["images"] = ["./img.nii.gz","./lung_vessels.nii.gz"];
+    params2["img.nii.gz"] =  {"min": -1200, "max":200} // lung window -1200, 200
+    params2["luts"] = [{"name": "CustomManual", "data":[
+        [0,0,0,0,],
+        [0.9,0,0,0,],
+        [1,1,0,0,],
+        ]
+    }];
+    params2["lung_vessels.nii.gz"] = {"lut": "CustomManual","min":0,"max":1,"alpha":0.5};
+    params2["mainView"] = "axial";
+    params2["orthogonal"] = true; // set to false for 1 window only
+    params2["smoothDisplay"] = false;
+    params2["showOrientation"] = true;
+    params2["mainView"] = "axial";
+    params2["radiological"] = true;
+    params2["ignoreNiftiTransforms"] = true;
+</script>
+
 </head>
 
 <body>
-
 <div class="float-container">
+    <hr>
+    downsampled
     <div class="float-child">
-        <div style="width:512px;height:300px;">
+        <div style="width:800px;height:600px;">
             <div class="papaya" data-params="params"></div>
         </div>
     </div>
     <div class="float-child">
-        <div id="surface-rendering" style="width:512px;height:512px"></div>
+        <div id="surface-rendering" style="width:600px;height:600px"></div>
+    </div>                
+</div>
+
+
+<div class="float-container">
+    <hr>
+    original
+    <div class="float-child">
+        <div style="width:800px;height:600px;">
+            <div class="papaya" data-params="params2"></div>
+        </div>
+    </div>
+    <div class="float-child">
+        <div id="surface-rendering2" style="width:600px;height:600px"></div>
     </div>                
 </div>
 
 <script type="text/javascript">
     window.onload = function() {
-        STLViewer("./lung_vessels.stl", "surface-rendering")
+        STLViewer("./lung_vessels-downsampled.stl", "surface-rendering");
+        STLViewer("./lung_vessels.stl", "surface-rendering2");
     }
 </script>
 

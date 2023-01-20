@@ -1,6 +1,6 @@
 # pulmonary-vessel-seg
 
-replicating & archiving a few methods for polumanry vessel segmentation
+Replicating & archiving a few methods for polumonary vessel segmentation
 
 + `methods/wasserthal-2022`
 ```
@@ -9,12 +9,11 @@ https://arxiv.org/abs/2208.05868
 repo: https://github.com/wasserth/TotalSegmentator
 ```
 
-+ `methods/bianca-2012`
++ `methods/poletti-2022`
 ```
-Lassen, Bianca, et al. "Automatic segmentation of the pulmonary lobes from chest CT scans based on fissures, vessels, and bronchi." IEEE transactions on medical imaging 32.2 (2012): 210-222.
-url: https://pubmed.ncbi.nlm.nih.gov/23014712
-repo: https://github.com/Connor323/Lung-Lobes-Segmentation-in-CT-Scans/blob/master/vessel_segment.py
-dockerized: https://github.com/pangyuteng/Lung-Lobes-Segmentation-in-CT-Scans
+Poletti, Julien, et al. "Automated lung vessel segmentation reveals blood vessel volume redistribution in viral pneumonia." European Journal of Radiology 150 (2022): 110259.
+url: https://www.sciencedirect.com/science/article/pii/S0720048X22001097
+repo url: https://github.com/fsc-mib/travel
 ```
 
 + `methods/knopczynski-2016`
@@ -25,11 +24,12 @@ repo url: https://github.com/konopczynski/Vessel3DDL
 dockerized, py3 friendly: https://github.com/pangyuteng/Vessel3DDL/tree/py3
 ```
 
-+ `methods/poletti-2022`
++ `methods/bianca-2012`
 ```
-Poletti, Julien, et al. "Automated lung vessel segmentation reveals blood vessel volume redistribution in viral pneumonia." European Journal of Radiology 150 (2022): 110259.
-url: https://www.sciencedirect.com/science/article/pii/S0720048X22001097
-repo url: https://github.com/fsc-mib/travel
+Lassen, Bianca, et al. "Automatic segmentation of the pulmonary lobes from chest CT scans based on fissures, vessels, and bronchi." IEEE transactions on medical imaging 32.2 (2012): 210-222.
+url: https://pubmed.ncbi.nlm.nih.gov/23014712
+repo: https://github.com/Connor323/Lung-Lobes-Segmentation-in-CT-Scans/blob/master/vessel_segment.py
+dockerized: https://github.com/pangyuteng/Lung-Lobes-Segmentation-in-CT-Scans
 ```
 
 + `methods/frangi-1998`
