@@ -8,10 +8,10 @@ if [ -f ${OUTPUT_NIFTI_FILE} ]; then
     echo "vessel segmentation already done. no need to run."
     exit 0
 fi
-
+export currentpwd=${PWD}
 cd /opt/app/scripts/UseClassifier
 python classify.py ${INPUT_NIFTI_FILE} ${OUTPUT_NIFTI_FILE}
-cd -
+cd $currentpwd
 python remove_non_lung.py ${LUNG_NIFTI_FILE} ${OUTPUT_NIFTI_FILE}
 
 echo "done"

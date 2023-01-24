@@ -2,7 +2,7 @@ universe = docker
 docker_image = pangyuteng/vessel3ddl:inference
 
 executable = knopczynski-2016/inference.sh
-transfer_input_files = knopczynski-2016/inference.sh,remove_non_lung.py.py
+transfer_input_files = knopczynski-2016/inference.sh,remove_non_lung.py
 should_transfer_files = YES
 when_to_transfer_output = ON_EXIT
 
