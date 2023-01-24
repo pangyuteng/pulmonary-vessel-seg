@@ -1,0 +1,21 @@
+universe = docker
+docker_image = pangyuteng/totalsegmentator:latest
+
+executable = wasserthal-2022/inference.sh
+transfer_input_files = inference.sh
+should_transfer_files = YES
+when_to_transfer_output = ON_EXIT
+
+log = log/inference.$(cluster).$(process).log
+error = log/inference.$(cluster).$(process).err
+output = log/inference.$(cluster).$(process).out
+
+requirements = (OpSys == "LINUX" && Arch == "X86_64" && GPUMEM > 10000 )
+request_cpus = 4
+request_gpus = 1
+request_memory = 2GB
+request_disk = 20GB
+
+max_materialize = 5
+arguments = "$(myargs)"
+queue myargs from wasserthal.args

@@ -1,0 +1,11 @@
+JOB  A  inference.sub
+JOB  B  process.sub
+JOB  C  aggregate.sub
+
+PARENT A CHILD B
+PARENT B CHILD C
+
+CATEGORY A limited
+CATEGORY B limited
+
+MAXJOBS limited 5
