@@ -11,7 +11,7 @@ lung = sitk.GetArrayFromImage(lung_obj)
 vsl = sitk.GetArrayFromImage(vsl_obj)    
 
 vsl[lung==0]=0
-vsl_obj = sitk.GetArrayFromImage(vsl)
+vsl_obj = sitk.GetImageFromArray(vsl)
 vsl_obj.CopyInformation(lung_obj)
 
 sitk.WriteImage(vsl_obj,vessel_file)
