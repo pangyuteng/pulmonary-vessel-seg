@@ -11,10 +11,10 @@ error = log/inference.$(cluster).$(process).err
 output = log/inference.$(cluster).$(process).out
 
 requirements = (OpSys == "LINUX" && Arch == "X86_64" && GPUMEM > 10000 )
-request_cpus = 4
+request_cpus = 1
 request_gpus = 1
 request_memory = 10GB
-request_disk = 20GB
+request_disk = 5GB
 
 max_materialize = 5
 arguments = "$(myargs)"
