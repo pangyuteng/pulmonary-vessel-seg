@@ -18,12 +18,15 @@ for x in sorted(img_mhd_list):
     uid = os.path.basename(source_img_mhd_path).replace("VESSEL12_","").replace(".mhd","")
     source_lung_path = os.path.join(data_dir,'VESSEL12_01-20_Lungmasks',f'VESSEL12_{uid}.mhd')
     target_folder_path = os.path.join(out_dir,uid)
+    os.makedirs(target_folder_path,exist_ok=True)
+    target_seg_path = os.path.join(target_folder_path,'segmentations')
     target_img_path = os.path.join(target_folder_path,'img.nii.gz')
     item = dict(
         uid=uid,
         source_img_path=source_img_mhd_path,
         source_lung_path=source_lung_path,
         target_img_path=target_img_path,
+        target_seg_path=target_seg_path,
         target_folder_path=target_folder_path,
     )
     mylist.append(item)
@@ -31,7 +34,7 @@ for x in sorted(img_mhd_list):
 with open('wasserthal.args','w') as f:
     for n,x in enumerate(mylist):
         vsl = os.path.join(x['target_folder_path'],'wasserthal.nii.gz')
-        myline = f"{x['source_img_path']} {x['target_img_path']} {x['target_folder_path']} {vsl}\n"
+        myline = f"{x['source_img_path']} {x['target_img_path']} {x['target_seg_path']} {vsl}\n"
         f.write(myline)
 
 with open('knopczynski.args','w') as f:
@@ -42,4 +45,5 @@ with open('knopczynski.args','w') as f:
         f.write(myline)
 
 """
+python gen_args.py /mnt/hd2/data/vessel12/VESSEL12 /mnt/scratch/tmp/vessel12
 """
