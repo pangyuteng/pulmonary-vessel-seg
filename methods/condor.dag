@@ -1,9 +1,7 @@
-JOB  A  inference.sub
-JOB  B  process.sub
-JOB  C  aggregate.sub
+JOB  A  wasserthal.sub
+JOB  B  knopczynski.sub
 
-PARENT A CHILD B
-PARENT B CHILD C
+#PARENT A CHILD B
 
 CATEGORY A limited
 CATEGORY B limited

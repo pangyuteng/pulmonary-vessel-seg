@@ -3,80 +3,43 @@ import sys
 import warnings
 import json
 
-root_folder = os.path.abspath(sys.argv[1])
-csv_folder = os.path.abspath(sys.argv[2])
+data_dir = os.path.abspath(sys.argv[1])
+out_dir = os.path.abspath(sys.argv[2])
 
-json_file = os.path.join(root_folder,'dataset.json')
-with open(json_file,'r') as f:
-    dataset_dict = json.loads(f.read())
-
-label_dict = {v:int(k) for k,v in dataset_dict['labels'].items()}
-label_dict.pop("background")
-if not os.path.exists('dataset.json'):
-    print(label_dict)
-    with open('dataset.json','w') as f:
-        f.write(json.dumps(label_dict,sort_keys=True,indent=4))
-
-datalist = []
-datalist.extend(dataset_dict['training'])
-datalist.extend(dataset_dict['validation'])
-datalist.extend(dataset_dict['test'])
+sub_folders = [os.path.join(data_dir,x) for x in ['VESSEL12_01-05','VESSEL12_06-10','VESSEL12_11-15','VESSEL12_16-20']]
+img_mhd_list = []
+for s in sub_folders:
+    tmp_list = [os.path.join(s,x) for x in os.listdir(s) if x.endswith('.mhd')]
+    img_mhd_list.extend(tmp_list)
 
 mylist = []
-for myitem in datalist:
-
-    if 'label' not in myitem.keys():
-        continue
-
-    image_file = os.path.abspath(os.path.join(root_folder,myitem['image']))
-    mask_file = os.path.abspath(os.path.join(root_folder,myitem['label']))
-    if not os.path.exists(image_file):
-        warnings.warn(f'missing image_file {x}')
-        continue
-    if not os.path.exists(mask_file):
-        warnings.warn(f'missing mask_file {x}')
-        continue
-    case_id = os.path.basename(image_file).replace('.nii.gz','')
-    case_folder = os.path.join(root_folder,'totalseg',case_id)
-    os.makedirs(case_folder,exist_ok=True)
-    item=dict(
-        image_file=image_file,
-        mask_file=mask_file,
-        case_folder=case_folder)
+for x in sorted(img_mhd_list):
+    source_img_mhd_path = x
+    uid = os.path.basename(source_img_mhd_path).replace("VESSEL12_","").replace(".mhd","")
+    source_lung_path = os.path.join(data_dir,'VESSEL12_01-20_Lungmasks',f'VESSEL12_{uid}.mhd')
+    target_folder_path = os.path.join(out_dir,uid)
+    target_img_path = os.path.join(target_folder_path,'img.nii.gz')
+    item = dict(
+        uid=uid,
+        source_img_path=source_img_mhd_path,
+        source_lung_path=source_lung_path,
+        target_img_path=target_img_path,
+        target_folder_path=target_folder_path,
+    )
     mylist.append(item)
 
-assert(len(mylist)==360) # Train + Validation
-
-flags = ""
-with open('inference.args','w') as f:
-    for n,mydict in enumerate(mylist):
-        case_folder = mydict['case_folder']
-        image_file = mydict['image_file']
-        seg_folder = os.path.join(case_folder,'segmentations')
-        myline = f"{image_file} {seg_folder} {flags}\n"
+with open('wasserthal.args','w') as f:
+    for n,x in enumerate(mylist):
+        vsl = os.path.join(x['target_folder_path'],'wasserthal.nii.gz')
+        myline = f"{x['source_img_path']} {x['target_img_path']} {x['target_folder_path']} {vsl}\n"
         f.write(myline)
 
-with open('process.args','w') as f:
-    for n,mydict in enumerate(mylist):
-        case_folder = mydict['case_folder']
-        image_file = mydict['image_file']
-        mask_file = mydict['mask_file']
-        seg_folder = os.path.join(case_folder,'segmentations')
-        seg_file = os.path.join(case_folder,'segmentations.nii.gz')
-        json_file = os.path.join(case_folder,'scores.json')
-        myline = f"{image_file} {mask_file} {seg_folder} {seg_file} {json_file}\n"
+with open('knopczynski.args','w') as f:
+    for n,x in enumerate(mylist):
+        vsl = os.path.join(x['target_folder_path'],'knopczynski.nii.gz')
+        lung = source_lung_path
+        myline = f"{x['source_img_path']} {vsl} {x['source_lung_path']}\n"
         f.write(myline)
-
-with open('aggregate.args','w') as f:
-    myline = f"{root_folder} {csv_folder} -p default\n"
-    f.write(myline)
 
 """
-
-docker run -it -u $(id -u):$(id -g) \
-    -w $PWD -v /mnt:/mnt pangyuteng/ml:latest bash
-
-python gen_args.py /mnt/scratch/data/amos22 results
-
-
 """
