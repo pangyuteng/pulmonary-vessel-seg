@@ -14,6 +14,7 @@ fi
 python mhd2niigz.py ${INPUT_MHD_FILE} ${INPUT_NIFTI_FILE}
 
 if [ ! -f ${ORIGINAL_VESSEL_FILE} ]; then
+    #TotalSegmentator --fast -i ${INPUT_NIFTI_FILE} -o ${OUTPUT_NIFTI_FOLDER}
     TotalSegmentator -i ${INPUT_NIFTI_FILE} -o ${OUTPUT_NIFTI_FOLDER}
     TotalSegmentator -i ${INPUT_NIFTI_FILE} -o ${OUTPUT_NIFTI_FOLDER} -ta lung_vessels
 fi
