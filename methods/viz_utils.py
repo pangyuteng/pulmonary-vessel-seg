@@ -119,9 +119,9 @@ if __name__ == "__main__":
         is_label = ast.literal_eval(sys.argv[4])
         gen_downsample(input_nifti_file,output_nifti_file,is_label=is_label)
     elif action == 'stl':
-        output_nifti_file = sys.argv[2]
+        input_nifti_file = sys.argv[2]
         output_stl_file = sys.argv[3]
-        gen_stl(output_nifti_file,output_stl_file)
+        gen_stl(input_nifti_file,output_stl_file)
     else:
         raise NotImplementedError()
 

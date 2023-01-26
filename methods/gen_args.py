@@ -44,6 +44,11 @@ with open('knopczynski.args','w') as f:
         myline = f"{x['source_img_path']} {vsl} {x['source_lung_path']}\n"
         f.write(myline)
 
+with open('viz.args','w') as f:
+    for n,x in enumerate(mylist):
+        myline = f"{x['target_folder_path']}\n"
+        f.write(myline)
+
 """
 python gen_args.py /mnt/hd2/data/vessel12/VESSEL12 /mnt/scratch/tmp/vessel12
 """
