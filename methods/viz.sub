@@ -1,5 +1,5 @@
 universe = docker
-docker_image = pangyuteng/ml:latest
+docker_image = pangyuteng/dcm:latest
 
 executable = viz.sh
 transfer_input_files = viz.sh,viz_utils.py
@@ -12,9 +12,9 @@ output = log/viz.$(cluster).$(process).out
 
 requirements = (OpSys == "LINUX" && Arch == "X86_64")
 request_cpus = 1
-request_memory = 5GB
+request_memory = 10GB
 request_disk = 5GB
 
-max_materialize = 10
+max_materialize = 1
 arguments = "$(myargs)"
 queue myargs from viz.args
