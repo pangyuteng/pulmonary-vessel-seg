@@ -35,6 +35,9 @@ def review():
         stl_file = None
         image_basename = None
         mask_basename = None
+        origial_note='na'
+        nifti_note='original resolution'
+        stl_note='na'
 
     elif kind == 'knopczynski':
 
@@ -48,6 +51,9 @@ def review():
         stl_file = knopczynski_stl_downsampled_file
         image_basename = os.path.basename(image_file)
         mask_basename = os.path.basename(mask_file)
+        origial_note='na'
+        nifti_note='downsampled voxel size1 1x1x10mm'
+        stl_note='downsampled voxel size1 2x2x2mm'
 
     elif kind == 'wasserthal':
 
@@ -61,6 +67,9 @@ def review():
         stl_file = wasserthal_stl_downsampled_file
         image_basename = os.path.basename(image_file)
         mask_basename = os.path.basename(mask_file)
+        origial_note='na'
+        nifti_note='downsampled voxel size1 1x1x10mm'
+        stl_note='downsampled voxel size1 2x2x2mm'
 
     else:
         return jsonify({"message":"not supported"})
@@ -73,9 +82,9 @@ def review():
         stl_file = stl_file,
         image_basename = image_basename,
         mask_basename = mask_basename,
-        origial_note='na',
-        nifti_note='downsampled voxel size1 1x1x10mm',
-        stl_note='downsampled voxel size1 2x2x2mm',
+        origial_note=origial_note,
+        nifti_note=nifti_note,
+        stl_note=stl_note,
     )
 
 
