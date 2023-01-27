@@ -6,19 +6,34 @@
 
     <style>
         body {
-            color: rgb(200,200,200);
             background-color: rgb(20,20,20);
-            margin: 0;
+            font-family: Courier;
+            color: rgb(255, 255, 255);
+            font-size: 20px;
+        }
+        a:link {
+            color: rgb(147, 210, 0);
+            background-color: transparent;
+            text-decoration: none;
+        }
+        a:visited {
+            color: rgb(147, 210, 0);
+            background-color: transparent;
+            text-decoration: none;
+        }
+        a:active {
+            color: rgb(147, 210, 0);
+            background-color: transparent;
         }
         .float-container {
-            border: 3px solid rgb(20,20,20);
+            border: 3px solid rgb(0,0,0);
             padding: 20px;
         }
         .float-child {
             /* width: 30%; */    
             float: left;
             padding: 20px;
-            border: 3px solid rgb(20,20,20);
+            border: 3px solid rgb(5,5,5);
         }  
         
     </style>
@@ -123,8 +138,8 @@
     case_id: {{case_id}}
     origial_note: {{origial_note}}
     </pre>
+    <hr>
     <div class="float-container">
-        <hr>
         <div class="float-child">
         </pre>nifti_note: {{nifti_note}}</pre>
             <div style="width:800px;height:600px;">

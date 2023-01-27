@@ -1,4 +1,32 @@
+<html>
+<head>
+    <style>
+    body {
+        background-color: rgb(0, 0, 0);
+        font-family: Courier;
+        color: rgb(255, 255, 255);
+        font-size: 20px;
+    }
+    a:link {
+        color: rgb(147, 210, 0);
+        background-color: transparent;
+        text-decoration: none;
+    }
+    a:visited {
+        color: rgb(147, 210, 0);
+        background-color: transparent;
+        text-decoration: none;
+    }
+    a:active {
+        color: rgb(147, 210, 0);
+        background-color: transparent;
+    }
+    </style>
+</head>
+<body>
 hello world!<br>
 {% for item in url_list %}
 <a href="{{ url_for(item) }}">{{item}}</a><br>
 {% endfor %}
+</body>
+</html>
