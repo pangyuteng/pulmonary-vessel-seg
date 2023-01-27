@@ -11,7 +11,11 @@
 </head>
 <body>
 {% for n,row in df.iterrows() %}
-<a href="{{ url_for('review',case_id=row.case_id) }}"><img loading=lazy src="{{row.png_url}}" alt="…" title="id: {{row.case_id}}" style="width:100px;"></a>{% if n % 10 == 0 %}<br>{% endif %}
+<a href="{{ url_for('review',case_id=row.case_id) }}">
+{{row.case_id}}<br><br>
+<img loading=lazy src="{{row.png_url}}" alt="…" style="width:100px;">
+<br>
+</a>
 {% endfor %}
 </body>
 </html>

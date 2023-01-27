@@ -2,78 +2,140 @@
 <html lang="en">
 <head>
 	<meta charset="utf-8">
-	<title>Papaya</title>
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>demo</title>
+
     <style>
         body {
-         background-color: rgb(15, 15, 15);
-         font-family: Courier;
-         color: rgb(142,142,142);
-         font-size: 20px;
+            color: rgb(200,200,200);
+            background-color: rgb(20,20,20);
+            margin: 0;
         }
+        .float-container {
+            border: 3px solid rgb(20,20,20);
+            padding: 20px;
+        }
+        .float-child {
+            /* width: 30%; */    
+            float: left;
+            padding: 20px;
+            border: 3px solid rgb(20,20,20);
+        }  
+        
     </style>
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='papaya.css')}}" />
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
-    <script type="text/javascript" src="{{ url_for('static', filename='papaya.js')}}"></script>	
-    
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
-    <script type="text/javascript">
-        //papaya.Container.startPapaya();
-        //papaya.Container.syncViewers = true;
-        var params = [];
-        //params["kioskMode"]=true;
-        params["images"] = ["{{ image_file }}","{{ mask_file }}"];
-        params["{{ image_basename }}"] = {"min": -1200, "max":200} // lung window -1200, 200
-        params["luts"] = [{"name": "CustomManual", "data":[
-            [0,0,0,0,],
-            [0.9,0,0,0,],
-            [1,1,0,0,],
-            ]
-        }];
-        params["{{ mask_basename }}"] = {"lut": "CustomManual","min":0,"max":1,"alpha":0.5};
-        params["mainView"] = "axial";
-        params["orthogonal"] = true; // set to false for 1 window only
-        params["smoothDisplay"] = false;
-        params["showOrientation"] = true;
-        params["radiological"] = true;
-        params["ignoreNiftiTransforms"] = true;
+    <script type="text/javascript" src="{{ url_for('static', filename='three.min.js')}}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='STLLoader.js')}}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='OrbitControls.js')}}"></script>
+    
+    <script>
+    function STLViewer(model, elementID) {
+    
+        var elem = document.getElementById(elementID)
+        var camera = new THREE.PerspectiveCamera(70, 
+        elem.clientWidth/elem.clientHeight, 1, 1000);
+    
+        var renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer.setSize(elem.clientWidth, elem.clientHeight);
+        elem.appendChild(renderer.domElement);
+    
+        window.addEventListener('resize', function () {
+            renderer.setSize(elem.clientWidth, elem.clientHeight);
+            camera.aspect = elem.clientWidth/elem.clientHeight;
+            camera.updateProjectionMatrix();
+        }, false);
+    
+    
+        var controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.rotateSpeed = 0.05;
+        controls.dampingFactor = 0.1;
+        controls.enableZoom = true;
+        controls.autoRotate = true;
+        controls.autoRotateSpeed = 5;//.75;
+    
+    
+        var scene = new THREE.Scene();
+        scene.add(new THREE.HemisphereLight(0xffffff, 1.5));
+    
+        (new THREE.STLLoader()).load(model, function (geometry) {
+            var material = new THREE.MeshPhongMaterial({ 
+                color: 0xff5533, 
+                specular: 100, 
+                shininess: 100 });
+            var mesh = new THREE.Mesh(geometry, material);
+            scene.add(mesh);
+    
+            var middle = new THREE.Vector3();
+            geometry.computeBoundingBox();
+            geometry.boundingBox.getCenter(middle);
+            mesh.geometry.applyMatrix(new THREE.Matrix4().makeTranslation( 
+                -middle.x, -middle.y, -middle.z ) );
+            mesh.rotation.x = Math.PI / 2;
+            var largestDimension = Math.max(geometry.boundingBox.max.x,
+                geometry.boundingBox.max.y, 
+                geometry.boundingBox.max.z)
+            camera.position.z = largestDimension * 3;
+    
+            var animate = function () {
+                requestAnimationFrame(animate);
+                controls.update();
+                renderer.render(scene, camera);
+            }; 
+    
+            animate();
+        });
+    }
     </script>
-    <script type="text/javascript">
-        //papaya.Container.startPapaya();
-        //papaya.Container.syncViewers = true;
-        var params2 = [];
-        //params2["kioskMode"]=true;
-        params2["images"] = ["{{ image_file }}","{{ w_mask_file }}"];
-        params2["{{ image_basename }}"] = {"min": -1200, "max":200} // lung window -1200, 200
-        params2["luts"] = [{"name": "CustomManual", "data":[
-            [0,0,0,0,],
-            [0.9,0,0,0,],
-            [1,1,0,0,],
-            ]
-        }];
-        params2["{{ w_mask_basename }}"] = {"lut": "CustomManual","min":0,"max":1,"alpha":0.5};
-        params2["mainView"] = "axial";
-        params2["orthogonal"] = true; // set to false for 1 window only
-        params2["smoothDisplay"] = false;
-        params2["showOrientation"] = true;
-        params2["radiological"] = true;
-        params2["ignoreNiftiTransforms"] = true;
-    </script>
+
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='papaya.css')}}" />
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='papaya.js')}}"></script>	
+
+<script type="text/javascript">
+    //papaya.Container.startPapaya();
+    //papaya.Container.syncViewers = true;
+    var params = [];
+    //params["kioskMode"]=true;
+    params["images"] = ["{{ image_file }}","{{ mask_file }}"];
+    params["{{ image_basename }}"] = {"min": -1200, "max":200} // lung window -1200, 200
+    params["luts"] = [{"name": "CustomManual", "data":[
+        [0,0,0,0,],
+        [0.9,0,0,0,],
+        [1,1,0,0,],
+        ]
+    }];
+    params["{{ mask_basename }}"] = {"lut": "CustomManual","min":0,"max":1,"alpha":0.5};
+    params["mainView"] = "axial";
+    params["orthogonal"] = true; // set to false for 1 window only
+    params["smoothDisplay"] = false;
+    params["showOrientation"] = true;
+    params["radiological"] = true;
+    params["ignoreNiftiTransforms"] = true;
+</script>
 
 </head>
 <body style="background-color:black;">
     
     <p2>{{ case_id}} <br></p2>
-    <hr>
-    <div class="container" style="display:flex;flex-flow: row wrap;">
-        <div style="width:800px;height:300px;">
-        <div class="papaya" data-params="params"></div>
+    <div class="float-container">
+        <hr>
+        <div class="float-child">
+            <div style="width:800px;height:600px;">
+                <div class="papaya" data-params="params"></div>
+            </div>
         </div>
+        <div class="float-child">
+            <div id="surface-rendering" style="width:600px;height:600px"></div>
+        </div>                
     </div>
-    <div class="container" style="display:flex;flex-flow: row wrap;">
-        <div style="width:800px;height:300px;">
-        <div class="papaya" data-params="params2"></div>
-        </div>
-    </div>
+    
+    <script type="text/javascript">
+        window.onload = function() {
+            STLViewer("{{ stl_file }}", "surface-rendering");
+        }
+    </script>
+
 </body>
 </html>
