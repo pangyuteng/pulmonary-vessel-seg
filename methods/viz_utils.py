@@ -4,26 +4,35 @@ import ast
 import logging
 logger = logging.getLogger(__file__)
 
-import vtk
+import imageio
 import numpy as np
 import SimpleITK as sitk
+import vtk
 
-"""
-import imageio
-def generate_mip(ct_data, mask_data, file_out):
+def generate_mip(image, out_png_file, mask=None,min_max_val=None,axis_list=[1]):
 
-    ct_data = ct_data.clip(-1000,1000)
-    ct_mip = np.sum(ct_data,axis=-2)
-    mymin,mymax = np.min(ct_mip),np.max(ct_mip)
-    ct_mip = ((ct_mip-mymin)/(mymax-mymin)).clip(0,1)*255
+    if min_max_val is not None:
+        min_val, max_val = min_max_val
+        image = image.clip(min_val,max_val)
+    else:
+        min_val, max_val = np.min(image),np.max(image)
 
-    mask_mip = (np.max(mask_data,axis=-2)/104).clip(0,1)*255
+    image = ((image-min_val)/(max_val-min_val)).clip(0,1)
+    if mask is not None:
+        image[mask==0]=0
 
-    mythumbnail = np.concatenate([ct_mip,mask_mip],axis=1)
+    mylist = []
+    for axis in axis_list:
+        mip = np.max(image,axis=axis)
+        min_val, max_val = np.min(mip),np.max(mip)
+        mip = mip.squeeze()
+        mip = (255.*(mip-min_val)/(max_val-min_val)).clip(0,255)
+        mylist.append(mip)
+
+    mythumbnail = np.concatenate(mylist,axis=1)
     mythumbnail = mythumbnail.astype(np.uint8)
 
-    imageio.imwrite(file_out,mythumbnail)
-"""
+    imageio.imwrite(out_png_file,mythumbnail)
 
 # MIN_VAL,MAX_VAL = -1000, 1000 # all purpose
 MIN_VAL,MAX_VAL = -1200, 200 # lungs ~W:1400 L:-500
