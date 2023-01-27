@@ -28,15 +28,18 @@ def review():
     image_downsampled_file = os.path.join(case_folder,'img-downsampled.nii.gz')
 
     knopczynski_file = os.path.join(case_folder,'knopczynski.nii.gz')
-    wasserthal_file = os.path.join(case_folder,'wasserthal.nii.gz')
-
     knopczynski_stl_file = os.path.join(case_folder,'knopczynski.stl')
+    knopczynski_downsampled_file = os.path.join(case_folder,'knopczynski-downsampled.nii.gz')
+    knopczynski_stl_downsampled_file = os.path.join(case_folder,'knopczynski-downsampled.stl')
+
+
+    wasserthal_file = os.path.join(case_folder,'wasserthal.nii.gz')
     wasserthal_stl_file = os.path.join(case_folder,'wasserthal.stl')
+    wasserthal_downsampled_file = os.path.join(case_folder,'wasserthal-downsampled.nii.gz')
+    wasserthal_stl_downsampled_file = os.path.join(case_folder,'wasserthal-downsampled.stl')
     
-    knopczynski_stl_file = os.path.join(case_folder,'knopczynski-downsampled.stl')
-    knopczynski_stl_file = os.path.join(case_folder,'knopczynski-downsampled.stl')
     image_file = image_downsampled_file
-    mask_file = knopczynski_file
+    mask_file = knopczynski_downsampled_file
     stl_file = knopczynski_stl_file
 
     return render_template("review.html",

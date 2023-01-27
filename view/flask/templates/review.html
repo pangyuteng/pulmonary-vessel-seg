@@ -73,6 +73,7 @@
             mesh.geometry.applyMatrix(new THREE.Matrix4().makeTranslation( 
                 -middle.x, -middle.y, -middle.z ) );
             mesh.rotation.x = Math.PI / 2;
+            mesh.rotation.y = Math.PI;
             
             var largestDimension = Math.max(geometry.boundingBox.max.x,
                 geometry.boundingBox.max.y, 
