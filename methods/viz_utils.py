@@ -135,6 +135,11 @@ if __name__ == "__main__":
         output_nifti_file = sys.argv[3]
         is_label = ast.literal_eval(sys.argv[4])
         gen_downsample(input_nifti_file,output_nifti_file,is_label=is_label)
+    elif action == 'downsample222':
+        input_nifti_file = sys.argv[2]
+        output_nifti_file = sys.argv[3]
+        is_label = ast.literal_eval(sys.argv[4])
+        gen_downsample(input_nifti_file,output_nifti_file,is_label=is_label,out_spacing=[2,2,2])
     elif action == 'stl':
         input_nifti_file = sys.argv[2]
         output_stl_file = sys.argv[3]
