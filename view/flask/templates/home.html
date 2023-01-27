@@ -1,0 +1,4 @@
+hello world!<br>
+{% for item in url_list %}
+<a href="{{ url_for(item) }}">{{item}}</a><br>
+{% endfor %}

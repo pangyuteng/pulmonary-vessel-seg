@@ -1,0 +1,10 @@
+flask>=2.2.2
+flask-restplus>=0.13.0
+flask-login>=0.6.2
+pandas>=1.5.2
+pydicom>=2.3.1
+tqdm>=4.64.1
+imageio>=2.22.4
+SimpleITK==2.0.0
+#fury==0.8.0
+#xvfbwrapper==0.2.9

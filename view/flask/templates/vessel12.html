@@ -1,0 +1,17 @@
+<html>
+<head>
+    <style>
+        body {
+         background-color: rgb(0, 0, 0);
+         font-family: Courier;
+         color: rgb(42,42,42);
+         font-size: 20px;
+        }
+    </style>
+</head>
+<body>
+{% for n,row in df.iterrows() %}
+<a href="{{ url_for('review',case_id=row.case_id) }}"><img loading=lazy src="{{row.png_url}}" alt="…" title="id: {{row.case_id}}" style="width:100px;"></a>{% if n % 10 == 0 %}<br>{% endif %}
+{% endfor %}
+</body>
+</html>

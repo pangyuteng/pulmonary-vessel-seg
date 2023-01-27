@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<title>Papaya</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+         background-color: rgb(15, 15, 15);
+         font-family: Courier;
+         color: rgb(142,142,142);
+         font-size: 20px;
+        }
+    </style>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='papaya.css')}}" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='papaya.js')}}"></script>	
+    
+
+    <script type="text/javascript">
+        //papaya.Container.startPapaya();
+        //papaya.Container.syncViewers = true;
+        var params = [];
+        //params["kioskMode"]=true;
+        params["images"] = ["{{ image_file }}","{{ mask_file }}"];
+        params["{{ image_basename }}"] = {"min": -1200, "max":200} // lung window -1200, 200
+        params["luts"] = [{"name": "CustomManual", "data":[
+            [0,0,0,0,],
+            [0.9,0,0,0,],
+            [1,1,0,0,],
+            ]
+        }];
+        params["{{ mask_basename }}"] = {"lut": "CustomManual","min":0,"max":1,"alpha":0.5};
+        params["mainView"] = "axial";
+        params["orthogonal"] = true; // set to false for 1 window only
+        params["smoothDisplay"] = false;
+        params["showOrientation"] = true;
+        params["radiological"] = true;
+        params["ignoreNiftiTransforms"] = true;
+    </script>
+    <script type="text/javascript">
+        //papaya.Container.startPapaya();
+        //papaya.Container.syncViewers = true;
+        var params2 = [];
+        //params2["kioskMode"]=true;
+        params2["images"] = ["{{ image_file }}","{{ w_mask_file }}"];
+        params2["{{ image_basename }}"] = {"min": -1200, "max":200} // lung window -1200, 200
+        params2["luts"] = [{"name": "CustomManual", "data":[
+            [0,0,0,0,],
+            [0.9,0,0,0,],
+            [1,1,0,0,],
+            ]
+        }];
+        params2["{{ w_mask_basename }}"] = {"lut": "CustomManual","min":0,"max":1,"alpha":0.5};
+        params2["mainView"] = "axial";
+        params2["orthogonal"] = true; // set to false for 1 window only
+        params2["smoothDisplay"] = false;
+        params2["showOrientation"] = true;
+        params2["radiological"] = true;
+        params2["ignoreNiftiTransforms"] = true;
+    </script>
+
+</head>
+<body style="background-color:black;">
+    
+    <p2>{{ case_id}} <br></p2>
+    <hr>
+    <div class="container" style="display:flex;flex-flow: row wrap;">
+        <div style="width:800px;height:300px;">
+        <div class="papaya" data-params="params"></div>
+        </div>
+    </div>
+    <div class="container" style="display:flex;flex-flow: row wrap;">
+        <div style="width:800px;height:300px;">
+        <div class="papaya" data-params="params2"></div>
+        </div>
+    </div>
+</body>
+</html>
