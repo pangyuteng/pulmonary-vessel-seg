@@ -61,7 +61,7 @@ if [ ! -f ${STL_FILE} ]; then
     python viz_utils.py stl $DOWN_FILE $STL_FILE
 fi
 
-export FLIP=0
+export FLIP=1
 export IMG_FILE=${OUTPUT_NIFTI_FOLDER}/img.nii.gz
 export LUNG_FILE=${OUTPUT_NIFTI_FOLDER}/segmentations/lung.nii.gz
 export PNG_FILE=${OUTPUT_NIFTI_FOLDER}/img-mip.png
