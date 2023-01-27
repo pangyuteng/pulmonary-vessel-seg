@@ -8,7 +8,6 @@ import vtk
 import numpy as np
 import SimpleITK as sitk
 
-import pandas as pd
 import imageio
 
 def generate_mip(ct_data, mask_data, file_out):

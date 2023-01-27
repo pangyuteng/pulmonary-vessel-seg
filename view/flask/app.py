@@ -26,13 +26,16 @@ def review():
 
     image_file = os.path.join(case_folder,'img.nii.gz')
     image_downsampled_file = os.path.join(case_folder,'img-downsampled.nii.gz')
-    
+
     knopczynski_file = os.path.join(case_folder,'knopczynski.nii.gz')
     wasserthal_file = os.path.join(case_folder,'wasserthal.nii.gz')
 
     knopczynski_stl_file = os.path.join(case_folder,'knopczynski.stl')
     wasserthal_stl_file = os.path.join(case_folder,'wasserthal.stl')
     
+    knopczynski_stl_file = os.path.join(case_folder,'knopczynski-downsampled.stl')
+    knopczynski_stl_file = os.path.join(case_folder,'knopczynski-downsampled.stl')
+    image_file = image_downsampled_file
     mask_file = knopczynski_file
     stl_file = knopczynski_stl_file
 
