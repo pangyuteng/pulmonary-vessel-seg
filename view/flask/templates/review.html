@@ -119,16 +119,20 @@
 
 </head>
 <body style="background-color:black;">
-    
-    <p2>{{ case_id}} <br></p2>
+    <pre>
+    case_id: {{case_id}}
+    origial_note: {{origial_note}}
+    </pre>
     <div class="float-container">
         <hr>
         <div class="float-child">
+        </pre>nifti_note: {{nifti_note}}</pre>
             <div style="width:800px;height:600px;">
                 <div class="papaya" data-params="params"></div>
             </div>
         </div>
         <div class="float-child">
+        </pre>stl_note: {{stl_note}}</pre>
             <div id="surface-rendering" style="width:600px;height:600px"></div>
         </div>                
     </div>

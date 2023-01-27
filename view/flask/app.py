@@ -49,6 +49,9 @@ def review():
         stl_file = stl_file,
         image_basename = os.path.basename(image_file),
         mask_basename = os.path.basename(mask_file),
+        origial_note='na',
+        nifti_note='downsampled voxel size1 1x1x10mm',
+        stl_note='downsampled voxel size1 2x2x2mm',
     )
 
 
