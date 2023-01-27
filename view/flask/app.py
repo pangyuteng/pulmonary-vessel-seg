@@ -22,33 +22,57 @@ app.config['TEMPLATES_AUTO_RELOAD'] = True
 @app.route('/review')
 def review():
     case_id = request.args.get('case_id')
+    kind = request.args.get('kind')
     case_folder = os.path.join(DATADIR_VESSEL12,case_id)
 
     image_file = os.path.join(case_folder,'img.nii.gz')
     image_downsampled_file = os.path.join(case_folder,'img-downsampled.nii.gz')
 
-    knopczynski_file = os.path.join(case_folder,'knopczynski.nii.gz')
-    knopczynski_stl_file = os.path.join(case_folder,'knopczynski.stl')
-    knopczynski_downsampled_file = os.path.join(case_folder,'knopczynski-downsampled.nii.gz')
-    knopczynski_stl_downsampled_file = os.path.join(case_folder,'knopczynski-downsampled-222.stl')
+    if kind == 'image':
 
+        image_file = image_file
+        mask_file = None
+        stl_file = None
+        image_basename = None
+        mask_basename = None
 
-    wasserthal_file = os.path.join(case_folder,'wasserthal.nii.gz')
-    wasserthal_stl_file = os.path.join(case_folder,'wasserthal.stl')
-    wasserthal_downsampled_file = os.path.join(case_folder,'wasserthal-downsampled.nii.gz')
-    wasserthal_stl_downsampled_file = os.path.join(case_folder,'wasserthal-downsampled-222.stl')
-    
-    image_file = image_downsampled_file
-    mask_file = knopczynski_downsampled_file
-    stl_file = knopczynski_stl_downsampled_file
+    elif kind == 'knopczynski':
+
+        knopczynski_file = os.path.join(case_folder,'knopczynski.nii.gz')
+        knopczynski_stl_file = os.path.join(case_folder,'knopczynski.stl')
+        knopczynski_downsampled_file = os.path.join(case_folder,'knopczynski-downsampled.nii.gz')
+        knopczynski_stl_downsampled_file = os.path.join(case_folder,'knopczynski-downsampled-222.stl')
+
+        image_file = image_downsampled_file
+        mask_file = knopczynski_downsampled_file
+        stl_file = knopczynski_stl_downsampled_file
+        image_basename = os.path.basename(image_file)
+        mask_basename = os.path.basename(mask_file)
+
+    elif kind == 'wasserthal':
+
+        wasserthal_file = os.path.join(case_folder,'wasserthal.nii.gz')
+        wasserthal_stl_file = os.path.join(case_folder,'wasserthal.stl')
+        wasserthal_downsampled_file = os.path.join(case_folder,'wasserthal-downsampled.nii.gz')
+        wasserthal_stl_downsampled_file = os.path.join(case_folder,'wasserthal-downsampled-222.stl')
+
+        image_file = image_downsampled_file
+        mask_file = wasserthal_downsampled_file
+        stl_file = wasserthal_stl_downsampled_file
+        image_basename = os.path.basename(image_file)
+        mask_basename = os.path.basename(mask_file)
+
+    else:
+        return jsonify({"message":"not supported"})
 
     return render_template("review.html",
+        kind = kind,
         case_id = case_id,
         image_file = image_file,
         mask_file = mask_file,
         stl_file = stl_file,
-        image_basename = os.path.basename(image_file),
-        mask_basename = os.path.basename(mask_file),
+        image_basename = image_basename,
+        mask_basename = mask_basename,
         origial_note='na',
         nifti_note='downsampled voxel size1 1x1x10mm',
         stl_note='downsampled voxel size1 2x2x2mm',

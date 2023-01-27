@@ -39,7 +39,8 @@ def generate_thumbnail(image_file, out_png_file, mask_file=None,min_max_val=None
 
     mythumbnail = np.concatenate(mylist,axis=1)
     mythumbnail = mythumbnail.astype(np.uint8)
-    if flip:
+    if flip is not None:
+        print('flip',flip)
         mythumbnail = np.flip(mythumbnail,axis=flip)
 
     imageio.imwrite(out_png_file,mythumbnail)

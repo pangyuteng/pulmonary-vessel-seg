@@ -40,10 +40,11 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
+
+    {% if stl_file %}
     <script type="text/javascript" src="{{ url_for('static', filename='three.min.js')}}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='STLLoader.js')}}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='OrbitControls.js')}}"></script>
-    
     <script>
     function STLViewer(model, elementID) {
     
@@ -105,6 +106,7 @@
         });
     }
     </script>
+    {% endif %}
 
 <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='papaya.css')}}" />
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
@@ -115,6 +117,7 @@
     //papaya.Container.syncViewers = true;
     var params = [];
     //params["kioskMode"]=true;
+    {% if mask_file %}
     params["images"] = ["{{ image_file }}","{{ mask_file }}"];
     params["{{ image_basename }}"] = {"min": -1200, "max":200} // lung window -1200, 200
     params["luts"] = [{"name": "CustomManual", "data":[
@@ -123,7 +126,11 @@
         [1,1,0,0,],
         ]
     }];
-    params["{{ mask_basename }}"] = {"lut": "CustomManual","min":0,"max":1,"alpha":0.5};
+    params["{{ mask_basename }}"] = {"lut": "CustomManual","min":0,"max":1,"alpha":0.5};    
+    {% else %}
+    params["images"] = ["{{ image_file }}"];
+    params["{{ image_basename }}"] = {"min": -1200, "max":200} // lung window -1200, 200
+    {% endif %}
     params["mainView"] = "axial";
     params["orthogonal"] = true; // set to false for 1 window only
     params["smoothDisplay"] = false;
@@ -146,17 +153,19 @@
                 <div class="papaya" data-params="params"></div>
             </div>
         </div>
+        {% if stl_file %}
         <div class="float-child">
         </pre>stl_note: {{stl_note}}</pre>
             <div id="surface-rendering" style="width:600px;height:600px"></div>
-        </div>                
+        </div>
+        {% endif %}
     </div>
-    
+    {% if stl_file %}
     <script type="text/javascript">
         window.onload = function() {
             STLViewer("{{ stl_file }}", "surface-rendering");
         }
     </script>
-
+    {% endif %}
 </body>
 </html>

@@ -33,13 +33,13 @@
         <td><a href="{{ url_for('review',case_id=row.case_id) }}">
             {{row.case_id}}
         </a></td>
-        <td><a href="{{ url_for('review',case_id=row.case_id) }}">
+        <td><a href="{{ url_for('review',case_id=row.case_id,kind='image') }}">
             <img loading=lazy src="{{row.img_url}}" alt="…" style="width:256px;">
         </a></td>
-        <td><a href="{{ url_for('review',case_id=row.case_id) }}">
+        <td><a href="{{ url_for('review',case_id=row.case_id,kind='knopczynski') }}">
             <img loading=lazy src="{{row.knopczynski_url}}" alt="…" style="width:256px;">
         </a></td>
-        <td><a href="{{ url_for('review',case_id=row.case_id) }}">
+        <td><a href="{{ url_for('review',case_id=row.case_id,kind='wasserthal') }}">
             <img loading=lazy src="{{row.wasserthal_url}}" alt="…" style="width:256px;">
         </a></td>
     </a>
