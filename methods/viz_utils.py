@@ -8,8 +8,8 @@ import vtk
 import numpy as np
 import SimpleITK as sitk
 
+"""
 import imageio
-
 def generate_mip(ct_data, mask_data, file_out):
 
     ct_data = ct_data.clip(-1000,1000)
@@ -23,7 +23,7 @@ def generate_mip(ct_data, mask_data, file_out):
     mythumbnail = mythumbnail.astype(np.uint8)
 
     imageio.imwrite(file_out,mythumbnail)
-
+"""
 
 # MIN_VAL,MAX_VAL = -1000, 1000 # all purpose
 MIN_VAL,MAX_VAL = -1200, 200 # lungs ~W:1400 L:-500
