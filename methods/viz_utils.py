@@ -9,7 +9,19 @@ import numpy as np
 import SimpleITK as sitk
 import vtk
 
-def generate_mip(image, out_png_file, mask=None,min_max_val=None,axis_list=[1]):
+def generate_thumbnail(image_file, out_png_file, mask_file=None,min_max_val=None,axis_list=[1],flip=None):
+    if image_file:
+        img_obj = sitk.ReadImage(image_file)
+        image = sitk.GetArrayFromImage(img_obj)
+        if flip:
+            image = np.flip(image,axis=flip)
+    if mask_file:
+        mask_obj = sitk.ReadImage(mask_file)
+        mask = sitk.GetArrayFromImage(mask_obj)
+        if flip:
+            mask = np.flip(mask,axis=flip)
+    else:
+        mask = None
 
     if min_max_val is not None:
         min_val, max_val = min_max_val
@@ -23,7 +35,7 @@ def generate_mip(image, out_png_file, mask=None,min_max_val=None,axis_list=[1]):
 
     mylist = []
     for axis in axis_list:
-        mip = np.max(image,axis=axis)
+        mip = np.sum(image,axis=axis)
         min_val, max_val = np.min(mip),np.max(mip)
         mip = mip.squeeze()
         mip = (255.*(mip-min_val)/(max_val-min_val)).clip(0,255)
@@ -153,9 +165,17 @@ if __name__ == "__main__":
         input_nifti_file = sys.argv[2]
         output_stl_file = sys.argv[3]
         gen_stl(input_nifti_file,output_stl_file)
+    elif action == 'thumbnail':
+        image_file = sys.argv[2]
+        mask_file = sys.argv[3]
+        flip = ast.literal_eval(sys.argv[4])
+        out_png_file = sys.argv[5]
+        generate_thumbnail(image_file, out_png_file, mask_file=mask_file,min_max_val=None,axis_list=[1],flip=flip)
     else:
         raise NotImplementedError()
 
+
+    
 """
 python viz_utils.py downsample img.nii.gz img-downsampled.nii.gz False
 python viz_utils.py downsample lung_vessels.nii.gz lung_vessels-downsampled.nii.gz True

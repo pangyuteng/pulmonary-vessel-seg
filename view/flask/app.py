@@ -62,9 +62,18 @@ def home():
 
 @app.route('/vessel12')
 def vessel12():
-    case_list = [ {'case_id':x,"png_url": os.path.join(DATADIR_VESSEL12,x,"thumbnail_0.png")} \
-        for x in sorted(os.listdir(DATADIR_VESSEL12)) \
-        if os.path.isdir(os.path.join(DATADIR_VESSEL12,x)) ]
+    case_list = []
+    for x in sorted(os.listdir(DATADIR_VESSEL12)):
+        case_dir = os.path.join(DATADIR_VESSEL12,x)
+        if not os.path.isdir(case_dir):
+            continue
+        item = {
+            'case_id':x,
+            "img_url": os.path.join(DATADIR_VESSEL12,x,"img-mip.png"),
+            "knopczynski_url": os.path.join(DATADIR_VESSEL12,x,"knopczynski-mip.png"),
+            "wasserthal_url": os.path.join(DATADIR_VESSEL12,x,"wasserthal-mip.png"),
+        }
+        case_list.append(item)    
     df = pd.DataFrame(case_list)
     return render_template("vessel12.html",df=df)
 

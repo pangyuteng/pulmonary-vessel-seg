@@ -61,3 +61,24 @@ if [ ! -f ${STL_FILE} ]; then
     python viz_utils.py stl $DOWN_FILE $STL_FILE
 fi
 
+export FLIP=0
+export IMG_FILE=${OUTPUT_NIFTI_FOLDER}/img.nii.gz
+export LUNG_FILE=${OUTPUT_NIFTI_FOLDER}/segmentations/lung.nii.gz
+export PNG_FILE=${OUTPUT_NIFTI_FOLDER}/img-mip.png
+if [ ! -f ${PNG_FILE} ]; then
+    python viz_utils.py thumbnail $IMG_FILE $LUNG_FILE $FLIP $PNG_FILE
+fi
+
+export VSL_FILE=${OUTPUT_NIFTI_FOLDER}/knopczynski.nii.gz
+export LUNG_FILE=${OUTPUT_NIFTI_FOLDER}/segmentations/lung.nii.gz
+export PNG_FILE=${OUTPUT_NIFTI_FOLDER}/knopczynski-mip.png
+if [ ! -f ${PNG_FILE} ]; then
+    python viz_utils.py thumbnail $VSL_FILE $LUNG_FILE $FLIP $PNG_FILE
+fi
+
+export VSL_FILE=${OUTPUT_NIFTI_FOLDER}/wasserthal.nii.gz
+export LUNG_FILE=${OUTPUT_NIFTI_FOLDER}/segmentations/lung.nii.gz
+export PNG_FILE=${OUTPUT_NIFTI_FOLDER}/wasserthal-mip.png
+if [ ! -f ${PNG_FILE} ]; then
+    python viz_utils.py thumbnail $VSL_FILE $LUNG_FILE $FLIP $PNG_FILE
+fi

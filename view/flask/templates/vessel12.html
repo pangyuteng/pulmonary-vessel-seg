@@ -24,12 +24,27 @@
     </style>
 </head>
 <body>
-{% for n,row in df.iterrows() %}
-<a href="{{ url_for('review',case_id=row.case_id) }}">
-{{row.case_id}}<br><br>
-<img loading=lazy src="{{row.png_url}}" alt="…" style="width:100px;">
-<br>
-</a>
-{% endfor %}
+<table>
+    <tr>
+        <th>case id</th><th>cumulative-sum of: image</th><th>knopczynski</th><th>wasserthal</th>
+    </tr>
+    {% for n,row in df.iterrows() %}
+    <tr>
+        <td><a href="{{ url_for('review',case_id=row.case_id) }}">
+            {{row.case_id}}
+        </a></td>
+        <td><a href="{{ url_for('review',case_id=row.case_id) }}">
+            <img loading=lazy src="{{row.img_url}}" alt="…" style="width:256px;">
+        </a></td>
+        <td><a href="{{ url_for('review',case_id=row.case_id) }}">
+            <img loading=lazy src="{{row.knopczynski_url}}" alt="…" style="width:256px;">
+        </a></td>
+        <td><a href="{{ url_for('review',case_id=row.case_id) }}">
+            <img loading=lazy src="{{row.wasserthal_url}}" alt="…" style="width:256px;">
+        </a></td>
+    </a>
+    </tr>
+    {% endfor %}
+</table>
 </body>
 </html>
