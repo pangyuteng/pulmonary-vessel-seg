@@ -31,9 +31,9 @@
     </tr>
     {% for n,row in df.iterrows() %}
     <tr>
-        <td><a href="{{ url_for('review',case_id=row.case_id) }}">
+        <td>
             {{row.case_id}}
-        </a></td>
+        </td>
         <td><a href="{{ url_for('review',case_id=row.case_id,kind='image') }}">
             <img loading=lazy src="{{row.img_url}}" alt="…" style="width:256px;">
         </a></td>
