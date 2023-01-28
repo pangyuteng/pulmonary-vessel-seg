@@ -52,8 +52,8 @@ def review():
         image_basename = os.path.basename(image_file)
         mask_basename = os.path.basename(mask_file)
         origial_note='na'
-        nifti_note='downsampled voxel size1 1x1x10mm'
-        stl_note='downsampled voxel size1 2x2x2mm'
+        nifti_note='downsampled voxel size: 1x1x10mm'
+        stl_note='downsampled voxel size: 2x2x2mm'
 
     elif kind == 'wasserthal':
 
@@ -68,8 +68,8 @@ def review():
         image_basename = os.path.basename(image_file)
         mask_basename = os.path.basename(mask_file)
         origial_note='na'
-        nifti_note='downsampled voxel size1 1x1x10mm'
-        stl_note='downsampled voxel size1 2x2x2mm'
+        nifti_note='downsampled voxel size: 1x1x10mm'
+        stl_note='downsampled voxel size: 2x2x2mm'
 
     else:
         return jsonify({"message":"not supported"})

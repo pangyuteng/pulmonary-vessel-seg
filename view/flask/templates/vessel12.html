@@ -25,8 +25,9 @@
 </head>
 <body>
 <table>
+    thumbnails of image and segmentations (sum of array along A-P axis within the lung)
     <tr>
-        <th>case id</th><th>cumulative-sum of: image</th><th>knopczynski</th><th>wasserthal</th>
+        <th>case id</th><th>image</th><th>knopczynski-2016</th><th>wasserthal-2022</th>
     </tr>
     {% for n,row in df.iterrows() %}
     <tr>
