@@ -12,7 +12,9 @@ if [ -f ${OUTPUT_VESSEL_FILE} ]; then
     exit 0
 fi
 
-python mhd2niigz.py ${INPUT_MHD_FILE} ${INPUT_NIFTI_FILE}
+if [ -f ${INPUT_NIFTI_FILE} ]; then
+    python mhd2niigz.py ${INPUT_MHD_FILE} ${INPUT_NIFTI_FILE}
+fi
 
 if [ ! -f ${ORIGINAL_VESSEL_FILE} ]; then
     TotalSegmentator -i ${INPUT_NIFTI_FILE} -o ${OUTPUT_NIFTI_FOLDER}
