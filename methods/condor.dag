@@ -1,7 +1,7 @@
 JOB  A  wasserthal.sub
 JOB  B  knopczynski.sub
 
-#PARENT A CHILD B
+PARENT A CHILD B
 
 CATEGORY A limited
 CATEGORY B limited
