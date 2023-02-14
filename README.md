@@ -49,3 +49,25 @@ repo url: na
 + vessel seg with graphcut
 + a/v seperation
 
+#### GUI 1/2 - will give it a try:
+
++ Slicer3D+VTMK
+    + https://lassoan.github.io/SlicerSegmentationRecipes/VesselSegmentationBySubtraction/    
+    + https://www.youtube.com/watch?v=caEuwJ7pCWs
+    + https://www.youtube.com/watch?v=wS6-4dwZCfo
+
++ (minimal doc) Angicart or Angicart++
+    + https://vsavage.faculty.biomath.ucla.edu/Code/HTML/indexangic.html#beadeveloper
+    + https://github.com/jocelynshen/angicart-c
+    + https://github.com/andersonju9797/AngicartCPlusPlus
+    + https://vsavage.faculty.biomath.ucla.edu/Code/HTML/indexangicplusplus.html
+
+#### GUI 2/2 - i have not looked into this:
+
++ (not free) Inobiec "vessel tree segmentation tool"
+    + https://www.youtube.com/watch?v=RsfSVFGVVLc
+    + https://inobitec.com/eng/manual/dicomviewer/segmentation/edit-segmented-structure/#x106-2280006.4.4
+
++ (may not be user friendly?) VTMK
+    + http://www.vmtk.org/documentation/screenshots.html
+    + probably not designed for complex structures, such as plumonary vessels?
