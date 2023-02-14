@@ -1,5 +1,6 @@
 universe = docker
 docker_image = pangyuteng/dcm:latest
+docker_pull_policy = always
 
 executable = viz.sh
 transfer_input_files = viz.sh,viz_utils.py

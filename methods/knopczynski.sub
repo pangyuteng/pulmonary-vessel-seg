@@ -1,5 +1,6 @@
 universe = docker
 docker_image = pangyuteng/vessel3ddl:inference
+docker_pull_policy = always
 
 executable = knopczynski-2016/inference.sh
 transfer_input_files = knopczynski-2016/inference.sh,remove_non_lung.py

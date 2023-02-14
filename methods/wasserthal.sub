@@ -1,5 +1,6 @@
 universe = docker
 docker_image = pangyuteng/totalsegmentator:latest
+docker_pull_policy = always
 
 executable = wasserthal-2022/inference.sh
 transfer_input_files = wasserthal-2022/inference.sh,mhd2niigz.py
