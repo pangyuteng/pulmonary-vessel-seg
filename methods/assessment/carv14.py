@@ -46,6 +46,7 @@ def main(ground_truth_dir,segmentation_dir):
         y_obj = sitk.ReadImage(gt_path)
         y = sitk.GetArrayFromImage(y_obj)
         y_true = (y != 0).astype(np.int16)
+        # ??? -999,0,1,2 # gonna assume -999 is also vessel, just not labeled as Artery or Vein yet?
 
         for method,file_path in dict(
             wasserthal=wasserthal_path,
