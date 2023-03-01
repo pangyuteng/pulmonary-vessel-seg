@@ -11,6 +11,7 @@ lung = sitk.GetArrayFromImage(lung_obj)
 vsl = sitk.GetArrayFromImage(vsl_obj)    
 
 vsl[lung==0]=0
+vsl = vsl.astype(np.uint8)
 vsl_obj = sitk.GetImageFromArray(vsl)
 vsl_obj.CopyInformation(lung_obj)
 
