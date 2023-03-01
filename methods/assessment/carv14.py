@@ -7,6 +7,8 @@ import numpy as np
 import SimpleITK as sitk
 from sklearn.metrics import confusion_matrix
 
+results_csv_file = "results-carve14.csv"
+compiled_csv_file = "compiled-carve14.csv"
 def assess(ground_truth_dir,segmentation_dir):
 
     gt_dict = {}
@@ -47,7 +49,7 @@ def assess(ground_truth_dir,segmentation_dir):
         y = sitk.GetArrayFromImage(y_obj)
         print(np.unique(y))
         y_true = (y != 0).astype(np.int16)
-        # -998 (not labeled),0,1,2 # gonna assume -999 is also vessel, just not labeled as Artery or Vein yet?
+        # -999 (not labeled),0,1,2 # gonna assume -999s are vessel that has been reviewed, just not labeled as Artery or Vein yet?
 
         for method,file_path in dict(
             wasserthal=wasserthal_path,
@@ -71,18 +73,33 @@ def assess(ground_truth_dir,segmentation_dir):
 
         print(myitem)
         mylist.append(myitem)
-        pd.DataFrame(mylist).to_csv('results.csv',index=False)
+        pd.DataFrame(mylist).to_csv(results_csv_file,index=False)
 
 def compile(csv_file):
     df = pd.read_csv(csv_file)
+    score_name_list = ["dice","accuracy","sensitivity","specificity"]
+    method_list = ["wasserthal","knopczynski"]
+    mylist = []
+    for score_name in score_name_list:
+        for method in method_list:
+            values = df[f'{method}-{score_name}']
+            myitem=dict(
+                method=method,
+                score_name=score_name,
+                mean_val=values.mean().round(5),
+                std_val=values.std().round(5),
+                n=len(values),
+            )
+            mylist.append(myitem)
+    pd.DataFrame(mylist).to_csv(compiled_csv_file,index=False)
 
 if __name__ == "__main__":
     ground_truth_dir = sys.argv[1]
     segmentation_dir = sys.argv[2]
-    if not os.path.exists('results.csv'):
+    if not os.path.exists(results_csv_file):
         assess(ground_truth_dir,segmentation_dir)
-    if not os.path.exists('compiled.csv'):
-        compile(ground_truth_dir,segmentation_dir)
+    if not os.path.exists(compiled_csv_file):
+        compile(results_csv_file)
 
 
 '''
