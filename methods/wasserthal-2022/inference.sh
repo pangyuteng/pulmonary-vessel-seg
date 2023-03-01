@@ -12,7 +12,7 @@ if [ -f ${OUTPUT_VESSEL_FILE} ]; then
     exit 0
 fi
 
-if [ -f ${INPUT_NIFTI_FILE} ]; then
+if [ ! -f ${INPUT_NIFTI_FILE} ]; then
     python mhd2niigz.py ${INPUT_MHD_FILE} ${INPUT_NIFTI_FILE}
 fi
 

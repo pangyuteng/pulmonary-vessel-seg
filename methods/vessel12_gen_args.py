@@ -6,7 +6,7 @@ import json
 data_dir = os.path.abspath(sys.argv[1])
 out_dir = os.path.abspath(sys.argv[2])
 
-sub_folders = [os.path.join(data_dir,x) for x in ['VESSEL12_01-05','VESSEL12_06-10','VESSEL12_11-15','VESSEL12_16-20']]
+sub_folders = [os.path.join(data_dir,x) for x in ['VESSEL12_01-05','VESSEL12_06-10','VESSEL12_11-15','VESSEL12_16-20','VESSEL12_ExampleScans/Scans']]
 img_mhd_list = []
 for s in sub_folders:
     tmp_list = [os.path.join(s,x) for x in os.listdir(s) if x.endswith('.mhd')]
@@ -15,8 +15,12 @@ for s in sub_folders:
 mylist = []
 for x in sorted(img_mhd_list):
     source_img_mhd_path = x
-    uid = os.path.basename(source_img_mhd_path).replace("VESSEL12_","").replace(".mhd","")
-    source_lung_path = os.path.join(data_dir,'VESSEL12_01-20_Lungmasks',f'VESSEL12_{uid}.mhd')
+    if 'VESSEL12_ExampleScans' in source_img_mhd_path:
+        uid = os.path.basename(source_img_mhd_path).replace("VESSEL12_","").replace(".mhd","")
+        source_lung_path = os.path.join(data_dir,'VESSEL12_ExampleScans/Lungmasks',f'VESSEL12_{uid}.mhd')
+    else:
+        uid = os.path.basename(source_img_mhd_path).replace("VESSEL12_","").replace(".mhd","")
+        source_lung_path = os.path.join(data_dir,'VESSEL12_01-20_Lungmasks',f'VESSEL12_{uid}.mhd')
     target_folder_path = os.path.join(out_dir,uid)
     os.makedirs(target_folder_path,exist_ok=True)
     target_seg_path = os.path.join(target_folder_path,'segmentations')
@@ -30,7 +34,7 @@ for x in sorted(img_mhd_list):
         target_folder_path=target_folder_path,
     )
     mylist.append(item)
-
+    
 with open('wasserthal.args','w') as f:
     for n,x in enumerate(mylist):
         vsl = os.path.join(x['target_folder_path'],'wasserthal.nii.gz')
