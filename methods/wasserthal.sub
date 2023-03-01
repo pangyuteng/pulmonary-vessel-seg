@@ -11,12 +11,12 @@ log = log/inference.$(cluster).$(process).log
 error = log/inference.$(cluster).$(process).err
 output = log/inference.$(cluster).$(process).out
 
-requirements = (OpSys == "LINUX" && Arch == "X86_64" && GPUMEM > 10000 )
+requirements = (OpSys == "LINUX" && Arch == "X86_64" && GPUMEM > 20000 )
 request_cpus = 1
 request_gpus = 1
 request_memory = 10GB
 request_disk = 5GB
 
-max_materialize = 5
+max_materialize = 10
 arguments = "$(myargs)"
 queue myargs from wasserthal.args
