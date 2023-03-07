@@ -1,0 +1,9 @@
+method,score_name,mean_val,std_val,n
+wasserthal,dice,0.93449,0.03078,3
+knopczynski,dice,0.86893,0.02327,3
+wasserthal,accuracy,0.96003,0.01941,3
+knopczynski,accuracy,0.92377,0.00978,3
+wasserthal,sensitivity,0.89111,0.06302,3
+knopczynski,sensitivity,0.80338,0.04567,3
+wasserthal,specificity,0.99312,0.00797,3
+knopczynski,specificity,0.9783,0.01076,3
