@@ -4,7 +4,9 @@ import SimpleITK as sitk
 from skimage.morphology import skeletonize
 from skimage.segmentation import watershed
 
-def main(mask_file,qia_file):
+def main(image_file,mask_file,qia_file):
+    
+    image_obj = sitk.ReadImage(mask_file)
     mask_obj = sitk.ReadImage(mask_file)
     spacing = mask_obj.GetSpacing()
     origin = mask_obj.GetOrigin()
@@ -28,7 +30,7 @@ def main(mask_file,qia_file):
         adjusted_sigma = sigma/np.array(spacing)
         gaussian = sitk.SmoothingRecursiveGaussianImageFilter()
         gaussian.SetSigma(adjusted_sigma)
-        smoothed = gaussian.Execute(mask_obj)
+        smoothed = gaussian.Execute(image_obj)
         '''
         ref. on sitk.ObjectnessMeasureImageFilter
         https://simpleitk.org/doxygen/latest/html/sitkObjectnessMeasureImageFilter_8h_source.html
@@ -93,6 +95,8 @@ def main(mask_file,qia_file):
     # we create a vessel mask with classification of bv5 (1), bv5-10(2), and bv10 (3)
     labels = myclass.astype(np.uint8)
     skeleton = skeletonize(vsl_mask).astype(np.uint8)
+    # TODO: noisy? some small vessel due to branching may
+    # have label that is larger than expected.
     labels[skeleton==0]=0
 
     # watershed
@@ -112,6 +116,7 @@ def main(mask_file,qia_file):
     sitk.WriteImage(qia_obj,qia_file)
 
 if __name__ == "__main__":
-    mask_file = sys.argv[1]
-    qia_file = sys.argv[2]
-    main(mask_file,qia_file)
+    image_file = sys.argv[1]
+    mask_file = sys.argv[2]
+    qia_file = sys.argv[3]
+    main(image_file,mask_file,qia_file)

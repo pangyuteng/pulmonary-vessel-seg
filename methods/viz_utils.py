@@ -4,6 +4,7 @@ import ast
 import logging
 logger = logging.getLogger(__file__)
 
+import json
 import imageio
 import numpy as np
 import SimpleITK as sitk
@@ -148,8 +149,27 @@ def gen_stl(input_file,output_file):
 
     print(input_file,output_file)
 
+
+def gen_info(input_nifti_file,output_json_file):
+    file_reader = sitk.ImageFileReader()
+    file_reader.SetFileName(input_nifti_file)
+    file_reader.ReadImageInformation()
+    image_size = list(file_reader.GetSize())
+    image_spacing = list(file_reader.GetSpacing())
+    mydict = dict(
+        image_size=image_size,
+        image_spacing=image_spacing,
+    )
+    with open(output_json_file,'w') as f:
+        f.write(json.dumps(mydict))
+
 if __name__ == "__main__":
     action = sys.argv[1]
+    if action == 'info':
+        input_nifti_file = sys.argv[2]
+        output_json_file = sys.argv[3]
+        gen_info(input_nifti_file,output_json_file)
+
     if action == 'downsample':
         input_nifti_file = sys.argv[2]
         output_nifti_file = sys.argv[3]

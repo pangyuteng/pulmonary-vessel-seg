@@ -82,3 +82,9 @@ export PNG_FILE=${OUTPUT_NIFTI_FOLDER}/wasserthal-mip.png
 if [ ! -f ${PNG_FILE} ]; then
     python viz_utils.py thumbnail $VSL_FILE $LUNG_FILE $FLIP $PNG_FILE
 fi
+
+
+export INFO_FILE=${OUTPUT_NIFTI_FOLDER}/info.json
+if [ ! -f ${INFO_FILE} ]; then
+    python viz_utils.py info $IMG_FILE $INFO_FILE
+fi
