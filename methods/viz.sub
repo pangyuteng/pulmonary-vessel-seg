@@ -16,6 +16,6 @@ request_cpus = 1
 request_memory = 10GB
 request_disk = 5GB
 
-max_materialize = 10
+max_materialize = 100
 arguments = "$(myargs)"
 queue myargs from viz.args
