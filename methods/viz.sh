@@ -83,8 +83,12 @@ if [ ! -f ${PNG_FILE} ]; then
     python viz_utils.py thumbnail $VSL_FILE $LUNG_FILE $FLIP $PNG_FILE
 fi
 
-
 export INFO_FILE=${OUTPUT_NIFTI_FOLDER}/info.json
 if [ ! -f ${INFO_FILE} ]; then
     python viz_utils.py info $IMG_FILE $INFO_FILE
+fi
+
+export VSL_INFO_FILE=${OUTPUT_NIFTI_FOLDER}/vessel.json
+if [ ! -f ${VSL_INFO_FILE} ]; then
+    python viz_utils.py vsl_info $OUTPUT_NIFTI_FOLDER $VSL_INFO_FILE
 fi

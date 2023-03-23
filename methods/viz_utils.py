@@ -163,14 +163,36 @@ def gen_info(input_nifti_file,output_json_file):
     with open(output_json_file,'w') as f:
         f.write(json.dumps(mydict))
 
+def gen_vessel_info(output_folder_path,output_json_file):
+    mydict = {}
+    method_list = ['knopczynski','wasserthal']
+    for method in method_list:
+        mypath = os.path.join(output_folder_path,method+".nii.gz")
+        if not os.path.exists(mypath):
+            continue
+        vsl_obj = sitk.ReadImage(mypath)
+        vsl_mask = sitk.GetArrayFromImage(vsl_obj)
+        voxel_size = np.prod(vsl_obj.GetSpacing())*0.001 # cc
+        vessel_volume_cc = np.sum(vsl_mask)*voxel_size
+        mydict[f'{method}_volume_cc']=float(np.round(vessel_volume_cc,2))
+        mydict['image_spacing']=list(vsl_obj.GetSpacing())
+        mydict['image_size']=list(vsl_obj.GetSize())
+        mydict['z_spacing']=list(vsl_obj.GetSpacing())[-1]
+
+    with open(output_json_file,'w') as f:
+        f.write(json.dumps(mydict))
+
 if __name__ == "__main__":
     action = sys.argv[1]
     if action == 'info':
         input_nifti_file = sys.argv[2]
         output_json_file = sys.argv[3]
         gen_info(input_nifti_file,output_json_file)
-
-    if action == 'downsample':
+    elif action == 'vsl_info':
+        input_folder = sys.argv[2]
+        output_json_file = sys.argv[3]
+        gen_vessel_info(input_folder,output_json_file)
+    elif action == 'downsample':
         input_nifti_file = sys.argv[2]
         output_nifti_file = sys.argv[3]
         is_label = ast.literal_eval(sys.argv[4])
