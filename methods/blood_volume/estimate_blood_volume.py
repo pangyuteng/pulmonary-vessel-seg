@@ -51,7 +51,7 @@ def main(image_file,mask_file,qia_file):
     we can use FWHM as diameter.
     so if we have a sigma of 1mm, then diameter would be 2.355*1 mm
     '''
-    # np.linspace(0,6,5) 
+
     for x_mm in np.arange(0.2,4,0.3):
         print(f'sigma: {x_mm}') 
         # since the image is not 1mm isotropic
@@ -60,7 +60,7 @@ def main(image_file,mask_file,qia_file):
         adjusted_sigma = sigma/np.array(spacing)
         gaussian = sitk.SmoothingRecursiveGaussianImageFilter()
         gaussian.SetSigma(adjusted_sigma)
-        smoothed = gaussian.Execute(image_obj)
+        smoothed = gaussian.Execute(mask_obj)
         '''
         ref. on sitk.ObjectnessMeasureImageFilter
         https://simpleitk.org/doxygen/latest/html/sitkObjectnessMeasureImageFilter_8h_source.html
