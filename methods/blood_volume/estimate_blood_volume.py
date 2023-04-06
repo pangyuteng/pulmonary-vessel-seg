@@ -32,12 +32,8 @@ def resample_img(itk_image, out_spacing, is_label=False):
 
 def main(image_file,mask_file,qia_file):
     
-    image_obj = sitk.ReadImage(mask_file)
+    image_obj = sitk.ReadImage(image_file)
     mask_obj = sitk.ReadImage(mask_file)
-
-    # https://pubmed.ncbi.nlm.nih.gov/23656466/
-    # https://www.atsjournals.org/doi/full/10.1164/rccm.201301-0162OC
-    # https://www.atsjournals.org/doi/suppl/10.1164/rccm.201301-0162OC?role=tab
 
     out_spacing = [0.625,0.625,0.625]
     image_obj = resample_img(image_obj, out_spacing, is_label=False)
@@ -47,8 +43,6 @@ def main(image_file,mask_file,qia_file):
     direction = mask_obj.GetDirection()
     vsl_mask = sitk.GetArrayFromImage(mask_obj)
     
-    raise NotImplementedError("different from scale-space-particles")
-
     arr_list = [np.zeros_like(vsl_mask)]
     '''
     https://en.wikipedia.org/wiki/Normal_distribution
@@ -78,6 +72,10 @@ def main(image_file,mask_file,qia_file):
         per https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6214740/pdf/nihms982442.pdf
         set alpha 0.53, beta 0.61 # gamma was not metioned.
 
+        https://pubmed.ncbi.nlm.nih.gov/32741657
+        https://pubmed.ncbi.nlm.nih.gov/25227036
+        set alpha 0.5, beta 0.5, c 20
+
         # alternative to frangi-filter, diameter can be estimated with "distance transform" if speed is a concern.
         from scipy.ndimage.morphology import distance_transform_edt
         skeleton = skeletonize(vsl_mask)
@@ -87,9 +85,9 @@ def main(image_file,mask_file,qia_file):
         myfilter = sitk.ObjectnessMeasureImageFilter()
         myfilter.SetBrightObject(True)
         myfilter.SetObjectDimension(1) # 1: lines (vessels),
-        myfilter.SetAlpha(0.53)
-        myfilter.SetBeta(0.61)
-        myfilter.SetGamma(5.0)
+        myfilter.SetAlpha(0.5)
+        myfilter.SetBeta(0.5)
+        myfilter.SetGamma(20.0)
         tmp_obj = myfilter.Execute(smoothed)
         arr_list.append(sitk.GetArrayFromImage(tmp_obj))
 
@@ -156,3 +154,13 @@ if __name__ == "__main__":
     mask_file = sys.argv[2]
     qia_file = sys.argv[3]
     main(image_file,mask_file,qia_file)
+
+"""
+
+docker run -it -u $(id -u):$(id -g) -w $PWD \
+    -v /cvibraid:/cvibraid -v /radraid:/radraid \
+    pangyuteng/ml:latest bash
+
+python estimate_blood_volume.py img.nii.gz wasserthal.nii.gz qia.nii.gz
+
+"""
