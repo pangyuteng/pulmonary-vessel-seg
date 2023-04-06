@@ -74,7 +74,7 @@ def main(image_file,mask_file,qia_file):
 
         https://pubmed.ncbi.nlm.nih.gov/32741657
         https://pubmed.ncbi.nlm.nih.gov/25227036
-        set alpha 0.5, beta 0.5, c 20
+        set alpha 0.5, beta 0.5, c 20 ?? likely not the same equation.
 
         # alternative to frangi-filter, diameter can be estimated with "distance transform" if speed is a concern.
         from scipy.ndimage.morphology import distance_transform_edt
@@ -85,9 +85,9 @@ def main(image_file,mask_file,qia_file):
         myfilter = sitk.ObjectnessMeasureImageFilter()
         myfilter.SetBrightObject(True)
         myfilter.SetObjectDimension(1) # 1: lines (vessels),
-        myfilter.SetAlpha(0.5)
-        myfilter.SetBeta(0.5)
-        myfilter.SetGamma(20.0)
+        myfilter.SetAlpha(0.53)
+        myfilter.SetBeta(0.61)
+        myfilter.SetGamma(5.0)
         tmp_obj = myfilter.Execute(smoothed)
         arr_list.append(sitk.GetArrayFromImage(tmp_obj))
 
