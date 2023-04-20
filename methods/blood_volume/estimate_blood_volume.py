@@ -132,7 +132,7 @@ def main(image_file,mask_file,outdir):
 
     # categorize per area
     myclass = np.zeros_like(arr)
-    myclass[np.logical_and(arr>2,arr<=3)]=1 # BV5
+    myclass[np.logical_and(arr>=1,arr<=3)]=1 # BV5
     myclass[np.logical_and(arr>3,arr<=5)]=2 # BV5-10
     myclass[arr>5]=3 # B10
 
