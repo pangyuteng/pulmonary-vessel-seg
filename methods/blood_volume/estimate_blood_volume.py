@@ -1,8 +1,10 @@
+import os
 import sys
 import numpy as np
 import SimpleITK as sitk
 from skimage.morphology import skeletonize
 from skimage.segmentation import watershed
+from scipy import ndimage
 
 def resample_img(itk_image, out_spacing, is_label=False):
     
@@ -30,18 +32,27 @@ def resample_img(itk_image, out_spacing, is_label=False):
 
     return resample.Execute(itk_image)
 
-def main(image_file,mask_file,qia_file):
+def main(image_file,mask_file,outdir):
+    os.makedirs(outdir,exist_ok=True)
     
     image_obj = sitk.ReadImage(image_file)
     mask_obj = sitk.ReadImage(mask_file)
 
-    out_spacing = [0.625,0.625,0.625]
-    image_obj = resample_img(image_obj, out_spacing, is_label=False)
-    mask_obj = resample_img(mask_obj, out_spacing, is_label=True)
+    #out_spacing = [0.625,0.625,0.625]
+    #image_obj = resample_img(image_obj, out_spacing, is_label=False)
+    #mask_obj = resample_img(mask_obj, out_spacing, is_label=True)
     spacing = mask_obj.GetSpacing()
     origin = mask_obj.GetOrigin()
     direction = mask_obj.GetDirection()
+    
     vsl_mask = sitk.GetArrayFromImage(mask_obj)
+    
+    img = sitk.GetArrayFromImage(image_obj)
+    img = img.astype(np.float)
+    img = ((img+1000)/2000).clip(0,1)
+    img[vsl_mask==0]=0
+    image_obj = sitk.GetImageFromArray(img)
+    image_obj.CopyInformation(mask_obj)
     
     arr_list = [np.zeros_like(vsl_mask)]
     '''
@@ -117,7 +128,7 @@ def main(image_file,mask_file,qia_file):
 
     qia_obj = sitk.GetImageFromArray(arr)
     qia_obj.CopyInformation(mask_obj)
-    sitk.WriteImage(qia_obj,"raw.nii.gz")
+    sitk.WriteImage(qia_obj,f"{outdir}/raw.nii.gz")
 
     # categorize per area
     myclass = np.zeros_like(arr)
@@ -129,8 +140,6 @@ def main(image_file,mask_file,qia_file):
     # we create a vessel mask with classification of bv5 (1), bv5-10(2), and bv10 (3)
     labels = myclass.astype(np.uint8)
     skeleton = skeletonize(vsl_mask).astype(np.uint8)
-    # TODO: noisy? some small vessel due to branching may
-    # have label that is larger than expected.
     labels[skeleton==0]=0
 
     # watershed
@@ -139,21 +148,21 @@ def main(image_file,mask_file,qia_file):
 
     qia_obj = sitk.GetImageFromArray(myclass)
     qia_obj.CopyInformation(mask_obj)
-    sitk.WriteImage(qia_obj,"classes.nii.gz")
+    sitk.WriteImage(qia_obj,f"{outdir}/classes.nii.gz")
 
     qia_obj = sitk.GetImageFromArray(labels)
     qia_obj.CopyInformation(mask_obj)
-    sitk.WriteImage(qia_obj,"labels.nii.gz")
+    sitk.WriteImage(qia_obj,f"{outdir}/labels.nii.gz")
 
     qia_obj = sitk.GetImageFromArray(bv)
     qia_obj.CopyInformation(mask_obj)
-    sitk.WriteImage(qia_obj,qia_file)
+    sitk.WriteImage(qia_obj,f"{outdir}/qia.nii.gz")
 
 if __name__ == "__main__":
     image_file = sys.argv[1]
     mask_file = sys.argv[2]
-    qia_file = sys.argv[3]
-    main(image_file,mask_file,qia_file)
+    outdir = sys.argv[3]
+    main(image_file,mask_file,outdir)
 
 """
 
@@ -161,6 +170,6 @@ docker run -it -u $(id -u):$(id -g) -w $PWD \
     -v /cvibraid:/cvibraid -v /radraid:/radraid \
     pangyuteng/ml:latest bash
 
-python estimate_blood_volume.py img.nii.gz wasserthal.nii.gz qia.nii.gz
+python estimate_blood_volume.py img.nii.gz wasserthal.nii.gz outdir
 
 """
