@@ -35,3 +35,7 @@ https://aapm.onlinelibrary.wiley.com/doi/pdf/10.1002/mp.13659
 ```
 https://pubmed.ncbi.nlm.nih.gov/32741657
 ```
+
+
+https://github.com/amy-tabb/CurveSkel-Tabb-Medeiros
+https://github.com/amy-tabb/CurveSkel-Tabb-Medeiros-2018
