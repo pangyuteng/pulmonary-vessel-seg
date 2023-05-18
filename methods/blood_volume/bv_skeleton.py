@@ -47,9 +47,9 @@ def main(image_file,mask_file,outdir,target_spacing=[1,1,1]):
 
     if target_spacing is not None:
         image_obj = resample_img(image_obj, target_spacing, is_label=False)
-        sitk.WriteImage(qia_obj,f"{outdir}/img.nii.gz")
+        sitk.WriteImage(image_obj,f"{outdir}/img.nii.gz")
         mask_obj = resample_img(mask_obj, target_spacing, is_label=True)
-        sitk.WriteImage(qia_obj,f"{outdir}/mask.nii.gz")
+        sitk.WriteImage(mask_obj,f"{outdir}/mask.nii.gz")
     spacing = mask_obj.GetSpacing()
     origin = mask_obj.GetOrigin()
     direction = mask_obj.GetDirection()
