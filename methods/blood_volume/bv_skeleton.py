@@ -39,7 +39,7 @@ def resample_img(itk_image, out_spacing, is_label=False):
 
     return resample.Execute(itk_image)
 
-def main(image_file,mask_file,outdir,target_spacing=[1,1,1]):
+def main(image_file,mask_file,outdir,target_spacing=[1.0,1.0,1.0]):
     os.makedirs(outdir,exist_ok=True)
     
     image_obj = sitk.ReadImage(image_file)
@@ -50,6 +50,7 @@ def main(image_file,mask_file,outdir,target_spacing=[1,1,1]):
         sitk.WriteImage(image_obj,f"{outdir}/img.nii.gz")
         mask_obj = resample_img(mask_obj, target_spacing, is_label=True)
         sitk.WriteImage(mask_obj,f"{outdir}/mask.nii.gz")
+
     spacing = mask_obj.GetSpacing()
     origin = mask_obj.GetOrigin()
     direction = mask_obj.GetDirection()
@@ -114,8 +115,8 @@ def main(image_file,mask_file,outdir,target_spacing=[1,1,1]):
         if idx == 0:
             continue
         values = bs_field[branch==idx]
-        tmp_radius = np.mean(values)
-        radius[branch==idx]=tmp_radius
+        tmp_radius = float(np.mean(values))
+        radius[bv==idx] = tmp_radius
 
     qia_obj = sitk.GetImageFromArray(radius)
     qia_obj.CopyInformation(mask_obj)
