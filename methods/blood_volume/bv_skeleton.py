@@ -39,7 +39,7 @@ def resample_img(itk_image, out_spacing, is_label=False):
 
     return resample.Execute(itk_image)
 
-def main(image_file,mask_file,outdir,target_spacing=[1.0,1.0,1.0]):
+def main(image_file,mask_file,outdir,target_spacing=[0.6,0.6,0.6]):
     os.makedirs(outdir,exist_ok=True)
     
     image_obj = sitk.ReadImage(image_file)
@@ -74,7 +74,23 @@ def main(image_file,mask_file,outdir,target_spacing=[1.0,1.0,1.0]):
     qia_obj = sitk.GetImageFromArray(bs_field)
     qia_obj.CopyInformation(mask_obj)
     sitk.WriteImage(qia_obj,f"{outdir}/bs_field.nii.gz")
+    '''
+    # radius
+    >>> [r for r in np.arange(1,6,1)]
+    [1, 2, 3, 4, 5]
+    # area
+    >>> [np.pi*(r**2) for r in np.arange(1,6,1)]
+    [3.141592653589793, 12.566370614359172, 28.274333882308138, 50.26548245743669, 78.53981633974483]
 
+
+    # radius
+    >>> [np.round(r,2) for r in np.arange(0.6,5,.6)]
+    [0.6, 1.2, 1.8, 2.4, 3.0, 3.6, 4.2, 4.8]
+    # area
+    >>> [np.round(np.pi*(r**2),2) for r in np.arange(0.6,5,.6)]
+    [1.13, 4.52, 10.18, 18.1, 28.27, 40.72, 55.42, 72.38]
+
+    '''
 
     # with skeleton as input
     # for each point in skeleton
