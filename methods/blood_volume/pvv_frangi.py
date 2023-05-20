@@ -190,8 +190,8 @@ def main(image_file,mask_file,outdir):
 
     mydict = {
         'pvv5-frangi': float(np.sum(pvv==1)/np.sum(pvv>0)),
-        'pvv10-frangi': float(np.sum(pvv==1)/np.sum(pvv>0)),
-        'pvv10+-frangi': float(np.sum(pvv==1)/np.sum(pvv>0)),
+        'pvv10-frangi': float(np.sum(pvv==2)/np.sum(pvv>0)),
+        'pvv10+-frangi': float(np.sum(pvv==3)/np.sum(pvv>0)),
     }
     json_file = f"{outdir}/frangi.json"
     with open(json_file,'w') as f:
