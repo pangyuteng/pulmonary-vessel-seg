@@ -64,3 +64,15 @@ print(G)
 pos=nx.get_node_attributes(G,'pos')
 nx.draw(G,pos)
 plt.savefig('ok.png')
+
+
+'''
+
+https://www.nature.com/articles/s41598-023-31470-6
+
+https://github.com/amy-tabb/CurveSkel-Tabb-Medeiros-2018
+
+https://github.com/vmtk/SlicerExtension-VMTK/blob/master/Docs/CenterlineComputation.md
+
+
+'''

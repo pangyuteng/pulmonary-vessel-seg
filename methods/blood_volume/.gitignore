@@ -1,3 +1,4 @@
 *.nii.gz
+test.gpickle
 outdir-dt
 outdir-frangi

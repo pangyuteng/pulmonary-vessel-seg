@@ -11,8 +11,11 @@ from skimage.measure import label, regionprops
 from tqdm import tqdm
 
 # ref 
+#
 #  BVV computation https://www.nature.com/articles/s41598-023-31470-6
-#  
+#
+#  skeletonization alternative https://github.com/amy-tabb/CurveSkel-Tabb-Medeiros-2018
+#
 
 def resample_img(itk_image, out_spacing, is_label=False):
     
