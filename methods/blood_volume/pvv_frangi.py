@@ -47,9 +47,23 @@ def main(image_file,mask_file,outdir):
     spacing = mask_obj.GetSpacing()
     origin = mask_obj.GetOrigin()
     direction = mask_obj.GetDirection()
-    
-    vsl_mask = sitk.GetArrayFromImage(mask_obj)
-    
+
+    connected_components = False
+    if connected_components:
+        vsl_mask = sitk.GetArrayFromImage(mask_obj)
+        blobs = label(vsl_mask)
+        props = regionprops(blobs)
+        # mm3 = 0.001 cc
+        th = 1/(0.001 np.prod(spacing)) # 1cc
+        vsl_mask = np.zeros_like(vsl_mask)
+        for p in props:
+            if p.area < th:
+                continue
+            vsl_mask[blobs==p.label] = 1
+        qia_obj = sitk.GetImageFromArray(vsl_mask)
+        qia_obj.CopyInformation(mask_obj)
+        sitk.WriteImage(qia_obj,f"{outdir}/vsl_mask.nii.gz")
+
     img = sitk.GetArrayFromImage(image_obj)
     img = img.astype(np.float)
     img = ((img+1000)/2000).clip(0,1)
