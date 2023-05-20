@@ -138,7 +138,7 @@ def main(image_file,mask_file,outdir,target_spacing=[0.6,0.6,0.6]):
     qia_obj.CopyInformation(mask_obj)
     sitk.WriteImage(qia_obj,f"{outdir}/radius.nii.gz")
 
-    pvv = np.zeros_like(ws_branch)
+    pvv = np.zeros_like(radius)
     pvv[np.logical_and(radius>0,radius<=1.5)]=1
     pvv[np.logical_and(radius>1.5,radius<2.5)]=2
     pvv[radius>=2.5]=3
