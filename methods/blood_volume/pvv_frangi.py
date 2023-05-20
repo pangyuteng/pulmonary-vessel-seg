@@ -7,6 +7,7 @@ from skimage.morphology import skeletonize
 from skimage.segmentation import watershed
 from scipy import ndimage
 from skimage.measure import label, regionprops
+from tqdm import tqdm
 
 def resample_img(itk_image, out_spacing, is_label=False):
     
