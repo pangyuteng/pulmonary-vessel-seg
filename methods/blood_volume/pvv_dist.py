@@ -1,5 +1,6 @@
 import os
 import sys
+import json
 import numpy as np
 import SimpleITK as sitk
 from skimage.morphology import skeletonize
@@ -138,33 +139,22 @@ def main(image_file,mask_file,outdir,target_spacing=[0.6,0.6,0.6]):
     qia_obj.CopyInformation(mask_obj)
     sitk.WriteImage(qia_obj,f"{outdir}/radius.nii.gz")
 
-    # import networkx as nx
-    # FG=nx.Graph()
-    # for idx in np.argwhere(skeleton):
-    #     is_intersection = intersection.take(idx)
-
-    '''
-    qia_obj = sitk.GetImageFromArray(dist_on_skel)
+    pvv = np.copy(radius)
+    pvv[radius>=3]=3
+    qia_obj = sitk.GetImageFromArray(pvv)
     qia_obj.CopyInformation(mask_obj)
-    sitk.WriteImage(qia_obj,f"{outdir}/raw.nii.gz")
-    
-    print(np.unique(dist_on_skel))
+    sitk.WriteImage(qia_obj,f"{outdir}/pvv.nii.gz")
+
+    mydict = {
+        'pvv5-dt': float(np.sum(pvv==1)/np.sum(pvv>0)),
+        'pvv10-dt': float(np.sum(pvv==1)/np.sum(pvv>0)),
+        'pvv10+-dt': float(np.sum(pvv==1)/np.sum(pvv>0)),
+    }
+    json_file = f"{outdir}/dist_transform.json"
+    with open(json_file,'w') as f:
+        f.write(json.dumps(mydict))
 
 
-    qia_obj = sitk.GetImageFromArray(bv)
-    qia_obj.CopyInformation(mask_obj)
-    sitk.WriteImage(qia_obj,f"{outdir}/bv.nii.gz")
-    
-    print(np.unique(bv))
-
-    # qia_obj = sitk.GetImageFromArray(labels)
-    # qia_obj.CopyInformation(mask_obj)
-    # sitk.WriteImage(qia_obj,f"{outdir}/labels.nii.gz")
-
-    # qia_obj = sitk.GetImageFromArray(bv)
-    # qia_obj.CopyInformation(mask_obj)
-    # sitk.WriteImage(qia_obj,f"{outdir}/qia.nii.gz")
-    '''
 if __name__ == "__main__":
     image_file = sys.argv[1]
     mask_file = sys.argv[2]
@@ -177,6 +167,6 @@ docker run -it -u $(id -u):$(id -g) -w $PWD \
     -v /cvibraid:/cvibraid -v /radraid:/radraid \
     pangyuteng/ml:latest bash
 
-python bv_skeleton.py img.nii.gz wasserthal.nii.gz outdir
+python pvv_dist.py img.nii.gz wasserthal.nii.gz outdir-dt
 
 """

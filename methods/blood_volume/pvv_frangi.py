@@ -1,10 +1,12 @@
 import os
 import sys
+import json
 import numpy as np
 import SimpleITK as sitk
 from skimage.morphology import skeletonize
 from skimage.segmentation import watershed
 from scipy import ndimage
+from skimage.measure import label, regionprops
 
 def resample_img(itk_image, out_spacing, is_label=False):
     
@@ -136,27 +138,61 @@ def main(image_file,mask_file,outdir):
     myclass[np.logical_and(arr>3,arr<=5)]=2 # BV5-10
     myclass[arr>5]=3 # B10
 
-    # for ease of compuation and visualization,
-    # we create a vessel mask with classification of bv5 (1), bv5-10(2), and bv10 (3)
-    labels = myclass.astype(np.uint8)
-    skeleton = skeletonize(vsl_mask).astype(np.uint8)
-    labels[skeleton==0]=0
+    vsl_mask = sitk.GetArrayFromImage(mask_obj)
+    skeleton = skeletonize(vsl_mask)
+    skeleton = skeleton.astype(np.int16)
+    qia_obj = sitk.GetImageFromArray(skeleton)
+    qia_obj.CopyInformation(mask_obj)
+    sitk.WriteImage(qia_obj,f"{outdir}/skeleton.nii.gz")
+
+
+    # determine branching point
+    # ref https://www.mathworks.com/matlabcentral/fileexchange/67600-branch-points-from-3d-logical-skeleton?s_tid=blogs_rc_5
+    weights = np.ones((3,3,3))
+    intersection = ndimage.convolve(skeleton,weights) > 3
+
+    intersection = intersection.astype(np.int16)
+    qia_obj = sitk.GetImageFromArray(intersection)
+    qia_obj.CopyInformation(mask_obj)
+    sitk.WriteImage(qia_obj,f"{outdir}/intersection.nii.gz")
+
+    branch = np.copy(skeleton)
+    branch[intersection==1]=0
+    branch = label(branch)
+    branch = branch.astype(np.int16)
+    qia_obj = sitk.GetImageFromArray(branch)
+    qia_obj.CopyInformation(mask_obj)
+    sitk.WriteImage(qia_obj,f"{outdir}/branch.nii.gz")
 
     # watershed
-    bv = watershed(vsl_mask*-1, labels, mask=vsl_mask>0)
-    bv = bv.astype(np.uint8)
+    branch_ws = watershed(vsl_mask*-1, branch, mask=vsl_mask>0)
+    branch_ws = branch_ws.astype(np.int16)
 
-    qia_obj = sitk.GetImageFromArray(myclass)
+    qia_obj = sitk.GetImageFromArray(branch_ws)
     qia_obj.CopyInformation(mask_obj)
-    sitk.WriteImage(qia_obj,f"{outdir}/classes.nii.gz")
+    sitk.WriteImage(qia_obj,f"{outdir}/watershed_labels.nii.gz")
 
-    qia_obj = sitk.GetImageFromArray(labels)
-    qia_obj.CopyInformation(mask_obj)
-    sitk.WriteImage(qia_obj,f"{outdir}/labels.nii.gz")
+    pvv = np.zeros_like(branch_ws)
+    for idx in tqdm(list(np.unique(branch))):
+        if idx == 0:
+            continue
+        values = myclass[branch==idx]
+        tmp_class = int(np.mean(values))
+        pvv[branch_ws==idx] = tmp_class
 
-    qia_obj = sitk.GetImageFromArray(bv)
+    qia_obj = sitk.GetImageFromArray(pvv)
     qia_obj.CopyInformation(mask_obj)
-    sitk.WriteImage(qia_obj,f"{outdir}/qia.nii.gz")
+    sitk.WriteImage(qia_obj,f"{outdir}/pvv.nii.gz")
+
+    mydict = {
+        'pvv5-dt': float(np.sum(pvv==1)/np.sum(pvv>0)),
+        'pvv10-dt': float(np.sum(pvv==1)/np.sum(pvv>0)),
+        'pvv10+-dt': float(np.sum(pvv==1)/np.sum(pvv>0)),
+    }
+    json_file = f"{outdir}/frangi.json"
+    with open(json_file,'w') as f:
+        f.write(json.dumps(mydict))
+
 
 if __name__ == "__main__":
     image_file = sys.argv[1]
@@ -170,6 +206,6 @@ docker run -it -u $(id -u):$(id -g) -w $PWD \
     -v /cvibraid:/cvibraid -v /radraid:/radraid \
     pangyuteng/ml:latest bash
 
-python estimate_blood_volume.py img.nii.gz wasserthal.nii.gz outdir
+python pvv_frangi.py img.nii.gz wasserthal.nii.gz outdir-frangi
 
 """
