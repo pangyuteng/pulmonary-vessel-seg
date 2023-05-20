@@ -7,6 +7,7 @@ from skimage.morphology import skeletonize
 from skimage.measure import label, regionprops
 from scipy import ndimage
 import networkx as nx
+import matplotlib.pyplot as plt
 
 mask_file = sys.argv[1]
 g_file = "test.gpickle"
@@ -36,7 +37,8 @@ if not os.path.exists(g_file):
     for x,y,z in indices:
         try:
             idx = branch[x,y,z]
-            G.add_node(idx,pos=(x,y,z))
+            #G.add_node(idx,pos=(x,y,z))
+            G.add_node(idx,pos=(x,y))
             for ox in [-1,1]:
                 for oy in [-1,1]:
                     for oz in [-1,1]:
@@ -44,7 +46,8 @@ if not os.path.exists(g_file):
                         nidx = branch[mx,my,mz]
                         if nidx == 0:
                             continue
-                        G.add_node(nidx,pos=(mx,my,mz))
+                        #G.add_node(nidx,pos=(mx,my,mz))
+                        G.add_node(nidx,pos=(mx,my))
                         if idx == nidx:
                             weight = 0
                         else:
@@ -58,3 +61,6 @@ if not os.path.exists(g_file):
     nx.write_gpickle(G, g_file)
 G = nx.read_gpickle(g_file)
 print(G)
+pos=nx.get_node_attributes(G,'pos')
+nx.draw(G,pos)
+plt.figsave('ok.png')
