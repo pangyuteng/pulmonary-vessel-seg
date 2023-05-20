@@ -61,17 +61,15 @@ def main(image_file,mask_file,outdir,target_spacing=[0.6,0.6,0.6]):
     # alternative to frangi-filter, diameter can be estimated with "distance transform" if speed is a concern.
     
     skeleton = skeletonize(vsl_mask)
-    
     skeleton = skeleton.astype(np.int16)
 
     qia_obj = sitk.GetImageFromArray(skeleton)
     qia_obj.CopyInformation(mask_obj)
     sitk.WriteImage(qia_obj,f"{outdir}/skeleton.nii.gz")
 
-
     bs_field = distance_transform_edt(vsl_mask>0)
-
     bs_field = bs_field.astype(np.int16)
+
     qia_obj = sitk.GetImageFromArray(bs_field)
     qia_obj.CopyInformation(mask_obj)
     sitk.WriteImage(qia_obj,f"{outdir}/bs_field.nii.gz")
@@ -105,8 +103,8 @@ def main(image_file,mask_file,outdir,target_spacing=[0.6,0.6,0.6]):
     # ref https://www.mathworks.com/matlabcentral/fileexchange/67600-branch-points-from-3d-logical-skeleton?s_tid=blogs_rc_5
     weights = np.ones((3,3,3))
     intersection = ndimage.convolve(skeleton,weights) > 3
-
     intersection = intersection.astype(np.int16)
+    
     qia_obj = sitk.GetImageFromArray(intersection)
     qia_obj.CopyInformation(mask_obj)
     sitk.WriteImage(qia_obj,f"{outdir}/intersection.nii.gz")
@@ -118,29 +116,28 @@ def main(image_file,mask_file,outdir,target_spacing=[0.6,0.6,0.6]):
     qia_obj = sitk.GetImageFromArray(branch)
     qia_obj.CopyInformation(mask_obj)
     sitk.WriteImage(qia_obj,f"{outdir}/branch.nii.gz")
-
+    
     # watershed
-    bv = watershed(vsl_mask*-1, branch, mask=vsl_mask>0)
-    bv = bv.astype(np.int16)
+    ws_branch = watershed(vsl_mask*-1, branch, mask=vsl_mask>0)
+    ws_branch = ws_branch.astype(np.int16)
 
-    qia_obj = sitk.GetImageFromArray(bv)
+    qia_obj = sitk.GetImageFromArray(ws_branch)
     qia_obj.CopyInformation(mask_obj)
     sitk.WriteImage(qia_obj,f"{outdir}/watershed_labels.nii.gz")
 
-    radius = np.zeros_like(bv)
-    for idx in tqdm(list(np.unique(branch))):
-        if idx == 0:
-            continue
-        values = bs_field[branch==idx]
-        tmp_radius = float(np.mean(values))
-        radius[bv==idx] = tmp_radius
+    radius = np.zeros_like(ws_branch)
+    props = regionprops(branch,intensity_image=bs_field)
+    for p in tqdm(props):
+        radius[ws_branch==p.label] = p.mean_intensity
 
     qia_obj = sitk.GetImageFromArray(radius)
     qia_obj.CopyInformation(mask_obj)
     sitk.WriteImage(qia_obj,f"{outdir}/radius.nii.gz")
 
-    pvv = np.copy(radius)
-    pvv[radius>=3]=3
+    pvv = np.zeros_like(ws_branch)
+    pvv[np.logical_and(radius>0,radius<=1.5)]=1
+    pvv[np.logical_and(radius>1.5,radius>2.5)]=2
+    pvv[radius>2.5]=3
     qia_obj = sitk.GetImageFromArray(pvv)
     qia_obj.CopyInformation(mask_obj)
     sitk.WriteImage(qia_obj,f"{outdir}/pvv.nii.gz")

@@ -173,22 +173,19 @@ def main(image_file,mask_file,outdir):
     qia_obj.CopyInformation(mask_obj)
     sitk.WriteImage(qia_obj,f"{outdir}/watershed_labels.nii.gz")
 
-    pvv = np.zeros_like(branch_ws)
-    for idx in tqdm(list(np.unique(branch))):
-        if idx == 0:
-            continue
-        values = myclass[branch==idx]
-        tmp_class = int(np.mean(values))
-        pvv[branch_ws==idx] = tmp_class
+    pvv = np.zeros_like(ws_branch)
+    props = regionprops(branch,intensity_image=myclass)
+    for p in tqdm(props):
+        pvv[ws_branch==p.label] = np.round(p.mean_intensity)
 
     qia_obj = sitk.GetImageFromArray(pvv)
     qia_obj.CopyInformation(mask_obj)
     sitk.WriteImage(qia_obj,f"{outdir}/pvv.nii.gz")
 
     mydict = {
-        'pvv5-dt': float(np.sum(pvv==1)/np.sum(pvv>0)),
-        'pvv10-dt': float(np.sum(pvv==1)/np.sum(pvv>0)),
-        'pvv10+-dt': float(np.sum(pvv==1)/np.sum(pvv>0)),
+        'pvv5-frangi': float(np.sum(pvv==1)/np.sum(pvv>0)),
+        'pvv10-frangi': float(np.sum(pvv==1)/np.sum(pvv>0)),
+        'pvv10+-frangi': float(np.sum(pvv==1)/np.sum(pvv>0)),
     }
     json_file = f"{outdir}/frangi.json"
     with open(json_file,'w') as f:
