@@ -37,7 +37,7 @@ def resample_img(itk_image, out_spacing, is_label=False):
 
 def main(image_file,mask_file,outdir):
     os.makedirs(outdir,exist_ok=True)
-    
+    print('ReadImage...')
     image_obj = sitk.ReadImage(image_file)
     mask_obj = sitk.ReadImage(mask_file)
 
@@ -57,6 +57,8 @@ def main(image_file,mask_file,outdir):
     image_obj = sitk.GetImageFromArray(img)
     image_obj.CopyInformation(mask_obj)
     
+    print('frangi...')
+
     arr_list = [np.zeros_like(vsl_mask)]
     '''
     https://en.wikipedia.org/wiki/Normal_distribution
@@ -139,6 +141,7 @@ def main(image_file,mask_file,outdir):
     myclass[np.logical_and(arr>3,arr<=5)]=2 # BV5-10
     myclass[arr>5]=3 # B10
 
+    print('skeletonize...')
     vsl_mask = sitk.GetArrayFromImage(mask_obj)
     skeleton = skeletonize(vsl_mask)
     skeleton = skeleton.astype(np.int16)
@@ -146,7 +149,7 @@ def main(image_file,mask_file,outdir):
     qia_obj.CopyInformation(mask_obj)
     sitk.WriteImage(qia_obj,f"{outdir}/skeleton.nii.gz")
 
-
+    print('intersection...')
     # determine branching point
     # ref https://www.mathworks.com/matlabcentral/fileexchange/67600-branch-points-from-3d-logical-skeleton?s_tid=blogs_rc_5
     weights = np.ones((3,3,3))
@@ -157,6 +160,7 @@ def main(image_file,mask_file,outdir):
     qia_obj.CopyInformation(mask_obj)
     sitk.WriteImage(qia_obj,f"{outdir}/intersection.nii.gz")
 
+    print('label...')
     branch = np.copy(skeleton)
     branch[intersection==1]=0
     branch = label(branch)
@@ -165,7 +169,7 @@ def main(image_file,mask_file,outdir):
     qia_obj.CopyInformation(mask_obj)
     sitk.WriteImage(qia_obj,f"{outdir}/branch.nii.gz")
 
-    # watershed
+    print('watershed...')
     ws_branch = watershed(vsl_mask*-1, branch, mask=vsl_mask>0)
     ws_branch = ws_branch.astype(np.int16)
 
