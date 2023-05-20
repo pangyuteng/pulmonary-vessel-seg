@@ -42,10 +42,10 @@ def resample_img(itk_image, out_spacing, is_label=False):
 
 def main(image_file,mask_file,outdir,target_spacing=[0.6,0.6,0.6]):
     os.makedirs(outdir,exist_ok=True)
-    
+    print('ReadImage...')
     image_obj = sitk.ReadImage(image_file)
     mask_obj = sitk.ReadImage(mask_file)
-
+    print('resample_img...')
     if target_spacing is not None:
         image_obj = resample_img(image_obj, target_spacing, is_label=False)
         sitk.WriteImage(image_obj,f"{outdir}/img.nii.gz")
@@ -59,14 +59,14 @@ def main(image_file,mask_file,outdir,target_spacing=[0.6,0.6,0.6]):
     vsl_mask = sitk.GetArrayFromImage(mask_obj)
     
     # alternative to frangi-filter, diameter can be estimated with "distance transform" if speed is a concern.
-    
+    print('skeletonize...')
     skeleton = skeletonize(vsl_mask)
     skeleton = skeleton.astype(np.int16)
 
     qia_obj = sitk.GetImageFromArray(skeleton)
     qia_obj.CopyInformation(mask_obj)
     sitk.WriteImage(qia_obj,f"{outdir}/skeleton.nii.gz")
-
+    print('bs_field...')
     bs_field = distance_transform_edt(vsl_mask>0)
     bs_field = bs_field.astype(np.int16)
 
@@ -98,7 +98,7 @@ def main(image_file,mask_file,outdir,target_spacing=[0.6,0.6,0.6]):
     # redraw volume/surface using branch radius and length
     # compute bvv5,bvv10,bvv10+
 
-
+    print('intersection...')
     # determine branching point
     # ref https://www.mathworks.com/matlabcentral/fileexchange/67600-branch-points-from-3d-logical-skeleton?s_tid=blogs_rc_5
     weights = np.ones((3,3,3))
@@ -109,6 +109,7 @@ def main(image_file,mask_file,outdir,target_spacing=[0.6,0.6,0.6]):
     qia_obj.CopyInformation(mask_obj)
     sitk.WriteImage(qia_obj,f"{outdir}/intersection.nii.gz")
 
+    print('label...')
     branch = np.copy(skeleton)
     branch[intersection==1]=0
     branch = label(branch)
@@ -118,6 +119,7 @@ def main(image_file,mask_file,outdir,target_spacing=[0.6,0.6,0.6]):
     sitk.WriteImage(qia_obj,f"{outdir}/branch.nii.gz")
     
     # watershed
+    print('watershed...')
     ws_branch = watershed(vsl_mask*-1, branch, mask=vsl_mask>0)
     ws_branch = ws_branch.astype(np.int16)
 
@@ -128,7 +130,7 @@ def main(image_file,mask_file,outdir,target_spacing=[0.6,0.6,0.6]):
     radius = np.zeros_like(ws_branch)
     print('regionprops...')
     props = regionprops(branch,intensity_image=bs_field)
-    print('regionprops...')
+    print('radius...')
     for p in tqdm(props):
         radius[ws_branch==p.label] = p.mean_intensity
 
