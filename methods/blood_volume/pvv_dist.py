@@ -126,7 +126,9 @@ def main(image_file,mask_file,outdir,target_spacing=[0.6,0.6,0.6]):
     sitk.WriteImage(qia_obj,f"{outdir}/watershed_labels.nii.gz")
 
     radius = np.zeros_like(ws_branch)
+    print('regionprops...')
     props = regionprops(branch,intensity_image=bs_field)
+    print('regionprops...')
     for p in tqdm(props):
         radius[ws_branch==p.label] = p.mean_intensity
 

@@ -166,15 +166,17 @@ def main(image_file,mask_file,outdir):
     sitk.WriteImage(qia_obj,f"{outdir}/branch.nii.gz")
 
     # watershed
-    branch_ws = watershed(vsl_mask*-1, branch, mask=vsl_mask>0)
-    branch_ws = branch_ws.astype(np.int16)
+    ws_branch = watershed(vsl_mask*-1, branch, mask=vsl_mask>0)
+    ws_branch = ws_branch.astype(np.int16)
 
-    qia_obj = sitk.GetImageFromArray(branch_ws)
+    qia_obj = sitk.GetImageFromArray(ws_branch)
     qia_obj.CopyInformation(mask_obj)
     sitk.WriteImage(qia_obj,f"{outdir}/watershed_labels.nii.gz")
 
     pvv = np.zeros_like(ws_branch)
+    print('regionprops...')
     props = regionprops(branch,intensity_image=myclass)
+    print('pvv...')
     for p in tqdm(props):
         pvv[ws_branch==p.label] = np.round(p.mean_intensity)
 
