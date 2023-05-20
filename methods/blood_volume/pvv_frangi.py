@@ -47,10 +47,11 @@ def main(image_file,mask_file,outdir):
     spacing = mask_obj.GetSpacing()
     origin = mask_obj.GetOrigin()
     direction = mask_obj.GetDirection()
+    
+    vsl_mask = sitk.GetArrayFromImage(mask_obj)
 
     connected_components = False
     if connected_components:
-        vsl_mask = sitk.GetArrayFromImage(mask_obj)
         blobs = label(vsl_mask)
         props = regionprops(blobs)
         # mm3 = 0.001 cc
