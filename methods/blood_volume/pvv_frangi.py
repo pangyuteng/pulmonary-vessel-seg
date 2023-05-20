@@ -54,7 +54,7 @@ def main(image_file,mask_file,outdir):
         blobs = label(vsl_mask)
         props = regionprops(blobs)
         # mm3 = 0.001 cc
-        th = 1/(0.001 np.prod(spacing)) # 1cc
+        th = 1/(0.001*np.prod(spacing)) # 1cc
         vsl_mask = np.zeros_like(vsl_mask)
         for p in props:
             if p.area < th:
