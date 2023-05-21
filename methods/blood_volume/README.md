@@ -25,8 +25,12 @@ docker pull acilbwh/chestimagingplatform:1.5
 + distance transform
 
 ```
+
+https://www.nature.com/articles/s41598-023-31470-6
+
 https://aapm.onlinelibrary.wiley.com/doi/pdf/10.1002/mp.13659
 
+pvv_dist.py
 
 ```
 
@@ -34,6 +38,9 @@ https://aapm.onlinelibrary.wiley.com/doi/pdf/10.1002/mp.13659
 + hessian vesselness 
 ```
 https://pubmed.ncbi.nlm.nih.gov/32741657
+
+pvv_frangi.py
+
 ```
 
 
