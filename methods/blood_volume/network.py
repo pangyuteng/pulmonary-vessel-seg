@@ -51,7 +51,7 @@ G = nx.read_gpickle(g_file)
 mask_obj = sitk.ReadImage(mask_file)
 vsl_mask = sitk.GetArrayFromImage(mask_obj)
 mygraph = np.zeros_like(vsl_mask)
-node_colorcolor = []
+node_color = []
 for item in tqdm(G.degree):
     k,v = item
     x,y,z = k
@@ -63,14 +63,14 @@ for item in tqdm(G.degree):
         c = (0,0,1)
 
     mygraph[x,y,z] = v+1
-    node_colorcolor.append(c)
+    node_color.append(c)
 
 graph_obj = sitk.GetImageFromArray(mygraph)
 graph_obj.CopyInformation(mask_obj)
 sitk.WriteImage(graph_obj,'graph.nii.gz')
 
 pos=nx.get_node_attributes(G,'pos')
-nx.draw(G,pos,node_size=1,alpha=0.5,node_colorcolor=node_colorcolor)
+nx.draw(G,pos,node_size=1,alpha=0.5,node_color=node_color)
 plt.savefig('graph.png')
 
 
