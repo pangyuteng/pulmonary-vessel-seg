@@ -149,6 +149,10 @@ def main(image_file,mask_file,outdir,target_spacing=[0.6,0.6,0.6]):
     qia_obj.CopyInformation(mask_obj)
     sitk.WriteImage(qia_obj,f"{outdir}/pvv.nii.gz")
 
+    mip = np.max(pvv,axis=1)*80
+    mip_file = f"{outdir}/mip.png"
+    imageio.imwrite(mip_file,mip)
+
     mydict = {
         'pvv5-dt': float(np.sum(pvv==1)/np.sum(pvv>0)),
         'pvv10-dt': float(np.sum(pvv==2)/np.sum(pvv>0)),
