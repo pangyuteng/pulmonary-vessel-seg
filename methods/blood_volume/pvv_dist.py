@@ -8,6 +8,7 @@ from skimage.segmentation import watershed
 from scipy import ndimage
 from scipy.ndimage.morphology import distance_transform_edt
 from skimage.measure import label, regionprops
+import imageio
 from tqdm import tqdm
 
 # ref 
@@ -140,15 +141,19 @@ def main(image_file,mask_file,outdir,target_spacing=[0.6,0.6,0.6]):
     qia_obj = sitk.GetImageFromArray(radius)
     qia_obj.CopyInformation(mask_obj)
     sitk.WriteImage(qia_obj,f"{outdir}/radius.nii.gz")
-
+    
     pvv = np.zeros_like(radius)
     pvv[np.logical_and(radius>0,radius<=1.5)]=1
     pvv[np.logical_and(radius>1.5,radius<2.5)]=2
     pvv[radius>=2.5]=3
+    pvv = pvv.astype(np.int16)
     qia_obj = sitk.GetImageFromArray(pvv)
     qia_obj.CopyInformation(mask_obj)
-    sitk.WriteImage(qia_obj,f"{outdir}/pvv.nii.gz")
-
+    pvv_file = os.path.join(outdir,'pvv.nii.gz')
+    sitk.WriteImage(qia_obj,pvv_file)
+    
+    #pvv_obj = sitk.ReadImage(pvv_file)
+    #pvv = sitk.GetArrayFromImage(pvv_obj)
     mip = np.max(pvv,axis=1)*80
     mip_file = f"{outdir}/mip.png"
     imageio.imwrite(mip_file,mip)
