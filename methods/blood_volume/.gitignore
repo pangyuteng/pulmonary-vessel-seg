@@ -1,6 +1,8 @@
 *.nii.gz
-test.gpickle
 outdir-dt
 outdir-frangi
+graph.gpickle
+skeleton.txt
 graph.png
 graph.nii.gz
+tabb/*

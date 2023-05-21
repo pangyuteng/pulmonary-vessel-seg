@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 from tqdm import tqdm
 
 mask_file = sys.argv[1]
-g_file = "test.gpickle"
+g_file = "graph.gpickle"
 if not os.path.exists(g_file):
     mask_obj = sitk.ReadImage(mask_file)
     vsl_mask = sitk.GetArrayFromImage(mask_obj)
@@ -20,9 +20,21 @@ if not os.path.exists(g_file):
     skeleton = skeletonize(vsl_mask)
     skeleton = skeleton.astype(np.int16)
     print(f'skeleton voxel count: {np.sum(skeleton)}')
+    
     print('intersection...')
     weights = np.ones((3,3,3))
     intersection = ndimage.convolve(skeleton,weights) > 3
+    
+    os.makedirs('tabb',exist_ok=True)
+    with open('tabb/0.txt','w') as f:
+        f.write(f'{np.sum(skeleton)}\n')
+        for x,y,z in tqdm(np.argwhere(skeleton==1)):
+            f.write(f'{x} {y} {z}\n')
+    with open('tabb/BB.txt','w') as f:
+        x,y,z = vsl_mask.shape
+        f.write(f'1\n')
+        f.write(f'0 0 0 \n')
+        f.write(f'{x} {y} {z}\n')
 
     # following methodology by Chapman 2016 https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4547695
     G=nx.Graph()
@@ -75,6 +87,10 @@ plt.savefig('graph.png')
 
 
 '''
+
+python network.py wasserthal.nii.gz
+
+docker run -it -v $PWD/tabb:/write_directory -e DO_DEMO=0 -e CC_FLAG=1 amytabb/curveskel-tabb-medeiros-2018-docker
 
 https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4547695
 
