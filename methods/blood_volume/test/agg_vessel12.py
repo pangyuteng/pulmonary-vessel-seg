@@ -25,8 +25,7 @@ def main(myfolder):
             idx = os.path.basename(os.path.dirname(png_file))
             tgt_file = f'static/mip-{idx}.png'
             shutil.copy(png_file,tgt_file)
-            #f.write(f'![{idx} | 500]({tgt_file}) \n')
-            f.write(f'<img src="{tgt_file}" width="512" style="transform: scaleX(-1);"><br>\n')
+            f.write(f'<img src="{tgt_file}" width="256""><br>\n')
 
 if __name__ == "__main__":
     myfolder = sys.argv[1]
