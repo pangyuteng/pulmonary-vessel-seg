@@ -20,10 +20,12 @@ def main(myfolder):
 
     os.makedirs('static',exist_ok=True)
     png_file_list = sorted(list(Path(myfolder).rglob("*.png")))
-    for png_file in png_file_list:
-        idx = os.path.basename(os.path.dirname(png_file))
-        tgt_file = f'static/mip-{idx}.png'
-        shutil.copy(png_file,tgt_file)
+    with open('README.md','w') as f:
+        for png_file in png_file_list:
+            idx = os.path.basename(os.path.dirname(png_file))
+            tgt_file = f'static/mip-{idx}.png'
+            shutil.copy(png_file,tgt_file)
+            f.write(f'![{idx}]({tgt_file})\n')
 
 if __name__ == "__main__":
     myfolder = sys.argv[1]
