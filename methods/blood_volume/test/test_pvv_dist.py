@@ -1,11 +1,12 @@
 import os
 import sys
+THIS_DIR = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(os.path.dirname(THIS_DIR))
+
 import pandas as pd
 import tempfile
 import json
 import shutil
-
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from pvv_dist import main as pvv_dist_main
 
 def main():
@@ -17,7 +18,7 @@ def main():
         with tempfile.TemporaryDirectory() as tmpdir:
             pvv_dist_main(row.image_path,row.mask_path,tmpdir)
             mip_file = os.path.join(tmpdir,'mip.png')
-            tgt_file = os.path.join(tmpdir,f'mip-{n:02d}.png')
+            tgt_file = os.path.join(THIS_DIR,f'mip-{n:02d}.png')
             shutil.copy(mip_file,tgt_file)
             json_file = os.path.join(tmpdir,'dist_transform.json')
             with open(json_file,'r') as f:

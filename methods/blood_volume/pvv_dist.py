@@ -46,6 +46,11 @@ def resample_img(itk_image, out_spacing, is_label=False):
 
 def main(image_file,mask_file,outdir,target_spacing=[0.6,0.6,0.6]):
     os.makedirs(outdir,exist_ok=True)
+
+    json_file = f"{outdir}/dist_transform.json"
+    if os.path.exists(json_file):
+        print(f'skip! {json_file} found')
+        return
     print('ReadImage...')
     image_obj = sitk.ReadImage(image_file)
     mask_obj = sitk.ReadImage(mask_file)
@@ -163,7 +168,7 @@ def main(image_file,mask_file,outdir,target_spacing=[0.6,0.6,0.6]):
         'pvv10-dt': float(np.sum(pvv==2)/np.sum(pvv>0)),
         'pvv10+-dt': float(np.sum(pvv==3)/np.sum(pvv>0)),
     }
-    json_file = f"{outdir}/dist_transform.json"
+    
     with open(json_file,'w') as f:
         f.write(json.dumps(mydict))
 

@@ -1,0 +1,21 @@
+universe = docker
+docker_image = pangyuteng/ml:latest
+docker_pull_policy = always
+
+executable = run.sh
+transfer_input_files = run.sh
+should_transfer_files = YES
+when_to_transfer_output = ON_EXIT
+
+log = log/inference.$(cluster).$(process).log
+error = log/inference.$(cluster).$(process).err
+output = log/inference.$(cluster).$(process).out
+
+requirements = (OpSys == "LINUX" && Arch == "X86_64")
+request_cpus = 1
+request_memory = 20GB
+request_disk = 5GB
+
+max_materialize = 20
+arguments = "$(myargs)"
+queue myargs from vessel12.args
