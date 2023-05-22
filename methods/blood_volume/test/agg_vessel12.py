@@ -21,8 +21,9 @@ def main(myfolder):
     os.makedirs('static',exist_ok=True)
     png_file_list = sorted(list(Path(myfolder).rglob("*.png")))
     for png_file in png_file_list:
-        idx = os.path.basename(os.path.dirname(json_file))
-        shutil.copy(png_file,f'static/mip-{idx}.png')
+        idx = os.path.basename(os.path.dirname(png_file))
+        tgt_file = f'static/mip-{idx}.png'
+        shutil.copy(png_file,tgt_file)
 
 if __name__ == "__main__":
     myfolder = sys.argv[1]
