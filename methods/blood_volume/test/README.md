@@ -1,20 +1,20 @@
-![01|512](static/mip-01.png)
-![02|512](static/mip-02.png)
-![03|512](static/mip-03.png)
-![04|512](static/mip-04.png)
-![05|512](static/mip-05.png)
-![06|512](static/mip-06.png)
-![07|512](static/mip-07.png)
-![08|512](static/mip-08.png)
-![09|512](static/mip-09.png)
-![10|512](static/mip-10.png)
-![11|512](static/mip-11.png)
-![12|512](static/mip-12.png)
-![13|512](static/mip-13.png)
-![14|512](static/mip-14.png)
-![15|512](static/mip-15.png)
-![16|512](static/mip-16.png)
-![17|512](static/mip-17.png)
-![18|512](static/mip-18.png)
-![19|512](static/mip-19.png)
-![20|512](static/mip-20.png)
+![01](static/mip-01.png){: width="250" }
+![02](static/mip-02.png){: width="250" }
+![03](static/mip-03.png){: width="250" }
+![04](static/mip-04.png){: width="250" }
+![05](static/mip-05.png){: width="250" }
+![06](static/mip-06.png){: width="250" }
+![07](static/mip-07.png){: width="250" }
+![08](static/mip-08.png){: width="250" }
+![09](static/mip-09.png){: width="250" }
+![10](static/mip-10.png){: width="250" }
+![11](static/mip-11.png){: width="250" }
+![12](static/mip-12.png){: width="250" }
+![13](static/mip-13.png){: width="250" }
+![14](static/mip-14.png){: width="250" }
+![15](static/mip-15.png){: width="250" }
+![16](static/mip-16.png){: width="250" }
+![17](static/mip-17.png){: width="250" }
+![18](static/mip-18.png){: width="250" }
+![19](static/mip-19.png){: width="250" }
+![20](static/mip-20.png){: width="250" }
