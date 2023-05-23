@@ -1,9 +1,11 @@
 import os
 import sys
-import pandas as pd
 import json
 import shutil
 from pathlib import Path
+import numpy as np
+import pandas as pd
+import SimpleITK as sitk
 
 def main(myfolder):
     json_file_list = sorted(list(Path(myfolder).rglob("*.json")))
@@ -13,6 +15,10 @@ def main(myfolder):
         with open(json_file,'r') as f:
             mydict = json.loads(f.read())
         mydict['idx']=idx
+        radius_file = os.path.join(os.path.dirname(json_file),'radius.nii.gz')
+        radius_obj = sitk.ReadImage(radius_file)
+        radius = sitk.GetArrayFromImage(radius_obj)
+        print(idx,np.unique(radius))
         mylist.append(mydict)
     cols = ['idx','pvv5-dt','pvv10-dt','pvv10+-dt']
     rdf = pd.DataFrame(mylist,columns=cols)
