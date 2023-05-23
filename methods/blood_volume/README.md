@@ -1,5 +1,34 @@
 
 
+# published BV values
+
+### keywords: "bv5 bv10 pulmonary"
+
++ "Assessment of small pulmonary blood vessels in COVID-19 patients using HRCT"
+
+    BV5/TBV: 57% , BV5-10/TBV:20% , BV>10/TBV:23% ( normal )
+
++ "Pruning of the pulmonary vasculature in asthma. The Severe Asthma Research Program (SARP) cohort"
+ 
+    BV<=5/TBV: 62% , BV<=10/TBV 74% ()  ( normal )
+
++ "Pulmonary Vascular Morphology as an Imaging Biomarker in Chronic Thromboembolic Pulmonary Hypertension"
+
+    BV5/TBV 58% , BV>10/TBV 0.28% (normal)
+
++ "Altered pulmonary blood volume distribution as a biomarker for predicting outcomes in COVID-19 disease"
+
+    + BV5%: 30%, BV5-10%: 25%, BV10%: 45% (covid negative)
+
+### keywords: "pvv5 pulmonary"
+
++ "Mortality prediction in idiopathic pulmonary fibrosis: evaluation of computer-based CT analysis with conventional severity measures"
+
+    + not reported, using it as a factor.
+
++ "Automatic pulmonary vessel segmentation on noncontrast chest CT: deep learning algorithm developed using spatiotemporally matched virtual noncontrast images and low-keV contrast-enhanced vessel maps"
+
+    + PVV5 63% (Gold 1)
 # Blood Volume (BVx) algos
 
 + scale-space-particles
