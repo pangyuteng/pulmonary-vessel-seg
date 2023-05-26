@@ -8,4 +8,4 @@ outdir=/cvibraid/cvib2/apps/personal/pteng/github/pulmonary-vessel-seg/methods/b
 mkdir -p $outdir
 
 cd /cvibraid/cvib2/apps/personal/pteng/github/pulmonary-vessel-seg/methods/blood_volume
-python pvv_dist.py $mask_file $outdir
+python pvv_dist.py $mask_file $outdir True

@@ -1,5 +1,6 @@
 import os
 import sys
+import ast
 import json
 import numpy as np
 import SimpleITK as sitk
@@ -42,7 +43,7 @@ def resample_img(itk_image, out_spacing, is_label=False):
 
     return resample.Execute(itk_image)
 
-def main(mask_file,outdir,debug=False):
+def main(mask_file,outdir,debug):
     os.makedirs(outdir,exist_ok=True)
     
     pvv_file = os.path.join(outdir,'pvv.nii.gz')
@@ -192,7 +193,8 @@ def main(mask_file,outdir,debug=False):
 if __name__ == "__main__":
     mask_file = sys.argv[1]
     outdir = sys.argv[2]
-    main(mask_file,outdir)
+    debug = ast.literal_eval(sys.argv[3])
+    main(mask_file,outdir,debug)
 
 """
 
