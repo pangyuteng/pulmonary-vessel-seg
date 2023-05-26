@@ -15,8 +15,6 @@ from tqdm import tqdm
 #
 #  BVV computation https://www.nature.com/articles/s41598-023-31470-6
 #
-#  skeletonization alternative https://github.com/amy-tabb/CurveSkel-Tabb-Medeiros-2018
-#
 
 def resample_img(itk_image, out_spacing, is_label=False):
     
@@ -44,22 +42,23 @@ def resample_img(itk_image, out_spacing, is_label=False):
 
     return resample.Execute(itk_image)
 
-def main(image_file,mask_file,outdir,target_spacing=[0.6,0.6,0.6]):
+def main(mask_file,outdir,debug=False):
     os.makedirs(outdir,exist_ok=True)
-
-    json_file = f"{outdir}/dist_transform.json"
+    
+    pvv_file = os.path.join(outdir,'pvv.nii.gz')
+    json_file = os.path.join(outdir,'results-dt.json')
     if os.path.exists(json_file):
         print(f'skip! {json_file} found')
         return
-    print('ReadImage...')
-    image_obj = sitk.ReadImage(image_file)
-    mask_obj = sitk.ReadImage(mask_file)
+
+    print('ReadMask...')
+    mask_obj_og = sitk.ReadImage(mask_file)
     print('resample_img...')
-    if target_spacing is not None:
-        image_obj = resample_img(image_obj, target_spacing, is_label=False)
-        sitk.WriteImage(image_obj,f"{outdir}/img.nii.gz")
-        mask_obj = resample_img(mask_obj, target_spacing, is_label=True)
-        sitk.WriteImage(mask_obj,f"{outdir}/mask.nii.gz")
+    target_spacing=[0.6,0.6,0.6]
+
+    mask_obj = resample_img(mask_obj_og, target_spacing, is_label=True)
+    if debug:
+        sitk.WriteImage(mask_obj,f"{outdir}/debug-mask.nii.gz")
 
     spacing = mask_obj.GetSpacing()
     origin = mask_obj.GetOrigin()
@@ -74,14 +73,17 @@ def main(image_file,mask_file,outdir,target_spacing=[0.6,0.6,0.6]):
 
     qia_obj = sitk.GetImageFromArray(skeleton)
     qia_obj.CopyInformation(mask_obj)
-    sitk.WriteImage(qia_obj,f"{outdir}/skeleton.nii.gz")
+    if debug:
+        sitk.WriteImage(qia_obj,f"{outdir}/debug-skeleton.nii.gz")
+
     print('bs_field...')
     bs_field = distance_transform_edt(vsl_mask>0)
     bs_field = bs_field.astype(np.int16)
 
     qia_obj = sitk.GetImageFromArray(bs_field)
     qia_obj.CopyInformation(mask_obj)
-    sitk.WriteImage(qia_obj,f"{outdir}/bs_field.nii.gz")
+    if debug:
+        sitk.WriteImage(qia_obj,f"{outdir}/debug-bs_field.nii.gz")
     '''
     # radius
     >>> [r for r in np.arange(1,6,1)]
@@ -116,7 +118,8 @@ def main(image_file,mask_file,outdir,target_spacing=[0.6,0.6,0.6]):
     
     qia_obj = sitk.GetImageFromArray(intersection)
     qia_obj.CopyInformation(mask_obj)
-    sitk.WriteImage(qia_obj,f"{outdir}/intersection.nii.gz")
+    if debug:
+        sitk.WriteImage(qia_obj,f"{outdir}/debug-intersection.nii.gz")
 
     print('label...')
     branch = np.copy(skeleton)
@@ -125,7 +128,8 @@ def main(image_file,mask_file,outdir,target_spacing=[0.6,0.6,0.6]):
     branch = branch.astype(np.int16)
     qia_obj = sitk.GetImageFromArray(branch)
     qia_obj.CopyInformation(mask_obj)
-    sitk.WriteImage(qia_obj,f"{outdir}/branch.nii.gz")
+    if debug:
+        sitk.WriteImage(qia_obj,f"{outdir}/debug-branch.nii.gz")
     
     # watershed
     print('watershed...')
@@ -134,7 +138,8 @@ def main(image_file,mask_file,outdir,target_spacing=[0.6,0.6,0.6]):
 
     qia_obj = sitk.GetImageFromArray(ws_branch)
     qia_obj.CopyInformation(mask_obj)
-    sitk.WriteImage(qia_obj,f"{outdir}/watershed_labels.nii.gz")
+    if debug:
+        sitk.WriteImage(qia_obj,f"{outdir}/debug-watershed_labels.nii.gz")
 
     radius = np.zeros_like(ws_branch)
     print('regionprops...')
@@ -145,7 +150,8 @@ def main(image_file,mask_file,outdir,target_spacing=[0.6,0.6,0.6]):
 
     qia_obj = sitk.GetImageFromArray(radius)
     qia_obj.CopyInformation(mask_obj)
-    sitk.WriteImage(qia_obj,f"{outdir}/radius.nii.gz")
+    if debug:
+        sitk.WriteImage(qia_obj,f"{outdir}/debug-radius.nii.gz")
     
     pvv = np.zeros_like(radius)
     pvv[np.logical_and(radius>0,radius<=1.5)]=1
@@ -154,30 +160,39 @@ def main(image_file,mask_file,outdir,target_spacing=[0.6,0.6,0.6]):
     pvv = pvv.astype(np.int16)
     qia_obj = sitk.GetImageFromArray(pvv)
     qia_obj.CopyInformation(mask_obj)
-    pvv_file = os.path.join(outdir,'pvv.nii.gz')
+    if debug:
+        sitk.WriteImage(qia_obj,os.path.join(outdir,'debug-pvv.nii.gz'))
+
+    qia_obj = sitk.Resample(qia_obj, mask_obj_og, sitk.Transform(), sitk.sitkNearestNeighbor, 0, mask_obj.GetPixelID())
     sitk.WriteImage(qia_obj,pvv_file)
+
+    spacing = qia_obj.GetSpacing()
+    cc_per_voxel = np.prod(spacing)*0.001
+
+    pvv = sitk.GetArrayFromImage(qia_obj)
     
-    #pvv_obj = sitk.ReadImage(pvv_file)
-    #pvv = sitk.GetArrayFromImage(pvv_obj)
     mip = np.max(pvv,axis=1)*80
     mip_file = f"{outdir}/mip.png"
     imageio.imwrite(mip_file,mip)
 
     mydict = {
-        'pvv5-dt': float(np.sum(pvv==1)/np.sum(pvv>0)),
-        'pvv10-dt': float(np.sum(pvv==2)/np.sum(pvv>0)),
-        'pvv10+-dt': float(np.sum(pvv==3)/np.sum(pvv>0)),
+        'pvv5-dt-prct': float(np.sum(pvv==1)/np.sum(pvv>0)),
+        'pvv10-dt-prct': float(np.sum(pvv==2)/np.sum(pvv>0)),
+        'pvv10+-dt-prct': float(np.sum(pvv==3)/np.sum(pvv>0)),
+        'pvv5-dt-cc': float(np.sum(pvv==1)*cc_per_voxel),
+        'pvv10-dt-cc': float(np.sum(pvv==2)*cc_per_voxel),
+        'pvv10+-dt-cc': float(np.sum(pvv==3)*cc_per_voxel),
     }
+    # TODO: add cc to above
     
     with open(json_file,'w') as f:
         f.write(json.dumps(mydict))
 
 
 if __name__ == "__main__":
-    image_file = sys.argv[1]
-    mask_file = sys.argv[2]
-    outdir = sys.argv[3]
-    main(image_file,mask_file,outdir)
+    mask_file = sys.argv[1]
+    outdir = sys.argv[2]
+    main(mask_file,outdir)
 
 """
 
@@ -185,6 +200,6 @@ docker run -it -u $(id -u):$(id -g) -w $PWD \
     -v /cvibraid:/cvibraid -v /radraid:/radraid \
     pangyuteng/ml:latest bash
 
-python pvv_dist.py img.nii.gz wasserthal.nii.gz outdir-dt
+python pvv_dist.py wasserthal.nii.gz outdir-dt
 
 """
