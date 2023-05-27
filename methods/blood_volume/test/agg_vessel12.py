@@ -15,13 +15,13 @@ def main(myfolder):
         with open(json_file,'r') as f:
             mydict = json.loads(f.read())
         mydict['idx']=idx
-        radius_file = os.path.join(os.path.dirname(json_file),'radius.nii.gz')
-        radius_obj = sitk.ReadImage(radius_file)
-        radius = sitk.GetArrayFromImage(radius_obj)
-        print(idx,np.unique(radius))
+        #pvv_file = os.path.join(os.path.dirname(json_file),'pvv.nii.gz')
+        #pvv_obj = sitk.ReadImage(pvv_file)
+        #pvv = sitk.GetArrayFromImage(pvv_obj)
+        #print(idx,np.unique(pvv))
         mylist.append(mydict)
-    cols = ['idx','pvv5-dt','pvv10-dt','pvv10+-dt']
-    rdf = pd.DataFrame(mylist,columns=cols)
+    #cols = ['idx','pvv5-dt','pvv10-dt','pvv10+-dt']
+    rdf = pd.DataFrame(mylist)#,columns=cols)
     rdf.to_csv('results.csv',index=False)
 
     os.makedirs('static',exist_ok=True)
