@@ -1,5 +1,6 @@
 import os
 import sys
+import ast
 import json
 import numpy as np
 import SimpleITK as sitk
@@ -8,6 +9,8 @@ from skimage.segmentation import watershed
 from scipy import ndimage
 from skimage.measure import label, regionprops
 from tqdm import tqdm
+
+from pvv_dist import resample_img
 
 '''
 https://en.wikipedia.org/wiki/Normal_distribution
@@ -52,18 +55,23 @@ sigma = np.sqrt(area/pi)*2/2.355
 
 '''
 
-def estimate_radius(image_file,lung_file,vessel_file,outdir):
+def estimate_radius(image_file,lung_file,vessel_file,outdir,debug):
     
     os.makedirs(outdir,exist_ok=True)
 
-    image_obj = sitk.ReadImage(image_file)
-    image = sitk.GetArrayFromImage(image_obj)
-    
+    og_image_obj = sitk.ReadImage(image_file)
     lung_obj = sitk.ReadImage(lung_file)
-    lung_mask = sitk.GetArrayFromImage(lung_obj)
-
     vessel_obj = sitk.ReadImage(vessel_file)
+    
+    out_spacing = [1.0,1.0,1.0]
+    image_obj = resample_img(og_image_obj, out_spacing, is_label=False)
+    lung_obj = resample_img(lung_obj, out_spacing, is_label=True)
+    vessel_obj = resample_img(vessel_obj, out_spacing, is_label=True)
+
+    image = sitk.GetArrayFromImage(image_obj)
+    lung_mask = sitk.GetArrayFromImage(lung_obj)
     vsl_mask = sitk.GetArrayFromImage(vessel_obj)
+
     spacing = image_obj.GetSpacing()
     origin = image_obj.GetOrigin()
     direction = image_obj.GetDirection()
@@ -75,7 +83,8 @@ def estimate_radius(image_file,lung_file,vessel_file,outdir):
     image[lung_mask==0]=0
     myimg_obj = sitk.GetImageFromArray(image)
     myimg_obj.CopyInformation(image_obj)
-    sitk.WriteImage(myimg_obj,f"{outdir}/myimg.nii.gz")
+    if debug:
+        sitk.WriteImage(myimg_obj,f"{outdir}/debug-myimg.nii.gz")
 
     radius_list = [r for r in np.linspace(0.25,5,10)]
     sigma_list = [r*2/2.355 for r in np.linspace(0.25,5,10)]
@@ -83,10 +92,12 @@ def estimate_radius(image_file,lung_file,vessel_file,outdir):
     for x_mm in sigma_list:
         print(f'sigma: {x_mm}') 
         sigma = np.ones(3)*x_mm
-        # unsure if we need to adjust sigma with spacing 
-        # or itk does it internally, 
-        # with no adjustment, radius seem to be "less noisy".
-        # sigma = sigma/np.array(spacing)
+        #
+        # https://simpleitk.org/doxygen/v1_2/html/classitk_1_1simple_1_1SmoothingRecursiveGaussianImageFilter.html
+        # sigma is measured in the units of image spacing
+        # (oddly, radius was noisy if sigma was adjusted with anisotropic spacing)
+        #
+        sigma = sigma/np.array(spacing) # (no real need since we set spacing to 1^3mm)
         gaussian = sitk.SmoothingRecursiveGaussianImageFilter()
         gaussian.SetSigma(sigma)
         smoothed = gaussian.Execute(myimg_obj)
@@ -131,14 +142,16 @@ def estimate_radius(image_file,lung_file,vessel_file,outdir):
 
     qia_obj = sitk.GetImageFromArray(radius)
     qia_obj.CopyInformation(image_obj)
-    sitk.WriteImage(qia_obj,f"{outdir}/radius.nii.gz")
+    if debug:
+        sitk.WriteImage(qia_obj,f"{outdir}/debug-radius.nii.gz")
 
     print('skeletonize...')
     skeleton = skeletonize(vsl_mask)
     skeleton = skeleton.astype(np.int16)
     qia_obj = sitk.GetImageFromArray(skeleton)
     qia_obj.CopyInformation(image_obj)
-    sitk.WriteImage(qia_obj,f"{outdir}/skeleton.nii.gz")
+    if debug:
+        sitk.WriteImage(qia_obj,f"{outdir}/debug-skeleton.nii.gz")
 
     print('intersection...')
     # determine branching point
@@ -149,7 +162,8 @@ def estimate_radius(image_file,lung_file,vessel_file,outdir):
     intersection = intersection.astype(np.int16)
     qia_obj = sitk.GetImageFromArray(intersection)
     qia_obj.CopyInformation(image_obj)
-    sitk.WriteImage(qia_obj,f"{outdir}/intersection.nii.gz")
+    if debug:
+        sitk.WriteImage(qia_obj,f"{outdir}/debug-intersection.nii.gz")
 
     print('label...')
     branch = np.copy(skeleton)
@@ -158,7 +172,7 @@ def estimate_radius(image_file,lung_file,vessel_file,outdir):
     branch = branch.astype(np.int16)
     qia_obj = sitk.GetImageFromArray(branch)
     qia_obj.CopyInformation(image_obj)
-    sitk.WriteImage(qia_obj,f"{outdir}/branch.nii.gz")
+    sitk.WriteImage(qia_obj,f"{outdir}/debug-branch.nii.gz")
 
     print('watershed...')
     ws_branch = watershed(vsl_mask*-1, branch, mask=vsl_mask>0)
@@ -166,7 +180,8 @@ def estimate_radius(image_file,lung_file,vessel_file,outdir):
 
     qia_obj = sitk.GetImageFromArray(ws_branch)
     qia_obj.CopyInformation(image_obj)
-    sitk.WriteImage(qia_obj,f"{outdir}/watershed_labels.nii.gz")
+    if debug:
+        sitk.WriteImage(qia_obj,f"{outdir}/debug-watershed_labels.nii.gz")
 
     print('regionprops...')
     props = regionprops(branch,intensity_image=radius)
@@ -177,7 +192,8 @@ def estimate_radius(image_file,lung_file,vessel_file,outdir):
     print(area.dtype)
     qia_obj = sitk.GetImageFromArray(area)
     qia_obj.CopyInformation(image_obj)
-    sitk.WriteImage(qia_obj,f"{outdir}/area.nii.gz")
+    if debug:
+        sitk.WriteImage(qia_obj,f"{outdir}/debug-area.nii.gz")
 
     print('pvv...')
     pvv = np.zeros_like(area)
@@ -190,7 +206,12 @@ def estimate_radius(image_file,lung_file,vessel_file,outdir):
 
     qia_obj = sitk.GetImageFromArray(pvv)
     qia_obj.CopyInformation(image_obj)
+    if debug:
+        sitk.WriteImage(qia_obj,f"{outdir}/debug-pvv.nii.gz")
+
+    qia_obj = resample_img(qia_obj, og_image_obj.GetSpacing(), is_label=True)
     sitk.WriteImage(qia_obj,f"{outdir}/pvv.nii.gz")
+
 
     mydict = {
         'pvv5-frangi': float(np.sum(pvv==1)/np.sum(pvv>0)),
@@ -207,7 +228,8 @@ if __name__ == "__main__":
     lung_file = sys.argv[2]
     vessel_file = sys.argv[3]
     outdir = sys.argv[4]
-    estimate_radius(image_file,lung_file,vessel_file,outdir)
+    debug = ast.literal_eval(sys.argv[5])
+    estimate_radius(image_file,lung_file,vessel_file,outdir,debug)
 
 """
 
@@ -215,6 +237,6 @@ docker run -it -u $(id -u):$(id -g) -w $PWD \
     -v /cvibraid:/cvibraid -v /radraid:/radraid \
     pangyuteng/ml:latest bash
 
-python pvv_frangi.py img.nii.gz lung.nii.gz wasserthal.nii.gz outdir-frangi
+python pvv_frangi.py img.nii.gz lung.nii.gz wasserthal.nii.gz outdir-frangi True
 
 """
