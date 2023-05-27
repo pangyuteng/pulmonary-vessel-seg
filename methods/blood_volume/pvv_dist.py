@@ -7,7 +7,7 @@ import SimpleITK as sitk
 from skimage.morphology import skeletonize
 from skimage.segmentation import watershed
 from scipy import ndimage
-from scipy.ndimage.morphology import distance_transform_edt
+from scipy.ndimage import distance_transform_edt
 from skimage.measure import label, regionprops
 import imageio
 from tqdm import tqdm
@@ -77,7 +77,7 @@ def main(mask_file,outdir,debug):
     if debug:
         sitk.WriteImage(qia_obj,f"{outdir}/debug-skeleton.nii.gz")
 
-    print('bs_field...')
+    print('bs_field (appx radius)...')
     bs_field = distance_transform_edt(vsl_mask>0)
     bs_field = bs_field.astype(float)*target_spacing[0]
     print(bs_field.dtype)
@@ -85,15 +85,14 @@ def main(mask_file,outdir,debug):
     qia_obj.CopyInformation(mask_obj)
     if debug:
         sitk.WriteImage(qia_obj,f"{outdir}/debug-bs_field.nii.gz")
+
+    arr = bs_field[np.where(bs_field>0)]
+    print(np.min(arr),np.max(arr))
+    hist,bin_edges = np.histogram(arr,bins=12,range=(0,6))
+    hist = hist / np.sum(hist)
+    hist = hist.tolist()
+    print(hist)
     '''
-    # radius
-    >>> [r for r in np.arange(1,6,1)]
-    [1, 2, 3, 4, 5]
-    # area
-    >>> [np.pi*(r**2) for r in np.arange(1,6,1)]
-    [3.141592653589793, 12.566370614359172, 28.274333882308138, 50.26548245743669, 78.53981633974483]
-
-
     # radius
     >>> [np.round(r,2) for r in np.arange(0.6,5,.6)]
     [0.6, 1.2, 1.8, 2.4, 3.0, 3.6, 4.2, 4.8]
@@ -142,15 +141,10 @@ def main(mask_file,outdir,debug):
     if debug:
         sitk.WriteImage(qia_obj,f"{outdir}/debug-watershed_labels.nii.gz")
 
-    area = np.zeros_like(ws_branch)
     print('regionprops...')
     props = regionprops(branch,intensity_image=bs_field)
     mapper_dict = {p.label:np.pi*(p.mean_intensity**2) for p in props}
     print('area...')
-    if False:
-        for p in tqdm(props):
-            area[ws_branch==p.label] = float(np.pi*(p.mean_intensity**2))
-
     map_func = np.vectorize(lambda x: float(mapper_dict.get(x,0)))
     area = map_func(ws_branch)
     print(area.dtype)
@@ -191,6 +185,7 @@ def main(mask_file,outdir,debug):
         'pvv5-dt-cc': float(np.sum(pvv==1)*cc_per_voxel),
         'pvv10-dt-cc': float(np.sum(pvv==2)*cc_per_voxel),
         'pvv10+-dt-cc': float(np.sum(pvv==3)*cc_per_voxel),
+        'hist': hist,
     }
     # TODO: add cc to above
     
