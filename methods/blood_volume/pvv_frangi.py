@@ -69,8 +69,9 @@ def estimate_radius(image_file,mask_file,outdir):
     image = (image-min_val)/(max_val-min_val)
     image = image.clip(0,1)
     image[vsl_mask>0]=0
-    my_obj = sitk.GetImageFromArray(image)
-    my_obj.CopyInformation(image_obj)
+    qia_obj = sitk.GetImageFromArray(image)
+    qia_obj.CopyInformation(image_obj)
+    sitk.WriteImage(qia_obj,f"{outdir}/myimg.nii.gz")
 
     arr_list = []
     for x_mm in [r*2/2.355 for r in np.linspace(0.25,5,10)]:
