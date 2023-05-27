@@ -1,4 +1,5 @@
 <img src="static/mip-01.png" width="256"><br>
+<img src="static/mip-02.png" width="256"><br>
 <img src="static/mip-03.png" width="256"><br>
 <img src="static/mip-04.png" width="256"><br>
 <img src="static/mip-05.png" width="256"><br>
