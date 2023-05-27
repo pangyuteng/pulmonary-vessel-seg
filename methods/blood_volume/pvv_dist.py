@@ -66,7 +66,7 @@ def main(mask_file,outdir,debug):
     direction = mask_obj.GetDirection()
     
     vsl_mask = sitk.GetArrayFromImage(mask_obj)
-    
+    print(vsl_mask.dtype)
     # alternative to frangi-filter, diameter can be estimated with "distance transform" if speed is a concern.
     print('skeletonize...')
     skeleton = skeletonize(vsl_mask)
@@ -79,8 +79,8 @@ def main(mask_file,outdir,debug):
 
     print('bs_field...')
     bs_field = distance_transform_edt(vsl_mask>0)
-    bs_field = bs_field.astype(np.float)*target_spacing[0]
-
+    bs_field = bs_field.astype(float)*target_spacing[0]
+    print(bs_field.dtype)
     qia_obj = sitk.GetImageFromArray(bs_field)
     qia_obj.CopyInformation(mask_obj)
     if debug:
@@ -145,15 +145,21 @@ def main(mask_file,outdir,debug):
     area = np.zeros_like(ws_branch)
     print('regionprops...')
     props = regionprops(branch,intensity_image=bs_field)
+    mapper_dict = {p.label:np.pi*(p.mean_intensity**2) for p in props}
     print('area...')
-    for p in tqdm(props):
-        area[ws_branch==p.label] = np.pi*(p.mean_intensity**2)
+    if False:
+        for p in tqdm(props):
+            area[ws_branch==p.label] = float(np.pi*(p.mean_intensity**2))
 
+    map_func = np.vectorize(lambda x: float(mapper_dict.get(x,0)))
+    area = map_func(ws_branch)
+    print(area.dtype)
     qia_obj = sitk.GetImageFromArray(area)
     qia_obj.CopyInformation(mask_obj)
     if debug:
         sitk.WriteImage(qia_obj,f"{outdir}/debug-area.nii.gz")
     
+    print('pvv...')
     pvv = np.zeros_like(area)
     pvv[np.logical_and(area>0,area<=5)]=1
     pvv[np.logical_and(area>5,area<10)]=2
@@ -163,7 +169,8 @@ def main(mask_file,outdir,debug):
     qia_obj.CopyInformation(mask_obj)
     if debug:
         sitk.WriteImage(qia_obj,os.path.join(outdir,'debug-pvv.nii.gz'))
-
+    
+    print('resample...')
     qia_obj = sitk.Resample(qia_obj, mask_obj_og, sitk.Transform(), sitk.sitkNearestNeighbor, 0, mask_obj.GetPixelID())
     sitk.WriteImage(qia_obj,pvv_file)
 
@@ -172,6 +179,7 @@ def main(mask_file,outdir,debug):
 
     pvv = sitk.GetArrayFromImage(qia_obj)
     
+    print('mip...')
     mip = np.max(pvv,axis=1)*80
     mip_file = f"{outdir}/mip.png"
     imageio.imwrite(mip_file,mip)
@@ -188,7 +196,7 @@ def main(mask_file,outdir,debug):
     
     with open(json_file,'w') as f:
         f.write(json.dumps(mydict))
-
+    print('pvv_dist.py done')
 
 if __name__ == "__main__":
     mask_file = sys.argv[1]
