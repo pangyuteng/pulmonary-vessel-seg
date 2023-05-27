@@ -15,10 +15,16 @@ def main(myfolder):
         with open(json_file,'r') as f:
             mydict = json.loads(f.read())
         mydict['idx']=idx
-        #pvv_file = os.path.join(os.path.dirname(json_file),'pvv.nii.gz')
-        #pvv_obj = sitk.ReadImage(pvv_file)
-        #pvv = sitk.GetArrayFromImage(pvv_obj)
-        #print(idx,np.unique(pvv))
+        if False:
+            print('-----------------------')
+            print(f'{idx}:')
+            nii_file = os.path.join(os.path.dirname(json_file),'debug-area.nii.gz')
+            nii_obj = sitk.ReadImage(nii_file)
+            arr = sitk.GetArrayFromImage(nii_obj)
+            arr = np.round(arr,0)
+            area_list = sorted(list(set([x for x in np.unique(arr) if x>0 ])))
+            for x in area_list:
+                print(x,np.sum(arr==x)/np.sum(arr>0))
         mylist.append(mydict)
     #cols = ['idx','pvv5-dt','pvv10-dt','pvv10+-dt']
     rdf = pd.DataFrame(mylist)#,columns=cols)
