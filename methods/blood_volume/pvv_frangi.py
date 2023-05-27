@@ -73,8 +73,10 @@ def estimate_radius(image_file,mask_file,outdir):
     myimg_obj.CopyInformation(image_obj)
     sitk.WriteImage(myimg_obj,f"{outdir}/myimg.nii.gz")
 
+    radius_list = [r for r in np.linspace(0.25,5,10)]
+    sigma_list = [r*2/2.355 for r in np.linspace(0.25,5,10)]
     arr_list = []
-    for x_mm in [r*2/2.355 for r in np.linspace(0.25,5,10)]:
+    for x_mm in sigma_list:
         print(f'sigma: {x_mm}') 
         # since the image is not 1mm isotropic
         # we adjust the sigma per image spacing
@@ -114,7 +116,7 @@ def estimate_radius(image_file,mask_file,outdir):
     arr = arr.astype(np.int16)
     arr[vsl_mask==0]=-1
     print(np.unique(arr))
-    mapper_dict = {n:r for n,r in enumerate([r for r in np.linspace(0.25,5,10)])}
+    mapper_dict = {n:r for n,r in enumerate(radius_list)}
     map_func = np.vectorize(lambda x: float(mapper_dict.get(x,0)))
     radius = map_func(arr)
     print(radius.dtype)
@@ -178,7 +180,6 @@ def estimate_radius(image_file,mask_file,outdir):
     pvv = pvv.astype(np.int16)
     qia_obj = sitk.GetImageFromArray(pvv)
     qia_obj.CopyInformation(mask_obj)
-
 
     qia_obj = sitk.GetImageFromArray(pvv)
     qia_obj.CopyInformation(mask_obj)
