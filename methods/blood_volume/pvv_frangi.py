@@ -24,8 +24,10 @@ vessels between 1.25 and 5 mm2 cross-sectional area, BV5-10
 between 5 and 10 mm2, and BV10 > 10 mm2)
 https://journals.physiology.org/doi/pdf/10.1152/japplphysiol.00458.2022
 
-# approximate diameter using FWHM which is ~ 2.355*sigma
-# https://en.wikipedia.org/wiki/Full_width_at_half_maximum
+approximate diameter using FWHM which is ~ 2.355*sigma
+https://en.wikipedia.org/wiki/Full_width_at_half_maximum
+
+diameter = 2*radius = 2.355*sigma
 
 radius = sigma*2.355/2
 area = pi*(radius^2)
@@ -95,12 +97,15 @@ def estimate_radius(image_file,lung_file,vessel_file,outdir,debug):
         #
         # https://simpleitk.org/doxygen/v1_2/html/classitk_1_1simple_1_1SmoothingRecursiveGaussianImageFilter.html
         # sigma is measured in the units of image spacing
-        # (oddly, radius was noisy if sigma was adjusted with anisotropic spacing)
-        #
+        # 
         sigma = sigma/np.array(spacing) # (no real need since we set spacing to 1^3mm)
+        print(sigma)
         gaussian = sitk.SmoothingRecursiveGaussianImageFilter()
         gaussian.SetSigma(sigma)
-        smoothed = gaussian.Execute(myimg_obj)
+        # 
+        # pvv varies obviously if you opt to use image_obj or vessel_obj
+        # 
+        smoothed = gaussian.Execute(vessel_obj)
 
         '''
         ref. on sitk.ObjectnessMeasureImageFilter
@@ -186,6 +191,7 @@ def estimate_radius(image_file,lung_file,vessel_file,outdir,debug):
     print('regionprops...')
     props = regionprops(branch,intensity_image=radius)
     mapper_dict = {p.label:np.pi*(p.mean_intensity**2) for p in props}
+
     print('area...')
     map_func = np.vectorize(lambda x: float(mapper_dict.get(x,0)))
     area = map_func(ws_branch)
@@ -211,12 +217,18 @@ def estimate_radius(image_file,lung_file,vessel_file,outdir,debug):
 
     qia_obj = resample_img(qia_obj, og_image_obj.GetSpacing(), is_label=True)
     sitk.WriteImage(qia_obj,f"{outdir}/pvv.nii.gz")
-
+    
+    spacing = qia_obj.GetSpacing()
+    cc_per_voxel = np.prod(spacing)*0.001
+    pvv = sitk.GetArrayFromImage(qia_obj)
 
     mydict = {
-        'pvv5-frangi': float(np.sum(pvv==1)/np.sum(pvv>0)),
-        'pvv10-frangi': float(np.sum(pvv==2)/np.sum(pvv>0)),
-        'pvv10+-frangi': float(np.sum(pvv==3)/np.sum(pvv>0)),
+        'pvv5-frangi-prct': float(np.sum(pvv==1)/np.sum(pvv>0)),
+        'pvv10-frangi-prct': float(np.sum(pvv==2)/np.sum(pvv>0)),
+        'pvv10+-frangi-prct': float(np.sum(pvv==3)/np.sum(pvv>0)),
+        'pvv5-frangi-cc': float(np.sum(pvv==1)*cc_per_voxel),
+        'pvv10-frangi-cc': float(np.sum(pvv==2)*cc_per_voxel),
+        'pvv10+-frangi-cc': float(np.sum(pvv==3)*cc_per_voxel),
     }
     json_file = f"{outdir}/frangi.json"
     with open(json_file,'w') as f:
