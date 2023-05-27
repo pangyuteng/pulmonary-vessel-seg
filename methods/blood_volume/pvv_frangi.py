@@ -52,23 +52,27 @@ sigma = np.sqrt(area/pi)*2/2.355
 
 '''
 
-def estimate_radius(image_file,mask_file,outdir):
+def estimate_radius(image_file,lung_file,vessel_file,outdir):
     
     os.makedirs(outdir,exist_ok=True)
 
     image_obj = sitk.ReadImage(image_file)
     image = sitk.GetArrayFromImage(image_obj)
-    mask_obj = sitk.ReadImage(mask_file)
-    vsl_mask = sitk.GetArrayFromImage(mask_obj)
-    spacing = mask_obj.GetSpacing()
-    origin = mask_obj.GetOrigin()
-    direction = mask_obj.GetDirection()
+    
+    lung_obj = sitk.ReadImage(lung_file)
+    lung_mask = sitk.GetArrayFromImage(lung_obj)
+
+    vessel_obj = sitk.ReadImage(vessel_file)
+    vsl_mask = sitk.GetArrayFromImage(vessel_obj)
+    spacing = image_obj.GetSpacing()
+    origin = image_obj.GetOrigin()
+    direction = image_obj.GetDirection()
     
     min_val,max_val = -1000,1000
     image = image.astype(np.float)
     image = (image-min_val)/(max_val-min_val)
     image = image.clip(0,1)
-    image[vsl_mask>0]=0
+    image[lung_mask==0]=0
     myimg_obj = sitk.GetImageFromArray(image)
     myimg_obj.CopyInformation(image_obj)
     sitk.WriteImage(myimg_obj,f"{outdir}/myimg.nii.gz")
@@ -122,15 +126,14 @@ def estimate_radius(image_file,mask_file,outdir):
     print(radius.dtype)
 
     qia_obj = sitk.GetImageFromArray(radius)
-    qia_obj.CopyInformation(mask_obj)
+    qia_obj.CopyInformation(image_obj)
     sitk.WriteImage(qia_obj,f"{outdir}/radius.nii.gz")
 
     print('skeletonize...')
-    vsl_mask = sitk.GetArrayFromImage(mask_obj)
     skeleton = skeletonize(vsl_mask)
     skeleton = skeleton.astype(np.int16)
     qia_obj = sitk.GetImageFromArray(skeleton)
-    qia_obj.CopyInformation(mask_obj)
+    qia_obj.CopyInformation(image_obj)
     sitk.WriteImage(qia_obj,f"{outdir}/skeleton.nii.gz")
 
     print('intersection...')
@@ -141,7 +144,7 @@ def estimate_radius(image_file,mask_file,outdir):
 
     intersection = intersection.astype(np.int16)
     qia_obj = sitk.GetImageFromArray(intersection)
-    qia_obj.CopyInformation(mask_obj)
+    qia_obj.CopyInformation(image_obj)
     sitk.WriteImage(qia_obj,f"{outdir}/intersection.nii.gz")
 
     print('label...')
@@ -150,7 +153,7 @@ def estimate_radius(image_file,mask_file,outdir):
     branch = label(branch)
     branch = branch.astype(np.int16)
     qia_obj = sitk.GetImageFromArray(branch)
-    qia_obj.CopyInformation(mask_obj)
+    qia_obj.CopyInformation(image_obj)
     sitk.WriteImage(qia_obj,f"{outdir}/branch.nii.gz")
 
     print('watershed...')
@@ -158,7 +161,7 @@ def estimate_radius(image_file,mask_file,outdir):
     ws_branch = ws_branch.astype(np.int16)
 
     qia_obj = sitk.GetImageFromArray(ws_branch)
-    qia_obj.CopyInformation(mask_obj)
+    qia_obj.CopyInformation(image_obj)
     sitk.WriteImage(qia_obj,f"{outdir}/watershed_labels.nii.gz")
 
     print('regionprops...')
@@ -169,7 +172,7 @@ def estimate_radius(image_file,mask_file,outdir):
     area = map_func(ws_branch)
     print(area.dtype)
     qia_obj = sitk.GetImageFromArray(area)
-    qia_obj.CopyInformation(mask_obj)
+    qia_obj.CopyInformation(image_obj)
     sitk.WriteImage(qia_obj,f"{outdir}/area.nii.gz")
 
     print('pvv...')
@@ -179,10 +182,10 @@ def estimate_radius(image_file,mask_file,outdir):
     pvv[area>=10]=3
     pvv = pvv.astype(np.int16)
     qia_obj = sitk.GetImageFromArray(pvv)
-    qia_obj.CopyInformation(mask_obj)
+    qia_obj.CopyInformation(image_obj)
 
     qia_obj = sitk.GetImageFromArray(pvv)
-    qia_obj.CopyInformation(mask_obj)
+    qia_obj.CopyInformation(image_obj)
     sitk.WriteImage(qia_obj,f"{outdir}/pvv.nii.gz")
 
     mydict = {
@@ -197,9 +200,10 @@ def estimate_radius(image_file,mask_file,outdir):
 
 if __name__ == "__main__":
     image_file = sys.argv[1]
-    mask_file = sys.argv[2]
-    outdir = sys.argv[3]
-    estimate_radius(image_file,mask_file,outdir)
+    lung_file = sys.argv[2]
+    vessel_file = sys.argv[3]
+    outdir = sys.argv[4]
+    estimate_radius(image_file,lung_file,vessel_file,outdir)
 
 """
 
@@ -207,6 +211,6 @@ docker run -it -u $(id -u):$(id -g) -w $PWD \
     -v /cvibraid:/cvibraid -v /radraid:/radraid \
     pangyuteng/ml:latest bash
 
-python pvv_frangi.py img.nii.gz wasserthal.nii.gz outdir-frangi
+python pvv_frangi.py img.nii.gz lung.nii.gz wasserthal.nii.gz outdir-frangi
 
 """
