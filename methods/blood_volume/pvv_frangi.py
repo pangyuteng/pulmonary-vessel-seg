@@ -82,6 +82,7 @@ def estimate_radius(image_file,lung_file,vessel_file,outdir,debug):
     image = image.astype(np.float)
     image = (image-min_val)/(max_val-min_val)
     image = image.clip(0,1)
+    image = 255*image
     image[lung_mask==0]=0
     myimg_obj = sitk.GetImageFromArray(image)
     myimg_obj.CopyInformation(image_obj)
@@ -91,9 +92,9 @@ def estimate_radius(image_file,lung_file,vessel_file,outdir,debug):
     radius_list = [r for r in np.linspace(0.25,5,10)]
     sigma_list = [r*2/2.355 for r in np.linspace(0.25,5,10)]
     arr_list = []
-    for x_mm in sigma_list:
-        print(f'sigma: {x_mm}') 
-        sigma = np.ones(3)*x_mm
+    for radius_mm,sigma_mm in zip(radius_list,sigma_list):
+        print(f'sigma: {sigma_mm}')
+        sigma = np.ones(3)*sigma_mm
         #
         # https://simpleitk.org/doxygen/v1_2/html/classitk_1_1simple_1_1SmoothingRecursiveGaussianImageFilter.html
         # sigma is measured in the units of image spacing
@@ -131,12 +132,14 @@ def estimate_radius(image_file,lung_file,vessel_file,outdir,debug):
         myfilter.SetBeta(0.5)
         myfilter.SetGamma(5.0)
         tmp_obj = myfilter.Execute(smoothed)
-        if debug:
-            sitk.WriteImage(tmp_obj,f"{outdir}/debug-frangi-{x_mm:06.2f}.nii.gz")
         tmp_arr = sitk.GetArrayFromImage(tmp_obj)
-        min_val,max_val = np.min(tmp_arr),np.max(tmp_arr)
+        min_val,max_val = np.min(tmp_arr[vsl_mask==1]),np.max(tmp_arr[vsl_mask==1])
         tmp_arr = (tmp_arr-min_val)/(max_val-min_val)
         arr_list.append(tmp_arr)
+        new_obj = sitk.GetImageFromArray(tmp_arr)
+        new_obj.CopyInformation(tmp_obj)
+        if debug:
+            sitk.WriteImage(new_obj,f"{outdir}/debug-radius-{radius_mm:06.2f}.nii.gz")
 
     arr = np.argmax(np.array(arr_list),axis=0)
     arr = arr.astype(np.int16)
