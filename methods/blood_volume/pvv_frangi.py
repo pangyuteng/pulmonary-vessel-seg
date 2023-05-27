@@ -82,12 +82,13 @@ def estimate_radius(image_file,lung_file,vessel_file,outdir):
     arr_list = []
     for x_mm in sigma_list:
         print(f'sigma: {x_mm}') 
-        # since the image is not 1mm isotropic
-        # we adjust the sigma per image spacing
         sigma = np.ones(3)*x_mm
-        adjusted_sigma = sigma/np.array(spacing)
+        # unsure if we need to adjust sigma with spacing 
+        # or itk does it internally, 
+        # with no adjustment, radius seem to be "less noisy".
+        # sigma = sigma/np.array(spacing)
         gaussian = sitk.SmoothingRecursiveGaussianImageFilter()
-        gaussian.SetSigma(adjusted_sigma)
+        gaussian.SetSigma(sigma)
         smoothed = gaussian.Execute(myimg_obj)
 
         '''
@@ -114,7 +115,10 @@ def estimate_radius(image_file,lung_file,vessel_file,outdir):
         myfilter.SetBeta(0.5)
         myfilter.SetGamma(5.0)
         tmp_obj = myfilter.Execute(smoothed)
-        arr_list.append(sitk.GetArrayFromImage(tmp_obj))
+        tmp_arr = sitk.GetArrayFromImage(tmp_obj)
+        min_val,max_val = np.min(tmp_arr),np.max(tmp_arr)
+        tmp_arr = (tmp_arr-min_val)/(max_val-min_val)
+        arr_list.append(tmp_arr)
 
     arr = np.argmax(np.array(arr_list),axis=0)
     arr = arr.astype(np.int16)
