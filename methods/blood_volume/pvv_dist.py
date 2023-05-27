@@ -88,10 +88,12 @@ def main(mask_file,outdir,debug):
 
     arr = bs_field[np.where(bs_field>0)]
     print(np.min(arr),np.max(arr))
-    hist,bin_edges = np.histogram(arr,bins=12,range=(0,6))
+    hist, bin_edges = np.histogram(arr,bins=12,range=(0,6))
+    hist = np.round(hist,2)
     hist = hist / np.sum(hist)
     hist = hist.tolist()
-    print(hist)
+    hist_dict = {f'radius-lt-{k}mm':v for k,v in zip(bin_edges[1:],hist)}
+    print(hist_dict)
     '''
     # radius
     >>> [np.round(r,2) for r in np.arange(0.6,5,.6)]

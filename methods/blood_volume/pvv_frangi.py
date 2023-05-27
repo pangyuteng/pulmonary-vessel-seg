@@ -9,81 +9,71 @@ from scipy import ndimage
 from skimage.measure import label, regionprops
 from tqdm import tqdm
 
-def resample_img(itk_image, out_spacing, is_label=False):
+'''
+https://en.wikipedia.org/wiki/Normal_distribution
+https://en.wikipedia.org/wiki/Full_width_at_half_maximum
+assuming vessel intensity can be fitted with a guassian distribution curve
+we can use FWHM as diameter.
+so if we have a sigma of 1mm, then diameter would be 2.355*1 mm
+
+“BVX”, where “X” indicates a range of vessel sizes in mm2 (BV5 is the volume of blood contained in
+vessels between 1.25 and 5 mm2 cross-sectional area, BV5-10
+between 5 and 10 mm2, and BV10 > 10 mm2)
+https://journals.physiology.org/doi/pdf/10.1152/japplphysiol.00458.2022
+
+# approximate diameter using FWHM which is ~ 2.355*sigma
+# https://en.wikipedia.org/wiki/Full_width_at_half_maximum
+
+radius = sigma*2.355/2
+area = pi*(radius^2)
+
+radius = np.sqrt(area/pi)
+sigma = radius*2/2.355
+sigma = np.sqrt(area/pi)*2/2.355
+
+
+# radius 
+>>> [r for r in np.linspace(0.25,5,10)]
+
+# area
+>>> [np.pi*(r**2) for r in np.linspace(0.25,5,10)]
+
+# sigma
+>>> [r*2/2.355 for r in np.linspace(0.25,5,10)]
+
+# area
+>>> [a for a in np.linspace(1,20,20)]
+
+# radius 
+>>> [np.sqrt(a/np.pi) for a in np.linspace(1,20,20)]
+
+# sigma
+>>> [np.sqrt(a/np.pi)*2/2.355 for a in np.linspace(1,20,20)]
+
+'''
+
+def estimate_radius(image_file,mask_file,outdir):
     
-    # Resample images to 2mm spacing with SimpleITK
-    original_spacing = itk_image.GetSpacing()
-    original_size = itk_image.GetSize()
-
-    out_size = [
-        int(np.round(original_size[0] * (original_spacing[0] / out_spacing[0]))),
-        int(np.round(original_size[1] * (original_spacing[1] / out_spacing[1]))),
-        int(np.round(original_size[2] * (original_spacing[2] / out_spacing[2])))]
-
-    resample = sitk.ResampleImageFilter()
-    resample.SetOutputSpacing(out_spacing)
-    resample.SetSize(out_size)
-    resample.SetOutputDirection(itk_image.GetDirection())
-    resample.SetOutputOrigin(itk_image.GetOrigin())
-    resample.SetTransform(sitk.Transform())
-    resample.SetDefaultPixelValue(itk_image.GetPixelIDValue())
-
-    if is_label:
-        resample.SetInterpolator(sitk.sitkNearestNeighbor)
-    else:
-        resample.SetInterpolator(sitk.sitkLinear)
-
-    return resample.Execute(itk_image)
-
-def main(image_file,mask_file,outdir):
     os.makedirs(outdir,exist_ok=True)
-    print('ReadImage...')
-    image_obj = sitk.ReadImage(image_file)
-    mask_obj = sitk.ReadImage(mask_file)
 
-    #out_spacing = [0.625,0.625,0.625]
-    #image_obj = resample_img(image_obj, out_spacing, is_label=False)
-    #mask_obj = resample_img(mask_obj, out_spacing, is_label=True)
+    image_obj = sitk.ReadImage(image_file)
+    image = sitk.GetArrayFromImage(image_obj)
+    mask_obj = sitk.ReadImage(mask_file)
+    vsl_mask = sitk.GetArrayFromImage(mask_obj)
     spacing = mask_obj.GetSpacing()
     origin = mask_obj.GetOrigin()
     direction = mask_obj.GetDirection()
     
-    vsl_mask = sitk.GetArrayFromImage(mask_obj)
+    min_val,max_val = -1000,1000
+    image = image.astype(np.float)
+    image = (image-min_val)/(max_val-min_val)
+    image = image.clip(0,1)
+    image[vsl_mask>0]=0
+    my_obj = sitk.GetImageFromArray(image)
+    my_obj.CopyInformation(image_obj)
 
-    connected_components = False
-    if connected_components:
-        blobs = label(vsl_mask)
-        props = regionprops(blobs)
-        # mm3 = 0.001 cc
-        th = 1/(0.001*np.prod(spacing)) # 1cc
-        vsl_mask = np.zeros_like(vsl_mask)
-        for p in props:
-            if p.area < th:
-                continue
-            vsl_mask[blobs==p.label] = 1
-        qia_obj = sitk.GetImageFromArray(vsl_mask)
-        qia_obj.CopyInformation(mask_obj)
-        sitk.WriteImage(qia_obj,f"{outdir}/vsl_mask.nii.gz")
-
-    img = sitk.GetArrayFromImage(image_obj)
-    img = img.astype(np.float)
-    img = ((img+1000)/2000).clip(0,1)
-    img[vsl_mask==0]=0
-    image_obj = sitk.GetImageFromArray(img)
-    image_obj.CopyInformation(mask_obj)
-    
-    print('frangi...')
-
-    arr_list = [np.zeros_like(vsl_mask)]
-    '''
-    https://en.wikipedia.org/wiki/Normal_distribution
-    https://en.wikipedia.org/wiki/Full_width_at_half_maximum
-    assuming vessel intensity can be fitted with a guassian distribution curve
-    we can use FWHM as diameter.
-    so if we have a sigma of 1mm, then diameter would be 2.355*1 mm
-    '''
-
-    for x_mm in np.arange(0.2,4,0.3):
+    arr_list = []
+    for x_mm in [r*2/2.355 for r in np.linspace(0.25,5,10)]:
         print(f'sigma: {x_mm}') 
         # since the image is not 1mm isotropic
         # we adjust the sigma per image spacing
@@ -91,7 +81,8 @@ def main(image_file,mask_file,outdir):
         adjusted_sigma = sigma/np.array(spacing)
         gaussian = sitk.SmoothingRecursiveGaussianImageFilter()
         gaussian.SetSigma(adjusted_sigma)
-        smoothed = gaussian.Execute(mask_obj)
+        smoothed = gaussian.Execute(my_obj)
+
         '''
         ref. on sitk.ObjectnessMeasureImageFilter
         https://simpleitk.org/doxygen/latest/html/sitkObjectnessMeasureImageFilter_8h_source.html
@@ -101,60 +92,35 @@ def main(image_file,mask_file,outdir):
         https://github.com/InsightSoftwareConsortium/ITK/blob/f84720ee0823964bd135de8eb973acc40c1e70e1/Modules/Filtering/ImageFeature/include/itkHessianToObjectnessMeasureImageFilter.hxx
 
         per https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6214740/pdf/nihms982442.pdf
+        Multiscale vessel enhancement filtering
         set alpha 0.53, beta 0.61 # gamma was not metioned.
 
         https://pubmed.ncbi.nlm.nih.gov/32741657
         https://pubmed.ncbi.nlm.nih.gov/25227036
         set alpha 0.5, beta 0.5, c 20 ?? likely not the same equation.
 
-        # alternative to frangi-filter, diameter can be estimated with "distance transform" if speed is a concern.
-        from scipy.ndimage.morphology import distance_transform_edt
-        skeleton = skeletonize(vsl_mask)
-        bs_field = distance_transform_edt(vessel>0)
-
         '''
         myfilter = sitk.ObjectnessMeasureImageFilter()
         myfilter.SetBrightObject(True)
         myfilter.SetObjectDimension(1) # 1: lines (vessels),
-        myfilter.SetAlpha(0.53)
-        myfilter.SetBeta(0.61)
+        myfilter.SetAlpha(0.5)
+        myfilter.SetBeta(0.5)
         myfilter.SetGamma(5.0)
         tmp_obj = myfilter.Execute(smoothed)
         arr_list.append(sitk.GetArrayFromImage(tmp_obj))
 
-    '''
-    “BVX”, where “X” indicates a range of vessel sizes in mm2 (BV5 is the volume of blood contained in
-    vessels between 1.25 and 5 mm2 cross-sectional area, BV5-10
-    between 5 and 10 mm2, and BV10 > 10 mm2)
-    https://journals.physiology.org/doi/pdf/10.1152/japplphysiol.00458.2022
-
-    circle area is pi*r^2
-    channel 0 -> sigma 1 -> diameter 2.355*1 mm -> radius 1.1775 -> pi*r^2 = 4.35
-
-    #sigma
-    >>> np.arange(0.2,4,0.3)
-    array([0.2, 0.5, 0.8, 1.1, 1.4, 1.7, 2. , 2.3, 2.6, 2.9, 3.2, 3.5, 3.8])
-    #diameter
-    >>> [s*2.355 for s in np.arange(0.2,4,0.3)]
-    [0.47100000000000003, 1.1775, 1.8840000000000001, 2.5904999999999996, 3.2969999999999997, 4.0035, 4.709999999999999, 5.416500000000001, 6.123, 6.8294999999999995, 7.5360000000000005, 8.2425, 8.949]
-    #area
-    >>> [np.pi*((s*2.355/2)**2) for s in np.arange(0.2,4,0.3)]
-    [0.17423351396625336, 1.0889594622890832, 2.787736223460054, 5.270563797479162, 8.53744218434641, 12.588371384061803, 17.423351396625325, 23.04238222203701, 29.44546386029681, 36.632596311404754, 44.60377957536086, 53.35901365216508, 62.89829854181745]
-
-    '''
     arr = np.argmax(np.array(arr_list),axis=0)
-    arr = arr.astype(np.uint8)
-    arr[vsl_mask==0]=0
+    arr = arr.astype(np.int16)
+    arr[vsl_mask==0]=-1
+    print(np.unique(arr))
+    mapper_dict = {n:r for n,r in enumerate([r for r in np.linspace(0.25,5,10)])}
+    map_func = np.vectorize(lambda x: float(mapper_dict.get(x,0)))
+    radius = map_func(arr)
+    print(radius.dtype)
 
-    qia_obj = sitk.GetImageFromArray(arr)
+    qia_obj = sitk.GetImageFromArray(radius)
     qia_obj.CopyInformation(mask_obj)
-    sitk.WriteImage(qia_obj,f"{outdir}/raw.nii.gz")
-
-    # categorize per area
-    myclass = np.zeros_like(arr)
-    myclass[np.logical_and(arr>=1,arr<=3)]=1 # BV5
-    myclass[np.logical_and(arr>3,arr<=5)]=2 # BV5-10
-    myclass[arr>5]=3 # B10
+    sitk.WriteImage(qia_obj,f"{outdir}/radius.nii.gz")
 
     print('skeletonize...')
     vsl_mask = sitk.GetArrayFromImage(mask_obj)
@@ -192,12 +158,26 @@ def main(image_file,mask_file,outdir):
     qia_obj.CopyInformation(mask_obj)
     sitk.WriteImage(qia_obj,f"{outdir}/watershed_labels.nii.gz")
 
-    pvv = np.zeros_like(ws_branch)
     print('regionprops...')
-    props = regionprops(branch,intensity_image=myclass)
+    props = regionprops(branch,intensity_image=radius)
+    mapper_dict = {p.label:np.pi*(p.mean_intensity**2) for p in props}
+    print('area...')
+    map_func = np.vectorize(lambda x: float(mapper_dict.get(x,0)))
+    area = map_func(ws_branch)
+    print(area.dtype)
+    qia_obj = sitk.GetImageFromArray(area)
+    qia_obj.CopyInformation(mask_obj)
+    sitk.WriteImage(qia_obj,f"{outdir}/area.nii.gz")
+
     print('pvv...')
-    for p in tqdm(props):
-        pvv[ws_branch==p.label] = np.round(p.mean_intensity)
+    pvv = np.zeros_like(area)
+    pvv[np.logical_and(area>0,area<=5)]=1
+    pvv[np.logical_and(area>5,area<10)]=2
+    pvv[area>=10]=3
+    pvv = pvv.astype(np.int16)
+    qia_obj = sitk.GetImageFromArray(pvv)
+    qia_obj.CopyInformation(mask_obj)
+
 
     qia_obj = sitk.GetImageFromArray(pvv)
     qia_obj.CopyInformation(mask_obj)
@@ -217,7 +197,7 @@ if __name__ == "__main__":
     image_file = sys.argv[1]
     mask_file = sys.argv[2]
     outdir = sys.argv[3]
-    main(image_file,mask_file,outdir)
+    estimate_radius(image_file,mask_file,outdir)
 
 """
 
