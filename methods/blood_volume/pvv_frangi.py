@@ -131,6 +131,8 @@ def estimate_radius(image_file,lung_file,vessel_file,outdir,debug):
         myfilter.SetBeta(0.5)
         myfilter.SetGamma(5.0)
         tmp_obj = myfilter.Execute(smoothed)
+        if debug:
+            sitk.WriteImage(tmp_obj,f"{outdir}/debug-frangi-{x_mm:06.2f}.nii.gz")
         tmp_arr = sitk.GetArrayFromImage(tmp_obj)
         min_val,max_val = np.min(tmp_arr),np.max(tmp_arr)
         tmp_arr = (tmp_arr-min_val)/(max_val-min_val)
