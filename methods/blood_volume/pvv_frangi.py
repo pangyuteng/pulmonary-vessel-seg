@@ -105,7 +105,7 @@ def estimate_radius(image_file,lung_file,vessel_file,outdir,debug):
         # 
         # pvv varies obviously if you opt to use image_obj or vessel_obj
         # 
-        smoothed = gaussian.Execute(vessel_obj)
+        smoothed = gaussian.Execute(myimg_obj)
 
         '''
         ref. on sitk.ObjectnessMeasureImageFilter
