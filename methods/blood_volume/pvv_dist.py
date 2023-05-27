@@ -79,7 +79,7 @@ def main(mask_file,outdir,debug):
 
     print('bs_field...')
     bs_field = distance_transform_edt(vsl_mask>0)
-    bs_field = bs_field.astype(np.int16)
+    bs_field = bs_field.astype(np.float)*target_spacing[0]
 
     qia_obj = sitk.GetImageFromArray(bs_field)
     qia_obj.CopyInformation(mask_obj)
@@ -142,22 +142,22 @@ def main(mask_file,outdir,debug):
     if debug:
         sitk.WriteImage(qia_obj,f"{outdir}/debug-watershed_labels.nii.gz")
 
-    radius = np.zeros_like(ws_branch)
+    area = np.zeros_like(ws_branch)
     print('regionprops...')
     props = regionprops(branch,intensity_image=bs_field)
-    print('radius...')
+    print('area...')
     for p in tqdm(props):
-        radius[ws_branch==p.label] = p.mean_intensity
+        area[ws_branch==p.label] = np.pi*(p.mean_intensity**2)
 
-    qia_obj = sitk.GetImageFromArray(radius)
+    qia_obj = sitk.GetImageFromArray(area)
     qia_obj.CopyInformation(mask_obj)
     if debug:
-        sitk.WriteImage(qia_obj,f"{outdir}/debug-radius.nii.gz")
+        sitk.WriteImage(qia_obj,f"{outdir}/debug-area.nii.gz")
     
-    pvv = np.zeros_like(radius)
-    pvv[np.logical_and(radius>0,radius<=1.5)]=1
-    pvv[np.logical_and(radius>1.5,radius<2.5)]=2
-    pvv[radius>=2.5]=3
+    pvv = np.zeros_like(area)
+    pvv[np.logical_and(area>0,area<=5)]=1
+    pvv[np.logical_and(area>5,area<10)]=2
+    pvv[area>=10]=3
     pvv = pvv.astype(np.int16)
     qia_obj = sitk.GetImageFromArray(pvv)
     qia_obj.CopyInformation(mask_obj)
