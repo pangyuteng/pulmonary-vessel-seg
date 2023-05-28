@@ -18,4 +18,29 @@
 <img src="static/dist-mip-18.png" width="256"><br>
 <img src="static/dist-mip-19.png" width="256"><br>
 <img src="static/dist-mip-20.png" width="256"><br>
-# frangi
+<img src="static/dist-mip-21.png" width="256"><br>
+<img src="static/dist-mip-22.png" width="256"><br>
+<img src="static/dist-mip-23.png" width="256"><br>
+# frangi<img src="static/frangi-mip-01.png" width="256"><br>
+<img src="static/frangi-mip-02.png" width="256"><br>
+<img src="static/frangi-mip-03.png" width="256"><br>
+<img src="static/frangi-mip-04.png" width="256"><br>
+<img src="static/frangi-mip-05.png" width="256"><br>
+<img src="static/frangi-mip-06.png" width="256"><br>
+<img src="static/frangi-mip-07.png" width="256"><br>
+<img src="static/frangi-mip-08.png" width="256"><br>
+<img src="static/frangi-mip-09.png" width="256"><br>
+<img src="static/frangi-mip-10.png" width="256"><br>
+<img src="static/frangi-mip-11.png" width="256"><br>
+<img src="static/frangi-mip-12.png" width="256"><br>
+<img src="static/frangi-mip-13.png" width="256"><br>
+<img src="static/frangi-mip-14.png" width="256"><br>
+<img src="static/frangi-mip-15.png" width="256"><br>
+<img src="static/frangi-mip-16.png" width="256"><br>
+<img src="static/frangi-mip-17.png" width="256"><br>
+<img src="static/frangi-mip-18.png" width="256"><br>
+<img src="static/frangi-mip-19.png" width="256"><br>
+<img src="static/frangi-mip-20.png" width="256"><br>
+<img src="static/frangi-mip-21.png" width="256"><br>
+<img src="static/frangi-mip-22.png" width="256"><br>
+<img src="static/frangi-mip-23.png" width="256"><br>

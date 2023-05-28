@@ -59,7 +59,12 @@ sigma = np.sqrt(area/pi)*2/2.355
 
 def estimate_radius(image_file,lung_file,vessel_file,outdir,debug):
     
-    os.makedirs(outdir,exist_ok=True)
+    os.makedirs(outdir,exist_ok=True)    
+    pvv_file = os.path.join(outdir,'pvv.nii.gz')
+    json_file = os.path.join(outdir,'results-frangi.json')
+    if os.path.exists(json_file):
+        print(f'skip! {json_file} found')
+        return
 
     og_image_obj = sitk.ReadImage(image_file)
     lung_obj = sitk.ReadImage(lung_file)
@@ -246,7 +251,6 @@ def estimate_radius(image_file,lung_file,vessel_file,outdir,debug):
         'pvv10-frangi-cc': float(np.sum(pvv==2)*cc_per_voxel),
         'pvv10+-frangi-cc': float(np.sum(pvv==3)*cc_per_voxel),
     }
-    json_file = f"{outdir}/frangi.json"
     with open(json_file,'w') as f:
         f.write(json.dumps(mydict))
 

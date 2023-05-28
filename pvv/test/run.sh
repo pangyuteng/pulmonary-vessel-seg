@@ -10,7 +10,7 @@ cd $code_dir
 
 outdir=$code_dir/test/vessel12-dist/${idx}
 mkdir -p $outdir
-python pvv_dist.py $mask_file $outdir True
+python pvv_dist.py $vessel_file $outdir True
 
 outdir=$code_dir/test/vessel12-frangi/${idx}
 mkdir -p $outdir
