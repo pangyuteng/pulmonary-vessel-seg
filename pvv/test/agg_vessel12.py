@@ -28,7 +28,7 @@ def main(dist_folder,frangi_folder):
     rdf.to_csv('results.csv',index=False,float_format='%.3f')
 
     os.makedirs('static',exist_ok=True)
-    with open('README.md','w') as f:
+    with open('viz.md','w') as f:
         for idx,mydict in main_dict.items():
             f.write(f'{idx}: dist, frangi<br>\n')
             for method in ['dist','frangi']:
