@@ -126,8 +126,9 @@ def estimate_radius(image_file,lung_file,vessel_file,outdir,debug):
     props = regionprops(branch,intensity_image=bs_field)
     for p in props:
         print(dir(p))
+        print(p.coords)
         print(p.label,p.mean_intensity)
-        sys.exist(1)
+        sys.exit(1)
 
     # qia_obj = sitk.GetImageFromArray(radius)
     # qia_obj.CopyInformation(image_obj)
