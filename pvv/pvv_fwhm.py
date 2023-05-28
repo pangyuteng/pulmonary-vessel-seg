@@ -80,7 +80,7 @@ def estimate_radius(image_file,lung_file,vessel_file,outdir,debug):
     bs_field = bs_field.astype(float)*out_spacing[0]
     print(bs_field.dtype)
     qia_obj = sitk.GetImageFromArray(bs_field)
-    qia_obj.CopyInformation(mask_obj)
+    qia_obj.CopyInformation(image_obj)
     if debug:
         sitk.WriteImage(qia_obj,f"{outdir}/debug-bs_field.nii.gz")
 
@@ -123,12 +123,11 @@ def estimate_radius(image_file,lung_file,vessel_file,outdir,debug):
     if debug:
         sitk.WriteImage(qia_obj,f"{outdir}/debug-watershed_labels.nii.gz")
 
-
-    props = regionprops(branch,intensity_image=radius)
+    props = regionprops(branch,intensity_image=bs_field)
     for p in props:
-        zc,xc,yc = props.centroid
-        orientation = props.orientation
-        print(xc,yc,zc,orientation)
+        print(dir(p))
+        print(p.label,p.mean_intensity)
+        sys.exist(1)
 
     # qia_obj = sitk.GetImageFromArray(radius)
     # qia_obj.CopyInformation(image_obj)
@@ -200,6 +199,6 @@ docker run -it -u $(id -u):$(id -g) -w $PWD \
     -v /cvibraid:/cvibraid -v /radraid:/radraid \
     pangyuteng/ml:latest bash
 
-python pvv_fwhm.py img.nii.gz lung.nii.gz wasserthal.nii.gz outdir-frangi True
+python pvv_fwhm.py img.nii.gz lung.nii.gz wasserthal.nii.gz outdir-fwhm True
 
 """
