@@ -89,8 +89,9 @@ def estimate_radius(image_file,lung_file,vessel_file,outdir,debug):
     if debug:
         sitk.WriteImage(myimg_obj,f"{outdir}/debug-myimg.nii.gz")
 
-    radius_list = [r for r in np.linspace(0.25,5,10)]
-    sigma_list = [r*2/2.355 for r in np.linspace(0.25,5,10)]
+    #radius_list = [r for r in np.linspace(0.25,5,10)]
+    radius_list = [0.3,0.5,0.75,1,1.1,1.3,1.4,1.75,2,3,4] # tweaked so 2 or more r can be mapped to the 3 classes of pvv.
+    sigma_list = [r*2/2.355 for r in radius_list]
     arr_list = []
     for radius_mm,sigma_mm in zip(radius_list,sigma_list):
         print(f'sigma: {sigma_mm}')
@@ -123,14 +124,19 @@ def estimate_radius(image_file,lung_file,vessel_file,outdir,debug):
         https://pubmed.ncbi.nlm.nih.gov/32741657
         https://pubmed.ncbi.nlm.nih.gov/25227036
         set alpha 0.5, beta 0.5, c 20 ?? likely not the same equation.
+        
+        Jimenez-Carretero, Daniel, et al. "3D Frangi-based lung vessel enhancement filter penalizing airways." 2013 IEEE 10th International Symposium on Biomedical Imaging. IEEE, 2013.
+        alpha 0.5, beta 0.5, c 500
 
+        argmax 
+        https://www.sciencedirect.com/science/article/pii/S1361841519301598
         '''
         myfilter = sitk.ObjectnessMeasureImageFilter()
         myfilter.SetBrightObject(True)
         myfilter.SetObjectDimension(1) # 1: lines (vessels),
         myfilter.SetAlpha(0.5)
         myfilter.SetBeta(0.5)
-        myfilter.SetGamma(5.0)
+        myfilter.SetGamma(500.0)
         tmp_obj = myfilter.Execute(smoothed)
         tmp_arr = sitk.GetArrayFromImage(tmp_obj)
         min_val,max_val = np.min(tmp_arr[vsl_mask==1]),np.max(tmp_arr[vsl_mask==1])
