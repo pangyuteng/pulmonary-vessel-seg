@@ -9,15 +9,17 @@ import SimpleITK as sitk
 
 def main(dist_folder,frangi_folder):
     main_dict = {}
-    for myfolder in [dist_folder,frangi_folder]:
+    for method,myfolder in [('dist',dist_folder),('frangi',frangi_folder)]:
         json_file_list = sorted(list([str(x) for x in Path(myfolder).rglob("*.json")]))
         print(json_file_list)
         for json_file in json_file_list:
             idx = os.path.basename(os.path.dirname(json_file))
+            mip_file = os.path.join(os.path.dirname(json_file),'mip.png')
             if idx not in main_dict.keys():
                 main_dict[idx]={'idx':idx}
             with open(json_file,'r') as f:
                 mydict = json.loads(f.read())
+            mydict[f'{method}_mip_file']=mip_file
             main_dict[idx].update(mydict)
 
     mylist = list(main_dict.values())
@@ -27,14 +29,14 @@ def main(dist_folder,frangi_folder):
 
     os.makedirs('static',exist_ok=True)
     with open('README.md','w') as f:
-        for method,myfolder in [('dist',dist_folder),('frangi',frangi_folder)]:
-            png_file_list = sorted(list(Path(myfolder).rglob("*.png")))
-            f.write(f"# {method}")
-            for png_file in png_file_list:
-                idx = os.path.basename(os.path.dirname(png_file))
+        for idx,mydict in main_dict.items():
+            f.write(f'{idx}: dist, frangi<br>\n')
+            for method in ['dist','frangi']:
+                mip_file = mydict[f'{method}_mip_file']
                 tgt_file = f'static/{method}-mip-{idx}.png'
-                shutil.copy(png_file,tgt_file)
-                f.write(f'<img src="{tgt_file}" width="256"><br>\n')
+                shutil.copy(mip_file,tgt_file)
+                f.write(f'<img src="{tgt_file}" width="256">\n')
+            f.write('<br>')
 
 if __name__ == "__main__":
     dist_folder = sys.argv[1]
