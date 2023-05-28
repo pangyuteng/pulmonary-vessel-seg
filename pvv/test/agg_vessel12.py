@@ -35,7 +35,7 @@ def main(dist_folder,frangi_folder):
                 mip_file = mydict[f'{method}_mip_file']
                 tgt_file = f'static/{method}-mip-{idx}.png'
                 shutil.copy(mip_file,tgt_file)
-                f.write(f'<img src="{tgt_file}" width="256">\n')
+                f.write(f'<img load="lazy" alt="..." src="{tgt_file}" width="256">\n')
             f.write('<br>')
 
 if __name__ == "__main__":
