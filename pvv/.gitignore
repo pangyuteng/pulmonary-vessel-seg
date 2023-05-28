@@ -8,4 +8,5 @@ graph.png
 graph.nii.gz
 tabb/*
 test/log
-test/vessel12
+test/vessel12-dist
+test/vessel12-frangi

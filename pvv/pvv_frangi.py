@@ -9,7 +9,7 @@ from skimage.segmentation import watershed
 from scipy import ndimage
 from skimage.measure import label, regionprops
 from tqdm import tqdm
-
+import imageio
 from pvv_dist import resample_img
 
 '''
@@ -232,6 +232,11 @@ def estimate_radius(image_file,lung_file,vessel_file,outdir,debug):
     spacing = qia_obj.GetSpacing()
     cc_per_voxel = np.prod(spacing)*0.001
     pvv = sitk.GetArrayFromImage(qia_obj)
+
+    print('mip...')
+    mip = np.max(pvv,axis=1)*80
+    mip_file = f"{outdir}/mip.png"
+    imageio.imwrite(mip_file,mip)
 
     mydict = {
         'pvv5-frangi-prct': float(np.sum(pvv==1)/np.sum(pvv>0)),

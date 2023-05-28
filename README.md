@@ -46,8 +46,8 @@ repo url: na
 
 #### maybe todos
 
-+ vessel seg with graphcut
-+ a/v seperation
++ pulmonary-vessel-like-volume quantification see folder `pvv`
++ artery vein seperation with graphcut, see folder `av-seperation`
 
 #### GUI 1/2 - will give it a try:
 
