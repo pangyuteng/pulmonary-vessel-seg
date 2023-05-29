@@ -28,13 +28,13 @@ def resample_img(itk_image, out_spacing, is_label=False):
 
     return resample.Execute(itk_image)
 
-def _vrnormalize(vec,maxzero):
+def _vrnormalize(vec,epsilon):
     '''
     Normalize a vector.
     ref. Matlab vrnormalize.m    
     '''
     norm_vec = np.linalg.norm(vec)
-    if (norm_vec) <= maxzero:
+    if norm_vec <= epsilon:
         vec_n = np.zeros(vec.size)
     else:
         vec_n = np.divide(vec,norm_vec)
