@@ -67,23 +67,22 @@ def vrrotvec(v1,v2,epsilon=1e-12):
 #
 # see doc for more detail https://itk.org/ItkSoftwareGuide.pdf
 #
-def extract_slice(itk_image,slice_center,slice_normal,slice_spacing,radius,is_label):
+def extract_slice(itk_image,slice_center,slice_normal,slice_spacing,slice_size,is_label):
     
-    ref_normal=(0.,0.,1.)
-
+    ref_normal=(0.,0.,1.) # probably we should use image_normal as ref.
     image_normal = list(itk_image.GetDirection())[6:]
 
     slice_direction = vrrotvec(image_normal,slice_normal)
     slice_direction= tuple(slice_direction.ravel())
-    slice_size = (radius*2,radius*2,1)
     
-    slice_origin = (slice_center[0]-radius,slice_center[1]-radius,slice_center[2])
+    slice_size_mm = np.array(slice_size)*np.array(slice_spacing)
+    slice_origin = np.array(slice_center) - np.array(slice_size_mm)/2.0
 
     resample = sitk.ResampleImageFilter()
     resample.SetOutputOrigin(slice_origin)
     resample.SetOutputDirection(slice_direction)
     resample.SetOutputSpacing(slice_spacing)
-    resample.SetSize(slice_size)
+    resample.SetSize(slice_size) # unit is voxel
 
     axis = slice_normal
     rotation_center = slice_center # remember to set center in case you want update the angle
@@ -118,12 +117,12 @@ if __name__ == "__main__":
     slice_center = itk_image.TransformContinuousIndexToPhysicalPoint(aorta_coord)
     print('aorta_coord',slice_center)
     slice_normal = (0.0,0.0,1.0)
-    slice_spacing = (1.0,1.0,1.0)
-    radius = 25
+    slice_spacing = (2.0,2.0,2.0) # 1mm isotropic
+    slice_size = (50,50,1) # unit is voxels
     is_label = False
 
     slice_file = 'slice.nii.gz'
-    print(slice_center,slice_normal,radius)
-    slice_obj = extract_slice(itk_image,slice_center,slice_normal,slice_spacing,radius,is_label)
+    print(slice_center,slice_normal,slice_size)
+    slice_obj = extract_slice(itk_image,slice_center,slice_normal,slice_spacing,slice_size,is_label)
     sitk.WriteImage(slice_obj,slice_file)
 
