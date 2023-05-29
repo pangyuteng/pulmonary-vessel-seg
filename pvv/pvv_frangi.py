@@ -10,7 +10,8 @@ from scipy import ndimage
 from skimage.measure import label, regionprops
 from tqdm import tqdm
 import imageio
-from pvv_dist import resample_img
+
+from utils import resample_img
 
 '''
 https://en.wikipedia.org/wiki/Normal_distribution

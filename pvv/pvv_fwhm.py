@@ -41,7 +41,7 @@ sigma = np.sqrt(area/pi)*2/2.355
 
 def estimate_radius(image_file,lung_file,vessel_file,outdir,debug):
     
-    os.makedirs(outdir,exist_ok=True)    
+    os.makedirs(outdir,exist_ok=True)
     pvv_file = os.path.join(outdir,'pvv.nii.gz')
     json_file = os.path.join(outdir,'results-frangi.json')
     if os.path.exists(json_file):
