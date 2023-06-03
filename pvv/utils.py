@@ -1,6 +1,7 @@
 import sys
 import numpy as np
 import SimpleITK as sitk
+import imageio
 
 def resample_img(itk_image, out_spacing, is_label=False):
     
@@ -67,7 +68,7 @@ def vrrotvec(v1,v2,epsilon=1e-12):
 #
 # see doc for more detail https://itk.org/ItkSoftwareGuide.pdf
 #
-def extract_slice(itk_image,slice_center,slice_normal,slice_spacing,slice_size,is_label):
+def extract_slice(itk_image,slice_center,slice_normal,slice_spacing,slice_radius,is_label):
     
     ref_normal=(0.,0.,1.) # probably we should use image_normal as ref.
     image_normal = list(itk_image.GetDirection())[6:]
@@ -75,9 +76,9 @@ def extract_slice(itk_image,slice_center,slice_normal,slice_spacing,slice_size,i
     slice_direction = vrrotvec(image_normal,slice_normal)
     slice_direction= tuple(slice_direction.ravel())
     
-    slice_size_mm = np.array(slice_size)*np.array(slice_spacing)
-    slice_origin = np.array(slice_center) - np.array(slice_size_mm)/2.0
-
+    slice_origin = get_slice_origin(itk_image,slice_center,slice_normal,slice_spacing,slice_radius)
+    radius_voxel = int(np.array(slice_radius)*np.array(slice_spacing[0]))
+    slice_size = (radius_voxel,radius_voxel,1)
     resample = sitk.ResampleImageFilter()
     resample.SetOutputOrigin(slice_origin)
     resample.SetOutputDirection(slice_direction)
@@ -108,6 +109,26 @@ def extract_slice(itk_image,slice_center,slice_normal,slice_spacing,slice_size,i
 
     return resample.Execute(itk_image)
 
+def get_slice_origin(img_obj,slice_center,slice_normal,slice_spacing,slice_radius):
+    epsilon = 1e-12
+    # plane equation.
+    # ax+by+cz+d=0
+    a,b,c = tuple(slice_normal)
+    x,y,z = tuple(slice_center)
+    d = -a*x-b*y-c*z
+    print(a,b,c,d)
+    px,py,_=img_obj.GetOrigin()
+    pz=(-a*px-b*py-d)/(c+epsilon)
+    vec_on_plane = np.array([px,py,pz])-np.array(slice_center)
+    vec_on_plane = _vrnormalize(vec_on_plane,epsilon)
+    
+    slice_origin = slice_center - slice_radius*vec_on_plane
+    print('slice_center',slice_center)
+    print('vec_on_plane',vec_on_plane)
+    print('slice_origin',slice_origin)
+    print('slice_radius',slice_radius,np.sqrt(np.sum(np.power(slice_origin-slice_center,2))))
+    return tuple(slice_origin)
+
 if __name__ == "__main__":
 
     img_file = sys.argv[1]
@@ -115,14 +136,27 @@ if __name__ == "__main__":
     
     aorta_coord = [253,172,150]
     slice_center = itk_image.TransformContinuousIndexToPhysicalPoint(aorta_coord)
+    print(itk_image.GetOrigin())
+    print(itk_image.GetDirection())
     print('aorta_coord',slice_center)
     slice_normal = (0.0,0.0,1.0)
-    slice_spacing = (2.0,2.0,2.0) # 1mm isotropic
-    slice_size = (50,50,1) # unit is voxels
+    #slice_normal = (0.5,0.5,0.1)
+    slice_spacing = (1.0,1.0,1.0) # 1mm isotropic
+    slice_radius = 100 #mm
     is_label = False
 
     slice_file = 'slice.nii.gz'
-    print(slice_center,slice_normal,slice_size)
-    slice_obj = extract_slice(itk_image,slice_center,slice_normal,slice_spacing,slice_size,is_label)
+    print(slice_center,slice_normal,slice_radius)
+    slice_obj = extract_slice(itk_image,slice_center,slice_normal,slice_spacing,slice_radius,is_label)
     sitk.WriteImage(slice_obj,slice_file)
+    slice_arr = sitk.GetArrayFromImage(slice_obj)
+    print('shape',slice_arr.shape)
+    slice_arr = slice_arr.astype(float)
+    #print(np.min(slice_arr),np.max(slice_arr))
+    min_val,max_val = -1000,1000
+    slice_arr = 255*(slice_arr-min_val)/(max_val-min_val)
+    slice_arr = slice_arr.clip(0,255).squeeze().astype(np.uint8)
+    #print(np.min(slice_arr),np.max(slice_arr))
+    imageio.imwrite('slice.png',slice_arr)
+
 

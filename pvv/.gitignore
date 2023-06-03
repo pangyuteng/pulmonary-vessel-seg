@@ -1,11 +1,10 @@
 __pycache__
 *.nii.gz
+*.png
 outdir-dt
 outdir-frangi
 graph.gpickle
 skeleton.txt
-graph.png
-graph.nii.gz
 tabb/*
 test/log
 test/vessel12-dist

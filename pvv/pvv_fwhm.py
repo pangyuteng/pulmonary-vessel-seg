@@ -84,7 +84,6 @@ def estimate_radius(image_file,lung_file,vessel_file,outdir,debug):
     if debug:
         sitk.WriteImage(qia_obj,f"{outdir}/debug-bs_field.nii.gz")
 
-
     print('skeletonize...')
     skeleton = skeletonize(vsl_mask)
     skeleton = skeleton.astype(np.int16)
