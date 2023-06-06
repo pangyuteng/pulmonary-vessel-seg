@@ -69,16 +69,18 @@ def vrrotvec(v1,v2,epsilon=1e-12):
 # see doc for more detail https://itk.org/ItkSoftwareGuide.pdf
 #
 def extract_slice(itk_image,slice_center,slice_normal,slice_spacing,slice_radius,is_label):
-    
+    epsilon = 1e-12
     ref_normal=(0.,0.,1.) # probably we should use image_normal as ref.
     image_normal = list(itk_image.GetDirection())[6:]
 
+    slice_normal = _vrnormalize(slice_normal,epsilon)
     slice_direction = vrrotvec(image_normal,slice_normal)
     slice_direction= tuple(slice_direction.ravel())
     
     slice_origin = get_slice_origin(itk_image,slice_center,slice_normal,slice_spacing,slice_radius)
-    radius_voxel = int(np.array(slice_radius)*np.array(slice_spacing[0]))
-    slice_size = (radius_voxel,radius_voxel,1)
+    #slice_origin = slice_center
+    radius_voxel = int(np.array(slice_radius)/np.array(slice_spacing[0]))
+    slice_size = (radius_voxel*2,radius_voxel*2,1)
     resample = sitk.ResampleImageFilter()
     resample.SetOutputOrigin(slice_origin)
     resample.SetOutputDirection(slice_direction)
@@ -89,6 +91,7 @@ def extract_slice(itk_image,slice_center,slice_normal,slice_spacing,slice_radius
     rotation_center = slice_center # remember to set center in case you want update the angle
     angle = 0
     translation = (0,0,0)
+    #translation = (-slice_radius,-slice_radius,0)
     scale_factor = 1
     similarity = sitk.Similarity3DTransform(
         scale_factor, axis, angle, translation, rotation_center
@@ -117,12 +120,19 @@ def get_slice_origin(img_obj,slice_center,slice_normal,slice_spacing,slice_radiu
     x,y,z = tuple(slice_center)
     d = -a*x-b*y-c*z
     print(a,b,c,d)
-    px,py,_=img_obj.GetOrigin()
+    px,py,_ = img_obj.GetOrigin()
     pz=(-a*px-b*py-d)/(c+epsilon)
     vec_on_plane = np.array([px,py,pz])-np.array(slice_center)
     vec_on_plane = _vrnormalize(vec_on_plane,epsilon)
-    
-    slice_origin = slice_center - slice_radius*vec_on_plane
+    #
+    #
+    # 45-45-90 triangle
+    # side length ratio: 1:1:sqrt(2)
+    # so the offset from center of square is...
+    #
+    offset = (slice_radius*2)/np.sqrt(2)
+    print('offset',offset)
+    slice_origin = slice_center + vec_on_plane*offset
     print('slice_center',slice_center)
     print('vec_on_plane',vec_on_plane)
     print('slice_origin',slice_origin)
@@ -132,17 +142,23 @@ def get_slice_origin(img_obj,slice_center,slice_normal,slice_spacing,slice_radiu
 if __name__ == "__main__":
 
     img_file = sys.argv[1]
-    itk_image = sitk.ReadImage(img_file)
+    img_obj = sitk.ReadImage(img_file)
     
-    aorta_coord = [253,172,150]
-    slice_center = itk_image.TransformContinuousIndexToPhysicalPoint(aorta_coord)
-    print(itk_image.GetOrigin())
-    print(itk_image.GetDirection())
-    print('aorta_coord',slice_center)
+    aorta_coord = [254,172,150]
+    a = aorta_coord
+    slice_center = img_obj.TransformContinuousIndexToPhysicalPoint(aorta_coord)
+    arr = np.copy(sitk.GetArrayFromImage(img_obj))
+    o = 2
+    arr[a[2]-o:a[2]+o,a[1]-o:a[1]+o,a[0]-o:a[0]+o]=1000 #???
+    print(np.min(arr),np.max(arr))
+    itk_image = sitk.GetImageFromArray(arr)
+    itk_image.CopyInformation(img_obj)
     slice_normal = (0.0,0.0,1.0)
-    #slice_normal = (0.5,0.5,0.1)
+    slice_normal = (0.1,0.1,0.4)
+    slice_normal = (1,0,0)
+    slice_normal = (0,1,0)
     slice_spacing = (1.0,1.0,1.0) # 1mm isotropic
-    slice_radius = 100 #mm
+    slice_radius = 50 #mm
     is_label = False
 
     slice_file = 'slice.nii.gz'
@@ -152,11 +168,9 @@ if __name__ == "__main__":
     slice_arr = sitk.GetArrayFromImage(slice_obj)
     print('shape',slice_arr.shape)
     slice_arr = slice_arr.astype(float)
-    #print(np.min(slice_arr),np.max(slice_arr))
     min_val,max_val = -1000,1000
     slice_arr = 255*(slice_arr-min_val)/(max_val-min_val)
     slice_arr = slice_arr.clip(0,255).squeeze().astype(np.uint8)
-    #print(np.min(slice_arr),np.max(slice_arr))
     imageio.imwrite('slice.png',slice_arr)
 
 
