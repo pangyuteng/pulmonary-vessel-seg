@@ -127,7 +127,11 @@ def main(mask_file,outdir,debug):
         sitk.WriteImage(qia_obj,f"{outdir}/debug-watershed_labels.nii.gz")
 
     method = 'naive'
-    print(f'regionprops... method: {method}')
+    idx_list = list(np.unique(branch))
+    if len(idx_list) < 50000:
+        method = 'vectorize'
+
+    print(f'regionprops... method: {method} since len(idx_list) {len(idx_list)} < {th}')
     if method == 'vectorize':
         # faster, but much more memory intensitve:
         props = regionprops(branch,intensity_image=bs_field)
@@ -137,7 +141,6 @@ def main(mask_file,outdir,debug):
         area = map_func(ws_branch)
     else:
         area = np.zeros_like(ws_branch).astype(float)
-        idx_list = list(np.unique(branch))
         for idx in tqdm(idx_list):
             if idx == 0:
                 continue
