@@ -29,11 +29,18 @@ def main(mask_file,outdir,debug):
         return
 
     print('ReadMask...')
-    mask_obj_og = sitk.ReadImage(mask_file)
+    og_mask_obj = sitk.ReadImage(mask_file)
+    print(og_mask_obj.GetSize())
+    print(og_mask_obj.GetSpacing())
+    print(og_mask_obj.GetDirection())
+
     print('resample_img...')
     target_spacing=[0.6,0.6,0.6]
 
-    mask_obj = resample_img(mask_obj_og, target_spacing, is_label=True)
+    mask_obj = resample_img(og_mask_obj, target_spacing, is_label=True)
+    print(mask_obj.GetSize())
+    print(mask_obj.GetSpacing())
+    print(mask_obj.GetDirection())
     if debug:
         sitk.WriteImage(mask_obj,f"{outdir}/debug-mask.nii.gz")
 
@@ -103,7 +110,7 @@ def main(mask_file,outdir,debug):
     branch = np.copy(skeleton)
     branch[intersection==1]=0
     branch = label(branch)
-    branch = branch.astype(np.int16)
+    branch = branch.astype(np.int32)
     qia_obj = sitk.GetImageFromArray(branch)
     qia_obj.CopyInformation(mask_obj)
     if debug:
@@ -119,12 +126,25 @@ def main(mask_file,outdir,debug):
     if debug:
         sitk.WriteImage(qia_obj,f"{outdir}/debug-watershed_labels.nii.gz")
 
-    print('regionprops...')
-    props = regionprops(branch,intensity_image=bs_field)
-    mapper_dict = {p.label:np.pi*(p.mean_intensity**2) for p in props}
-    print('area...')
-    map_func = np.vectorize(lambda x: float(mapper_dict.get(x,0)))
-    area = map_func(ws_branch)
+    method = 'naive'
+    print(f'regionprops... method: {method}')
+    if method == 'vectorize':
+        # faster, but much more memory intensitve:
+        props = regionprops(branch,intensity_image=bs_field)
+        mapper_dict = {p.label:np.pi*(p.mean_intensity**2) for p in props}
+        print('area...')
+        map_func = np.vectorize(lambda x: float(mapper_dict.get(x,0)))
+        area = map_func(ws_branch)
+    else:
+        area = np.zeros_like(ws_branch).astype(float)
+        idx_list = list(np.unique(branch))
+        for idx in tqdm(idx_list):
+            if idx == 0:
+                continue
+            bs_values = bs_field[branch==idx]
+            tmp_radius = np.mean(bs_values)
+            tmp_area = np.pi*(tmp_radius**2)
+            area[ws_branch==idx]=tmp_area
     print(area.dtype)
     qia_obj = sitk.GetImageFromArray(area)
     qia_obj.CopyInformation(mask_obj)
@@ -143,7 +163,7 @@ def main(mask_file,outdir,debug):
         sitk.WriteImage(qia_obj,os.path.join(outdir,'debug-pvv.nii.gz'))
     
     print('resample...')
-    qia_obj = sitk.Resample(qia_obj, mask_obj_og, sitk.Transform(), sitk.sitkNearestNeighbor, 0, mask_obj.GetPixelID())
+    qia_obj = sitk.Resample(qia_obj, og_mask_obj, sitk.Transform(), sitk.sitkNearestNeighbor, 0, mask_obj.GetPixelID())
     sitk.WriteImage(qia_obj,pvv_file)
 
     spacing = qia_obj.GetSpacing()
