@@ -128,7 +128,8 @@ def main(mask_file,outdir,debug):
 
     method = 'naive'
     idx_list = list(np.unique(branch))
-    if len(idx_list) < 50000:
+    th = 50000
+    if len(idx_list) < th:
         method = 'vectorize'
 
     print(f'regionprops... method: {method} since len(idx_list) {len(idx_list)} < {th}')
