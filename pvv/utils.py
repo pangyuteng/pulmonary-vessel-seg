@@ -91,7 +91,6 @@ def extract_slice(itk_image,slice_center,slice_normal,slice_spacing,slice_radius
     rotation_center = slice_center # remember to set center in case you want update the angle
     angle = 0
     translation = (0,0,0)
-    #translation = (-slice_radius,-slice_radius,0)
     scale_factor = 1
     similarity = sitk.Similarity3DTransform(
         scale_factor, axis, angle, translation, rotation_center
@@ -140,8 +139,13 @@ def get_slice_origin(img_obj,slice_center,slice_normal,slice_spacing,slice_radiu
     return tuple(slice_origin)
 
 
-def wtf(itk_image,slice_center,slice_normal,slice_spacing,slice_radius,is_label):
-    
+def holahola(itk_image,slice_center,slice_normal,slice_spacing,slice_radius,is_label):
+
+    print('GetOrigin',itk_image.GetOrigin())
+    print('GetDirection',itk_image.GetDirection())
+    print('GetSpacing',itk_image.GetSpacing())
+    print('GetSize',itk_image.GetSize())
+
     epsilon = 1e-12
     ref_normal=(0.,0.,1.)
 
@@ -152,27 +156,14 @@ def wtf(itk_image,slice_center,slice_normal,slice_spacing,slice_radius,is_label)
     radius_voxel = int(np.array(slice_radius)/np.array(slice_spacing[0]))
     slice_size = (radius_voxel*2,radius_voxel*2,1)
     resample = sitk.ResampleImageFilter()
-    resample.SetOutputOrigin(itk_image.GetOrigin())
-    resample.SetOutputDirection(slice_direction)#itk_image.GetDirection())
+    
+    slice_origin = get_slice_origin(itk_image,slice_center,slice_normal,slice_spacing,slice_radius)
+    resample.SetOutputOrigin(slice_origin)
+    resample.SetOutputDirection(slice_direction)
+
     resample.SetOutputSpacing(slice_spacing)
     resample.SetSize(slice_size) # unit is voxel
-
-    axis = slice_normal
-    rotation_center = slice_center
-    angle = 0
-    translation = np.array(slice_center)-np.array(itk_image.GetOrigin())
-    scale_factor = 1
-    similarity = sitk.Similarity3DTransform(
-        scale_factor, axis, angle, translation, rotation_center
-    )
-
-    affine = sitk.AffineTransform(3)
-    affine.SetMatrix(similarity.GetMatrix())
-    affine.SetTranslation(similarity.GetTranslation())
-    affine.SetCenter(similarity.GetCenter())
-
-    #resample.SetTransform(sitk.Transform())
-    resample.SetTransform(affine)
+    resample.SetTransform(sitk.Transform())
     resample.SetDefaultPixelValue(itk_image.GetPixelIDValue())
 
     if is_label:
@@ -181,71 +172,9 @@ def wtf(itk_image,slice_center,slice_normal,slice_spacing,slice_radius,is_label)
         resample.SetInterpolator(sitk.sitkLinear)
 
     itk_image = resample.Execute(itk_image)
+    print('GetOrigin',itk_image.GetOrigin())
+    print('GetDirection',itk_image.GetDirection())
+    print('GetSpacing',itk_image.GetSpacing())
+    print('GetSize',itk_image.GetSize())
+    print('return!')
     return itk_image
-    
-    axis = (0,0,1)
-    rotation_center = slice_center
-    angle = 0
-    translation = (-slice_radius,-slice_radius,0)
-    scale_factor = 1
-    similarity = sitk.Similarity3DTransform(
-        scale_factor, axis, angle, translation, rotation_center
-    )
-
-    affine = sitk.AffineTransform(3)
-    affine.SetMatrix(similarity.GetMatrix())
-    affine.SetTranslation(similarity.GetTranslation())
-    affine.SetCenter(similarity.GetCenter())
-
-    resample = sitk.ResampleImageFilter()
-    resample.SetOutputOrigin(itk_image.GetOrigin())
-    resample.SetOutputDirection(itk_image.GetDirection())
-    resample.SetOutputSpacing(itk_image.GetSpacing())
-    resample.SetSize(itk_image.GetSize())
-
-    resample.SetTransform(affine)
-    resample.SetDefaultPixelValue(itk_image.GetPixelIDValue())
-
-    if is_label:
-        resample.SetInterpolator(sitk.sitkNearestNeighbor)
-    else:
-        resample.SetInterpolator(sitk.sitkLinear)
-
-    itk_image = resample.Execute(itk_image)
-    return itk_image
-
-
-if __name__ == "__main__":
-
-    img_file = sys.argv[1]
-    img_obj = sitk.ReadImage(img_file)
-    
-    aorta_coord = [254,172,150]
-    a = aorta_coord
-    slice_center = img_obj.TransformContinuousIndexToPhysicalPoint(aorta_coord)
-    arr = np.copy(sitk.GetArrayFromImage(img_obj))
-    o = 2
-    arr[a[2]-o:a[2]+o,a[1]-o:a[1]+o,a[0]-o:a[0]+o]=1000 #???
-    itk_image = sitk.GetImageFromArray(arr)
-    itk_image.CopyInformation(img_obj)
-    slice_normal = (0.0,0.0,1.0)
-    slice_normal = (1,0,0)
-    slice_normal = (0,1,0)
-    slice_normal = (0.5,0.5,0.5)
-    slice_spacing = (1.0,1.0,1.0) # 1mm isotropic
-    slice_radius = 50 #mm
-    is_label = False
-
-    slice_file = 'slice.nii.gz'
-    print(slice_center,slice_normal,slice_radius)
-    slice_obj = wtf(itk_image,slice_center,slice_normal,slice_spacing,slice_radius,is_label)
-    sitk.WriteImage(slice_obj,slice_file)
-    slice_arr = sitk.GetArrayFromImage(slice_obj)
-    print('shape',slice_arr.shape)
-    slice_arr = slice_arr.astype(float)
-    min_val,max_val = -1000,1000
-    slice_arr = 255*(slice_arr-min_val)/(max_val-min_val)
-    slice_arr = slice_arr.clip(0,255).squeeze().astype(np.uint8)
-    imageio.imwrite('slice.png',slice_arr)
-
-
