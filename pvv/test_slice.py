@@ -124,8 +124,9 @@ def develper(outdir):
     myend = image_obj.TransformContinuousIndexToPhysicalPoint([myend[2],myend[1],myend[0]])
     slice_normal = np.array(myend) - np.array(mystart)
     slice_center = image_obj.TransformContinuousIndexToPhysicalPoint([mycenter[2],mycenter[1],mycenter[0]])
+    slice_center = mystart
     slice_spacing = [1,1,1]
-    slice_radius = 20
+    slice_radius = 10
 
     is_label = False
     print('slice_center,slice_normal,slice_spacing,slice_radius')
@@ -140,10 +141,10 @@ def develper(outdir):
     slice_arr = sitk.GetArrayFromImage(slice_obj)
     print('np.max(slice_arr)',np.max(slice_arr))
     print('shape',slice_arr.shape)
-    slice_arr = slice_arr.astype(float)
+    slice_arr = slice_arr[0,:,:].astype(float).squeeze()
     min_val,max_val = -1000,1000
     slice_arr = 255*(slice_arr-min_val)/(max_val-min_val)
-    slice_arr = slice_arr.clip(0,255).squeeze().astype(np.uint8)
+    slice_arr = slice_arr.clip(0,255).astype(np.uint8)
     imageio.imwrite(png_file,slice_arr)
 
 
@@ -179,10 +180,9 @@ def develper(outdir):
         sitk.WriteImage(slice_obj,nii_file)
         slice_arr = sitk.GetArrayFromImage(slice_obj)
         print('shape',slice_arr.shape)
-        slice_arr = slice_arr.astype(float)
         min_val,max_val = -1000,1000
         slice_arr = 255*(slice_arr-min_val)/(max_val-min_val)
-        slice_arr = slice_arr.clip(0,255).squeeze().astype(np.uint8)
+        slice_arr = slice_arr.clip(0,255).astype(np.uint8)
         imageio.imwrite(png_file,slice_arr)
 
 

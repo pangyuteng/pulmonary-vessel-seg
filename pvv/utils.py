@@ -154,7 +154,9 @@ def holahola(itk_image,slice_center,slice_normal,slice_spacing,slice_radius,is_l
     slice_direction= tuple(slice_direction.ravel())
 
     radius_voxel = int(np.array(slice_radius)/np.array(slice_spacing[0]))
-    slice_size = (radius_voxel*2,radius_voxel*2,1)
+    factor = 6
+    slice_size = (radius_voxel*factor,radius_voxel*factor,1)
+    slice_size = (radius_voxel*factor,radius_voxel*factor,radius_voxel*factor)
     resample = sitk.ResampleImageFilter()
     
     slice_origin = get_slice_origin(itk_image,slice_center,slice_normal,slice_spacing,slice_radius)
