@@ -77,8 +77,8 @@ def extract_slice(itk_image,slice_center,slice_normal,slice_spacing,slice_radius
     slice_direction = vrrotvec(image_normal,slice_normal)
     slice_direction= tuple(slice_direction.ravel())
     
-    slice_origin = get_slice_origin(itk_image,slice_center,slice_normal,slice_spacing,slice_radius)
-    #slice_origin = slice_center
+    #slice_origin = get_slice_origin(itk_image,slice_center,slice_normal,slice_spacing,slice_radius)
+    slice_origin = slice_center
     radius_voxel = int(np.array(slice_radius)/np.array(slice_spacing[0]))
     slice_size = (radius_voxel*2,radius_voxel*2,1)
     resample = sitk.ResampleImageFilter()
@@ -111,32 +111,51 @@ def extract_slice(itk_image,slice_center,slice_normal,slice_spacing,slice_radius
 
     return resample.Execute(itk_image)
 
-def get_slice_origin(img_obj,slice_center,slice_normal,slice_spacing,slice_radius):
+def get_slice_origin(slice_center,slice_direction,slice_radius):
     epsilon = 1e-12
-    # plane equation.
-    # ax+by+cz+d=0
-    a,b,c = tuple(slice_normal)
-    x,y,z = tuple(slice_center)
-    d = -a*x-b*y-c*z
-    print(a,b,c,d)
-    px,py,_ = img_obj.GetOrigin()
-    pz=(-a*px-b*py-d)/(c+epsilon)
-    vec_on_plane = np.array([px,py,pz])-np.array(slice_center)
-    vec_on_plane = _vrnormalize(vec_on_plane,epsilon)
-    #
-    #
+
+    direction_x = np.array(slice_direction[0:3])
+    direction_y = np.array(slice_direction[3:6])
+    direction_z = np.array(slice_direction[6:9])
+    print(direction_x)
+    print(direction_y)
+    vec_on_plane = _vrnormalize(direction_x+direction_y,epsilon)
+    print('vec_on_plane',vec_on_plane)
     # 45-45-90 triangle
     # side length ratio: 1:1:sqrt(2)
     # so the offset from center of square is...
     #
     offset = (slice_radius*2)/np.sqrt(2)
     print('offset',offset)
-    slice_origin = slice_center + vec_on_plane*offset
-    print('slice_center',slice_center)
-    print('vec_on_plane',vec_on_plane)
-    print('slice_origin',slice_origin)
-    print('slice_radius',slice_radius,np.sqrt(np.sum(np.power(slice_origin-slice_center,2))))
+    slice_origin = slice_center - vec_on_plane*offset
+
+    # slice_origin should be on the plane
+    a,b,c = tuple(direction_z)
+    x,y,z = tuple(slice_center)
+    d = -a*x-b*y-c*z
+    ox,oy,oz = slice_origin
+    assert(a*ox+b*oy+c*oz+d <= 1e-4)
+
     return tuple(slice_origin)
+
+
+    # plane equation.
+    # ax+by+cz+d=0
+
+    # slice_direction
+
+    # print(a,b,c,d)
+    # px,py,_ = img_obj.GetOrigin()
+    # pz=(-a*px-b*py-d)/(c+epsilon)
+    # vec_on_plane = np.array([px,py,pz])-np.array(slice_center)
+    # vec_on_plane = _vrnormalize(vec_on_plane,epsilon)
+    # #
+    # #
+    # print('slice_center',slice_center)
+    # print('vec_on_plane',vec_on_plane)
+    # print('slice_origin',slice_origin)
+    # print('slice_radius',slice_radius,np.sqrt(np.sum(np.power(slice_origin-slice_center,2))))
+    # return tuple(slice_origin)
 
 
 def holahola(itk_image,slice_center,slice_normal,slice_spacing,slice_radius,is_label):
@@ -154,12 +173,11 @@ def holahola(itk_image,slice_center,slice_normal,slice_spacing,slice_radius,is_l
     slice_direction= tuple(slice_direction.ravel())
 
     radius_voxel = int(np.array(slice_radius)/np.array(slice_spacing[0]))
-    factor = 6
+    factor = 2
     slice_size = (radius_voxel*factor,radius_voxel*factor,1)
-    slice_size = (radius_voxel*factor,radius_voxel*factor,radius_voxel*factor)
     resample = sitk.ResampleImageFilter()
     
-    slice_origin = get_slice_origin(itk_image,slice_center,slice_normal,slice_spacing,slice_radius)
+    slice_origin = get_slice_origin(slice_center,slice_direction,slice_radius)
     resample.SetOutputOrigin(slice_origin)
     resample.SetOutputDirection(slice_direction)
 
@@ -174,6 +192,10 @@ def holahola(itk_image,slice_center,slice_normal,slice_spacing,slice_radius,is_l
         resample.SetInterpolator(sitk.sitkLinear)
 
     itk_image = resample.Execute(itk_image)
+    
+    print('slice_center voxel',itk_image.TransformPhysicalPointToContinuousIndex(slice_center))
+    print('GetOrigin',itk_image.GetOrigin())
+    print('slice_origin',slice_origin)
     print('GetOrigin',itk_image.GetOrigin())
     print('GetDirection',itk_image.GetDirection())
     print('GetSpacing',itk_image.GetSpacing())

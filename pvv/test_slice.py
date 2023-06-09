@@ -97,7 +97,51 @@ def develper(outdir):
 
     og_image_obj = sitk.ReadImage(f"{outdir}/debug-myimg.nii.gz")
     image = sitk.GetArrayFromImage(og_image_obj)
+    image_obj = sitk.GetImageFromArray(image)
+    image_obj.CopyInformation(og_image_obj)
 
+    manual_points = True
+    if manual_points:
+
+        mystart = [160-1,62-1,56-1]
+        myend = [162-1,55-1,50-1]
+        mycenter = [161-1,61-1,55-1]
+
+        print(image.shape)
+        print(mystart,image[mystart[0],mystart[1],mystart[2]])
+        assert(image[mystart[0],mystart[1],mystart[2]]==-270)
+        print(myend,image[myend[0],myend[1],myend[2]])
+        print(mycenter,image[mycenter[0],mycenter[1],mycenter[2]])
+
+        image[mycenter[0],mycenter[1],mycenter[2]]=1000
+        print(image[mycenter[0],mycenter[1],mycenter[2]])
+
+        mystart = image_obj.TransformContinuousIndexToPhysicalPoint([mystart[2],mystart[1],mystart[0]])
+        myend = image_obj.TransformContinuousIndexToPhysicalPoint([myend[2],myend[1],myend[0]])
+        slice_normal = np.array(myend) - np.array(mystart)
+        slice_center = image_obj.TransformContinuousIndexToPhysicalPoint([mycenter[2],mycenter[1],mycenter[0]])
+        slice_spacing = [.1,.1,.1]
+        slice_radius = 10
+
+        is_label = False
+        print('slice_center,slice_normal,slice_spacing,slice_radius')
+        print(slice_center,slice_normal,slice_spacing,slice_radius)
+        slice_obj = holahola(image_obj,slice_center,slice_normal,slice_spacing,slice_radius,is_label)
+
+        n=0
+        png_file = os.path.join(outdir,f'slice{n:05d}.png')
+        nii_file = os.path.join(outdir,f'slice{n:05d}.nii.gz')
+
+        sitk.WriteImage(slice_obj,nii_file)
+        slice_arr = sitk.GetArrayFromImage(slice_obj)
+        print('np.max(slice_arr)',np.max(slice_arr))
+        print('shape',slice_arr.shape)
+        slice_arr = slice_arr[0,:,:].astype(float).squeeze()
+        min_val,max_val = -1000,1000
+        slice_arr = 255*(slice_arr-min_val)/(max_val-min_val)
+        slice_arr = slice_arr.clip(0,255).astype(np.uint8)
+        imageio.imwrite(png_file,slice_arr)
+        sys.exit(1)
     branch_obj = sitk.ReadImage(f"{outdir}/debug-branch.nii.gz")
     branch =sitk.GetArrayFromImage(branch_obj)
 
@@ -105,90 +149,58 @@ def develper(outdir):
     bs_field =sitk.GetArrayFromImage(bsfield_obj)
     print(len(np.unique(branch)))
 
-
-    mystart = [160-1,62-1,56-1]
-    myend = [162-1,55-1,50-1]
-    mycenter = [161-1,61-1,55-1]
-
-    print(image.shape)
-    print(mystart,image[mystart[0],mystart[1],mystart[2]])
-    print(myend,image[myend[0],myend[1],myend[2]])
-    print(mycenter,image[mycenter[0],mycenter[1],mycenter[2]])
-
-    image[mycenter[0],mycenter[1],mycenter[2]]=1000
-    print(image[mycenter[0],mycenter[1],mycenter[2]])
-    image_obj = sitk.GetImageFromArray(image)
-    image_obj.CopyInformation(og_image_obj)
-
-    mystart = image_obj.TransformContinuousIndexToPhysicalPoint([mystart[2],mystart[1],mystart[0]])
-    myend = image_obj.TransformContinuousIndexToPhysicalPoint([myend[2],myend[1],myend[0]])
-    slice_normal = np.array(myend) - np.array(mystart)
-    slice_center = image_obj.TransformContinuousIndexToPhysicalPoint([mycenter[2],mycenter[1],mycenter[0]])
-    slice_center = mystart
-    slice_spacing = [1,1,1]
-    slice_radius = 10
-
-    is_label = False
-    print('slice_center,slice_normal,slice_spacing,slice_radius')
-    print(slice_center,slice_normal,slice_spacing,slice_radius)
-    slice_obj = holahola(image_obj,slice_center,slice_normal,slice_spacing,slice_radius,is_label)
-
-    n=0
-    png_file = os.path.join(outdir,f'slice{n:05d}.png')
-    nii_file = os.path.join(outdir,f'slice{n:05d}.nii.gz')
-
-    sitk.WriteImage(slice_obj,nii_file)
-    slice_arr = sitk.GetArrayFromImage(slice_obj)
-    print('np.max(slice_arr)',np.max(slice_arr))
-    print('shape',slice_arr.shape)
-    slice_arr = slice_arr[0,:,:].astype(float).squeeze()
-    min_val,max_val = -1000,1000
-    slice_arr = 255*(slice_arr-min_val)/(max_val-min_val)
-    slice_arr = slice_arr.clip(0,255).astype(np.uint8)
-    imageio.imwrite(png_file,slice_arr)
-
-
-    sys.exit(1)
     props = regionprops(branch,intensity_image=bs_field)
-
-
-
+    png_file_list = []
     for n,p in enumerate(props):
-
-        if len(p.coords) < 20:
+        if n == 0 :
+            continue
+        if len(p.coords) < 10:
             continue
 
         png_file = os.path.join(outdir,f'slice{n:05d}.png')
         nii_file = os.path.join(outdir,f'slice{n:05d}.nii.gz')
         # assume sorted coords        
         centroid = p.coords[int(len(p.coords)/2)]
+        slice_spacing = [1,1,1]
         slice_radius = bs_field[centroid[0],centroid[1],centroid[2]]
-        
-        mystart = [int(p.coords[0][1]),int(p.coords[0][2]),int(p.coords[0][0])]
-        mystart = image_obj.TransformContinuousIndexToPhysicalPoint(mystart)
-        myend = [int(p.coords[-1][1]),int(p.coords[-1][2]),int(p.coords[-1][0])]
-        myend = np.array( image_obj.TransformContinuousIndexToPhysicalPoint(myend) )
 
-        slice_normal = myend - mystart
-        slice_center = (myend + mystart)/2
-        slice_spacing = [0.1,0.1,1]
-        
+        print('slice_radius',slice_radius)
+        print('branch-id',branch[centroid[0],centroid[1],centroid[2]])
+        mystart = [int(p.coords[0][0]),int(p.coords[0][1]),int(p.coords[0][2])]
+        print('mystart',p.coords[0],mystart)
+        myend = [int(p.coords[-1][0]),int(p.coords[-1][1]),int(p.coords[-1][2])]
+        print('myend',p.coords[-1],myend)
+        cidx = int(len(p.coords)/2)
+        mycenter = [int(p.coords[cidx][0]),int(p.coords[cidx][1]),int(p.coords[cidx][2])]
+        print('mycenter',p.coords[cidx],mycenter)
+
+        mystart = image_obj.TransformContinuousIndexToPhysicalPoint([mystart[2],mystart[1],mystart[0]])
+        myend = image_obj.TransformContinuousIndexToPhysicalPoint([myend[2],myend[1],myend[0]])
+        slice_center = image_obj.TransformContinuousIndexToPhysicalPoint([mycenter[2],mycenter[1],mycenter[0]])
+        slice_normal = np.array(myend) - np.array(mystart)
+        slice_spacing = [.1,.1,.1]
+        slice_radius = slice_radius*5
+
         is_label = False
         print('slice_center,slice_normal,slice_spacing,slice_radius')
         print(slice_center,slice_normal,slice_spacing,slice_radius)
-        slice_obj = wtf(image_obj,slice_center,slice_normal,slice_spacing,slice_radius,is_label)
+        slice_obj = holahola(image_obj,slice_center,slice_normal,slice_spacing,slice_radius,is_label)
         sitk.WriteImage(slice_obj,nii_file)
         slice_arr = sitk.GetArrayFromImage(slice_obj)
+        slice_arr = slice_arr[0,:,:].astype(float).squeeze()
         print('shape',slice_arr.shape)
         min_val,max_val = -1000,1000
         slice_arr = 255*(slice_arr-min_val)/(max_val-min_val)
         slice_arr = slice_arr.clip(0,255).astype(np.uint8)
         imageio.imwrite(png_file,slice_arr)
+        png_file_list.append(png_file)
 
-
-        if n > 10:
-            sys.exit(0)
+        if n > 5000:
+            break
     
+    with open(f'{outdir}/index.html','w') as f:
+        for x in png_file_list:
+            f.write(f'<img src="{os.path.basename(x)}">\n')
 
 if __name__ == "__main__":
     image_file = sys.argv[1]
