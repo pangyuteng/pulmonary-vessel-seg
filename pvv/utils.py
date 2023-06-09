@@ -125,7 +125,7 @@ def get_slice_origin(slice_center,slice_direction,slice_radius):
     # side length ratio: 1:1:sqrt(2)
     # so the offset from center of square is...
     #
-    offset = (slice_radius*2)/np.sqrt(2)
+    offset = slice_radius/np.sqrt(2)
     print('offset',offset)
     slice_origin = slice_center - vec_on_plane*offset
 

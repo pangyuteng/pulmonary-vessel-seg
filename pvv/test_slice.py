@@ -100,7 +100,7 @@ def develper(outdir):
     image_obj = sitk.GetImageFromArray(image)
     image_obj.CopyInformation(og_image_obj)
 
-    manual_points = True
+    manual_points = False
     if manual_points:
 
         mystart = [160-1,62-1,56-1]
@@ -141,13 +141,23 @@ def develper(outdir):
         slice_arr = 255*(slice_arr-min_val)/(max_val-min_val)
         slice_arr = slice_arr.clip(0,255).astype(np.uint8)
         imageio.imwrite(png_file,slice_arr)
+        print('manual_points! exit')
         sys.exit(1)
+
+
     branch_obj = sitk.ReadImage(f"{outdir}/debug-branch.nii.gz")
     branch =sitk.GetArrayFromImage(branch_obj)
 
     bsfield_obj = sitk.ReadImage(f"{outdir}/debug-bs_field.nii.gz")
     bs_field =sitk.GetArrayFromImage(bsfield_obj)
     print(len(np.unique(branch)))
+
+    og_image_obj = sitk.ReadImage(f"{outdir}/debug-myimg.nii.gz")
+    image = sitk.GetArrayFromImage(og_image_obj)
+    image[branch>0]=1000
+    image_obj = sitk.GetImageFromArray(image)
+    image_obj.CopyInformation(og_image_obj)
+
 
     props = regionprops(branch,intensity_image=bs_field)
     png_file_list = []
@@ -197,7 +207,7 @@ def develper(outdir):
 
         if n > 5000:
             break
-    
+    print("hohoho",n)
     with open(f'{outdir}/index.html','w') as f:
         for x in png_file_list:
             f.write(f'<img src="{os.path.basename(x)}">\n')
