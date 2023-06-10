@@ -155,10 +155,9 @@ def develper(outdir):
 
     og_image_obj = sitk.ReadImage(f"{outdir}/debug-myimg.nii.gz")
     image = sitk.GetArrayFromImage(og_image_obj)
-    image[branch>0]=1000
+    #image[branch>0]=1000
     image_obj = sitk.GetImageFromArray(image)
     image_obj.CopyInformation(og_image_obj)
-
 
     props = regionprops(branch,intensity_image=bs_field)
     png_file_list = []
@@ -192,7 +191,7 @@ def develper(outdir):
         slice_spacing = [.1,.1,.1]
         slice_radius = slice_radius*5
 
-        is_label = True
+        is_label = False
         print('slice_center,slice_normal,slice_spacing,slice_radius')
         print(slice_center,slice_normal,slice_spacing,slice_radius)
         slice_obj = extract_slice(image_obj,slice_center,slice_normal,slice_spacing,slice_radius,is_label)
@@ -200,7 +199,7 @@ def develper(outdir):
         slice_arr = sitk.GetArrayFromImage(slice_obj)
         slice_arr = slice_arr[0,:,:].astype(float).squeeze()
         print('shape',slice_arr.shape)
-        min_val,max_val = -1000,1000
+        min_val,max_val = -1300,100 # -600,1500
         slice_arr = 255*(slice_arr-min_val)/(max_val-min_val)
         slice_arr = slice_arr.clip(0,255).astype(np.uint8)
         imageio.imwrite(png_file,slice_arr)
