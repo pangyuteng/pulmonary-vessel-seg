@@ -94,15 +94,14 @@ def get_slice_origin(slice_center,slice_normal,slice_radius):
 
     image_normal = np.array([0.,0.,1.])
     slice_direction = vrrotvec(image_normal,slice_normal).ravel()
-    # print('!!!',slice_direction)
+
     direction_x = np.array(slice_direction[0:3])
     direction_y = np.array(slice_direction[3:6])
     direction_z = np.array(slice_direction[6:9])
 
     #direction_x, direction_y = get_orthonormals(slice_normal)
-    #direction_z = _vrnormalize(slice_normal)
     vec_on_plane = _vrnormalize(direction_x+direction_y)
-    # print('vec_on_plane',vec_on_plane)
+
     # 45-45-90 triangle
     # side length ratio: 1:1:sqrt(2)
     # so the offset from center of square is...
@@ -122,32 +121,7 @@ def get_slice_origin(slice_center,slice_normal,slice_radius):
 
     return tuple(slice_origin)
 
-
-    # plane equation.
-    # ax+by+cz+d=0
-
-    # slice_direction
-
-    # print(a,b,c,d)
-    # px,py,_ = img_obj.GetOrigin()
-    # pz=(-a*px-b*py-d)/(c+epsilon)
-    # vec_on_plane = np.array([px,py,pz])-np.array(slice_center)
-    # vec_on_plane = _vrnormalize(vec_on_plane,epsilon)
-    # #
-    # #
-    # print('slice_center',slice_center)
-    # print('vec_on_plane',vec_on_plane)
-    # print('slice_origin',slice_origin)
-    # print('slice_radius',slice_radius,np.sqrt(np.sum(np.power(slice_origin-slice_center,2))))
-    # return tuple(slice_origin)
-
-
 def extract_slice(itk_image,slice_center,slice_normal,slice_spacing,slice_radius,is_label):
-
-    #print('GetOrigin',itk_image.GetOrigin())
-    #print('GetDirection',itk_image.GetDirection())
-    #print('GetSpacing',itk_image.GetSpacing())
-    #print('GetSize',itk_image.GetSize())
 
     image_normal = (0,0,1)
     rotation_matrix = vrrotvec(image_normal,slice_normal)
