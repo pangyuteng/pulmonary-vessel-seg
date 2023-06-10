@@ -107,7 +107,6 @@ def get_slice_origin(slice_center,slice_normal,slice_radius):
     # so the offset from center of square is...
     #
     offset = slice_radius*2/np.sqrt(2)
-    print('offset',offset)
     slice_origin = slice_center - vec_on_plane*offset
 
     # slice_origin should be on the plane
@@ -140,59 +139,6 @@ def extract_slice(itk_image,slice_center,slice_normal,slice_spacing,slice_radius
 
 
     slice_origin = get_slice_origin(slice_center,slice_normal,slice_radius)
-    print('slice_origin',slice_origin)
-    
-    # affinetrasform.
-
-    # image to physical(source)
-    # physical to image(target)
-
-    # auto result = geometry::AffineTransformation::New();
-    # result->addImageToPhysicalTransformation(source);
-    # result->addPhysicalToImageTransformation(target);
-
-    # template <class ImagePointer>
-    # Self* addImageToPhysicalTransformation(const ImagePointer& image)
-    # {
-    # addScaling(image->getSpacing());
-    # if (ImagePointer::element_type::UseOrientationMatrix) addTransformation(image->getOrientationMatrix());
-    # addTranslation(image->getOrigin());
-    # return this;
-
-
-    # template <class ImagePointer>
-    # Self* addPhysicalToImageTransformation(const ImagePointer& image)
-    # {
-    # addTranslation(-image->getOrigin());
-    # if (ImagePointer::element_type::UseOrientationMatrix) addTransformation(image->getInverseOrientationMatrix());
-    # addScaling(image->getOneOverSpacing());
-    # return this;
-    # }
-
-    # axis = slice_normal
-    # rotation_center = slice_origin
-    # angle = 0
-
-    # translation = (0,0,0)
-    # scale_factor = 1
-    # similarity = sitk.Similarity3DTransform()
-    # similarity.SetCenter((0,0,0))
-    # similarity.SetRotation(rotation_matrix)
-    # similarity.SetScale((1,1,1))
-    # similarity.SetTranslation((0,0,0))
-
-    # affine = sitk.AffineTransform(3)
-    # affine.SetMatrix(similarity.GetMatrix())
-    # affine.SetTranslation(similarity.GetTranslation())
-    # affine.SetCenter(similarity.GetCenter())
-    
-    
-    translation = slice_origin-np.array(itk_image.GetOrigin())
-    affine = sitk.AffineTransform(3)
-    affine.SetTranslation(translation)
-    affine.SetCenter(slice_origin)
-    affine.SetMatrix(rotation_matrix.ravel())
-
     radius_voxel = int(np.array(slice_radius)/np.array(slice_spacing[0]))
     factor = 2
     slice_size = (radius_voxel*factor,radius_voxel*factor,1)
@@ -203,7 +149,6 @@ def extract_slice(itk_image,slice_center,slice_normal,slice_spacing,slice_radius
     resample.SetOutputSpacing(slice_spacing)
     resample.SetSize(slice_size) # unit is voxel
     resample.SetTransform(sitk.Transform())
-    #resample.SetTransform(affine)
     resample.SetDefaultPixelValue(itk_image.GetPixelIDValue())
 
     if is_label:
@@ -213,20 +158,21 @@ def extract_slice(itk_image,slice_center,slice_normal,slice_spacing,slice_radius
 
     itk_image = resample.Execute(itk_image)
     
-    print('slice_origin patient space',slice_origin)
-    print('slice_origin, patient space',itk_image.TransformContinuousIndexToPhysicalPoint([0,0,0]))
-    print('slice_origin image space', itk_image.TransformPhysicalPointToContinuousIndex(slice_origin))
-    print('---')
-    print('slice_center, patient space',slice_center)
-    print('slice_center, patient space',itk_image.TransformContinuousIndexToPhysicalPoint([radius_voxel,radius_voxel,0]))
-    print('slice_center image space',itk_image.TransformPhysicalPointToContinuousIndex(slice_center))
-    
-    
-    print('GetOrigin',itk_image.GetOrigin())
-    print('slice_origin',slice_origin)
-    print('GetOrigin',itk_image.GetOrigin())
-    print('GetDirection',itk_image.GetDirection())
-    print('GetSpacing',itk_image.GetSpacing())
-    print('GetSize',itk_image.GetSize())
-    print('return!')
+    if True:
+        print('slice_origin patient space',slice_origin)
+        print('slice_origin, patient space',itk_image.TransformContinuousIndexToPhysicalPoint([0,0,0]))
+        print('slice_origin image space', itk_image.TransformPhysicalPointToContinuousIndex(slice_origin))
+        print('---')
+        print('slice_center, patient space',slice_center)
+        print('slice_center, patient space',itk_image.TransformContinuousIndexToPhysicalPoint([radius_voxel,radius_voxel,0]))
+        print('slice_center image space',itk_image.TransformPhysicalPointToContinuousIndex(slice_center))
+        
+        
+        print('GetOrigin',itk_image.GetOrigin())
+        print('slice_origin',slice_origin)
+        print('GetOrigin',itk_image.GetOrigin())
+        print('GetDirection',itk_image.GetDirection())
+        print('GetSpacing',itk_image.GetSpacing())
+        print('GetSize',itk_image.GetSize())
+        print('return!')
     return itk_image
