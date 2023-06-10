@@ -29,7 +29,7 @@ def resample_img(itk_image, out_spacing, is_label=False):
 
     return resample.Execute(itk_image)
 
-def _vrnormalize(vec,epsilon):
+def _vrnormalize(vec,epsilon=1e-12):
     '''
     Normalize a vector.
     ref. Matlab vrnormalize.m    
@@ -41,22 +41,22 @@ def _vrnormalize(vec,epsilon):
         vec_n = np.divide(vec,norm_vec)
     return vec_n
 
-def vrrotvec(v1,v2,epsilon=1e-12):
+def vrrotvec(v1,v2):
     '''
     Calculate rotation between two vectors.
     ref. Matlab vrrotvec.m, vrrotvec2mat.m
     '''
     v1 = np.array(v1)
     v2 = np.array(v2)
-    v1n = _vrnormalize(v1,epsilon)
-    v2n = _vrnormalize(v2,epsilon)
-    v1xv2 = _vrnormalize(np.cross(v1n,v2n),epsilon)
-    ac = np.arccos(np.vdot(v1n,v2n))    
+    v1n = _vrnormalize(v1)
+    v2n = _vrnormalize(v2)
+    v1xv2 = _vrnormalize(np.cross(v1n,v2n))
+    ac = np.arccos(np.vdot(v1n,v2n))
     # build the rotation matrix
     s = np.sin(ac)
     c = np.cos(ac)
     t = 1 - c
-    n = _vrnormalize(v1xv2, epsilon)
+    n = _vrnormalize(v1xv2)
     x = n[0]
     y = n[1]
     z = n[2]
@@ -68,59 +68,41 @@ def vrrotvec(v1,v2,epsilon=1e-12):
 #
 # see doc for more detail https://itk.org/ItkSoftwareGuide.pdf
 #
-def extract_slice(itk_image,slice_center,slice_normal,slice_spacing,slice_radius,is_label):
-    epsilon = 1e-12
-    ref_normal=(0.,0.,1.) # probably we should use image_normal as ref.
-    image_normal = list(itk_image.GetDirection())[6:]
 
-    slice_normal = _vrnormalize(slice_normal,epsilon)
-    slice_direction = vrrotvec(image_normal,slice_normal)
-    slice_direction= tuple(slice_direction.ravel())
+def get_orthonormals(slice_normal):
+    epsilon = 1e-12
+
+    k = slice_normal
     
-    #slice_origin = get_slice_origin(itk_image,slice_center,slice_normal,slice_spacing,slice_radius)
-    slice_origin = slice_center
-    radius_voxel = int(np.array(slice_radius)/np.array(slice_spacing[0]))
-    slice_size = (radius_voxel*2,radius_voxel*2,1)
-    resample = sitk.ResampleImageFilter()
-    resample.SetOutputOrigin(slice_origin)
-    resample.SetOutputDirection(slice_direction)
-    resample.SetOutputSpacing(slice_spacing)
-    resample.SetSize(slice_size) # unit is voxel
+    x = np.random.randn(3)  # take a random vector
 
-    axis = slice_normal
-    rotation_center = slice_center # remember to set center in case you want update the angle
-    angle = 0
-    translation = (0,0,0)
-    scale_factor = 1
-    similarity = sitk.Similarity3DTransform(
-        scale_factor, axis, angle, translation, rotation_center
-    )
+    x -= x.dot(k) * k       # make it orthogonal to k
+    x /= np.linalg.norm(x)  # normalize it
+    y = np.cross(k, x)      # cross product with k
 
-    affine = sitk.AffineTransform(3)
-    affine.SetMatrix(similarity.GetMatrix())
-    affine.SetTranslation(similarity.GetTranslation())
-    affine.SetCenter(similarity.GetCenter())
+    # print(np.linalg.norm(x), np.linalg.norm(y)) # 1,1
+    # print(np.cross(x, y))          # same as k
+    # print(np.dot(x, y),np.dot(x, k),np.dot(y, k))
+    assert(np.dot(x, y) <  1e-8)
+    assert(np.dot(x, k) <  1e-8)
+    assert(np.dot(y, k) <  1e-8) # move this to test case
+    return x, y
 
-    resample.SetTransform(affine)
-    resample.SetDefaultPixelValue(itk_image.GetPixelIDValue())
+def get_slice_origin(slice_center,slice_normal,slice_radius):
 
-    if is_label:
-        resample.SetInterpolator(sitk.sitkNearestNeighbor)
-    else:
-        resample.SetInterpolator(sitk.sitkLinear)
-
-    return resample.Execute(itk_image)
-
-def get_slice_origin(slice_center,slice_direction,slice_radius):
     epsilon = 1e-12
 
+    image_normal = np.array([0.,0.,1.])
+    slice_direction = vrrotvec(image_normal,slice_normal).ravel()
+    # print('!!!',slice_direction)
     direction_x = np.array(slice_direction[0:3])
     direction_y = np.array(slice_direction[3:6])
     direction_z = np.array(slice_direction[6:9])
-    print(direction_x)
-    print(direction_y)
-    vec_on_plane = _vrnormalize(direction_x+direction_y,epsilon)
-    print('vec_on_plane',vec_on_plane)
+
+    #direction_x, direction_y = get_orthonormals(slice_normal)
+    #direction_z = _vrnormalize(slice_normal)
+    vec_on_plane = _vrnormalize(direction_x+direction_y)
+    # print('vec_on_plane',vec_on_plane)
     # 45-45-90 triangle
     # side length ratio: 1:1:sqrt(2)
     # so the offset from center of square is...
@@ -134,6 +116,8 @@ def get_slice_origin(slice_center,slice_direction,slice_radius):
     x,y,z = tuple(slice_center)
     d = -a*x-b*y-c*z
     ox,oy,oz = slice_origin
+
+    print(a*ox+b*oy+c*oz+d,a*ox+b*oy+c*oz+d <= 1e-4)
     assert(a*ox+b*oy+c*oz+d <= 1e-4)
 
     return tuple(slice_origin)
@@ -158,32 +142,94 @@ def get_slice_origin(slice_center,slice_direction,slice_radius):
     # return tuple(slice_origin)
 
 
-def holahola(itk_image,slice_center,slice_normal,slice_spacing,slice_radius,is_label):
+def extract_slice(itk_image,slice_center,slice_normal,slice_spacing,slice_radius,is_label):
 
-    print('GetOrigin',itk_image.GetOrigin())
-    print('GetDirection',itk_image.GetDirection())
-    print('GetSpacing',itk_image.GetSpacing())
-    print('GetSize',itk_image.GetSize())
+    #print('GetOrigin',itk_image.GetOrigin())
+    #print('GetDirection',itk_image.GetDirection())
+    #print('GetSpacing',itk_image.GetSpacing())
+    #print('GetSize',itk_image.GetSize())
 
-    epsilon = 1e-12
-    ref_normal=(0.,0.,1.)
+    image_normal = (0,0,1)
+    rotation_matrix = vrrotvec(image_normal,slice_normal)
 
-    slice_normal = _vrnormalize(slice_normal,epsilon)
-    slice_direction = vrrotvec(ref_normal,slice_normal)
-    slice_direction= tuple(slice_direction.ravel())
+    slice_direction = rotation_matrix.ravel()
+
+    direction_x = np.array(slice_direction[0:3])
+    direction_y = np.array(slice_direction[3:6])
+    direction_z = np.array(slice_direction[6:9])
+
+    slice_direction = []
+    slice_direction.extend(direction_x)
+    slice_direction.extend(direction_y)
+    slice_direction.extend(direction_z*-1) #??
+    slice_direction = np.array(slice_direction)
+
+
+    slice_origin = get_slice_origin(slice_center,slice_normal,slice_radius)
+    print('slice_origin',slice_origin)
+    
+    # affinetrasform.
+
+    # image to physical(source)
+    # physical to image(target)
+
+    # auto result = geometry::AffineTransformation::New();
+    # result->addImageToPhysicalTransformation(source);
+    # result->addPhysicalToImageTransformation(target);
+
+    # template <class ImagePointer>
+    # Self* addImageToPhysicalTransformation(const ImagePointer& image)
+    # {
+    # addScaling(image->getSpacing());
+    # if (ImagePointer::element_type::UseOrientationMatrix) addTransformation(image->getOrientationMatrix());
+    # addTranslation(image->getOrigin());
+    # return this;
+
+
+    # template <class ImagePointer>
+    # Self* addPhysicalToImageTransformation(const ImagePointer& image)
+    # {
+    # addTranslation(-image->getOrigin());
+    # if (ImagePointer::element_type::UseOrientationMatrix) addTransformation(image->getInverseOrientationMatrix());
+    # addScaling(image->getOneOverSpacing());
+    # return this;
+    # }
+
+    # axis = slice_normal
+    # rotation_center = slice_origin
+    # angle = 0
+
+    # translation = (0,0,0)
+    # scale_factor = 1
+    # similarity = sitk.Similarity3DTransform()
+    # similarity.SetCenter((0,0,0))
+    # similarity.SetRotation(rotation_matrix)
+    # similarity.SetScale((1,1,1))
+    # similarity.SetTranslation((0,0,0))
+
+    # affine = sitk.AffineTransform(3)
+    # affine.SetMatrix(similarity.GetMatrix())
+    # affine.SetTranslation(similarity.GetTranslation())
+    # affine.SetCenter(similarity.GetCenter())
+    
+    
+    translation = slice_origin-np.array(itk_image.GetOrigin())
+    affine = sitk.AffineTransform(3)
+    affine.SetTranslation(translation)
+    affine.SetCenter(slice_origin)
+    affine.SetMatrix(rotation_matrix.ravel())
 
     radius_voxel = int(np.array(slice_radius)/np.array(slice_spacing[0]))
     factor = 2
     slice_size = (radius_voxel*factor,radius_voxel*factor,1)
     resample = sitk.ResampleImageFilter()
     
-    slice_origin = get_slice_origin(slice_center,slice_direction,slice_radius)
     resample.SetOutputOrigin(slice_origin)
     resample.SetOutputDirection(slice_direction)
-
     resample.SetOutputSpacing(slice_spacing)
     resample.SetSize(slice_size) # unit is voxel
     resample.SetTransform(sitk.Transform())
+    #resample.SetTransform(affine)
     resample.SetDefaultPixelValue(itk_image.GetPixelIDValue())
 
     if is_label:
@@ -193,7 +239,15 @@ def holahola(itk_image,slice_center,slice_normal,slice_spacing,slice_radius,is_l
 
     itk_image = resample.Execute(itk_image)
     
-    print('slice_center voxel',itk_image.TransformPhysicalPointToContinuousIndex(slice_center))
+    print('slice_origin patient space',slice_origin)
+    print('slice_origin, patient space',itk_image.TransformContinuousIndexToPhysicalPoint([0,0,0]))
+    print('slice_origin image space', itk_image.TransformPhysicalPointToContinuousIndex(slice_origin))
+    print('---')
+    print('slice_center, patient space',slice_center)
+    print('slice_center, patient space',itk_image.TransformContinuousIndexToPhysicalPoint([radius_voxel,radius_voxel,0]))
+    print('slice_center image space',itk_image.TransformPhysicalPointToContinuousIndex(slice_center))
+    
+    
     print('GetOrigin',itk_image.GetOrigin())
     print('slice_origin',slice_origin)
     print('GetOrigin',itk_image.GetOrigin())

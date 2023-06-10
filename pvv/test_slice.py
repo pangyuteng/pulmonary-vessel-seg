@@ -84,7 +84,7 @@ def estimate_radius(image_file,lung_file,vessel_file,outdir,debug):
     if debug:
         sitk.WriteImage(qia_obj,f"{outdir}/debug-watershed_labels.nii.gz")
 
-from utils import holahola
+from utils import extract_slice
 
 # test  image
 # debug-myimg.nii.gz
@@ -107,15 +107,16 @@ def develper(outdir):
         myend = [162-1,55-1,50-1]
         mycenter = [161-1,61-1,55-1]
 
-        print(image.shape)
-        print(mystart,image[mystart[0],mystart[1],mystart[2]])
+        #print(image.shape)
+        #print(mystart,image[mystart[0],mystart[1],mystart[2]])
         assert(image[mystart[0],mystart[1],mystart[2]]==-270)
-        print(myend,image[myend[0],myend[1],myend[2]])
+        #print(myend,image[myend[0],myend[1],myend[2]])
         print(mycenter,image[mycenter[0],mycenter[1],mycenter[2]])
 
         image[mycenter[0],mycenter[1],mycenter[2]]=1000
         print(image[mycenter[0],mycenter[1],mycenter[2]])
-
+        
+        # SimpleITK uses x-y-z. Numpy uses z-y-x
         mystart = image_obj.TransformContinuousIndexToPhysicalPoint([mystart[2],mystart[1],mystart[0]])
         myend = image_obj.TransformContinuousIndexToPhysicalPoint([myend[2],myend[1],myend[0]])
         slice_normal = np.array(myend) - np.array(mystart)
@@ -126,7 +127,7 @@ def develper(outdir):
         is_label = False
         print('slice_center,slice_normal,slice_spacing,slice_radius')
         print(slice_center,slice_normal,slice_spacing,slice_radius)
-        slice_obj = holahola(image_obj,slice_center,slice_normal,slice_spacing,slice_radius,is_label)
+        slice_obj = extract_slice(image_obj,slice_center,slice_normal,slice_spacing,slice_radius,is_label)
 
         n=0
         png_file = os.path.join(outdir,f'slice{n:05d}.png')
@@ -191,10 +192,10 @@ def develper(outdir):
         slice_spacing = [.1,.1,.1]
         slice_radius = slice_radius*5
 
-        is_label = False
+        is_label = True
         print('slice_center,slice_normal,slice_spacing,slice_radius')
         print(slice_center,slice_normal,slice_spacing,slice_radius)
-        slice_obj = holahola(image_obj,slice_center,slice_normal,slice_spacing,slice_radius,is_label)
+        slice_obj = extract_slice(image_obj,slice_center,slice_normal,slice_spacing,slice_radius,is_label)
         sitk.WriteImage(slice_obj,nii_file)
         slice_arr = sitk.GetArrayFromImage(slice_obj)
         slice_arr = slice_arr[0,:,:].astype(float).squeeze()
