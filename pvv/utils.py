@@ -107,7 +107,7 @@ def get_slice_origin(slice_center,slice_normal,slice_radius):
     # side length ratio: 1:1:sqrt(2)
     # so the offset from center of square is...
     #
-    offset = slice_radius/np.sqrt(2)
+    offset = slice_radius*2/np.sqrt(2)
     print('offset',offset)
     slice_origin = slice_center - vec_on_plane*offset
 
@@ -161,7 +161,7 @@ def extract_slice(itk_image,slice_center,slice_normal,slice_spacing,slice_radius
     slice_direction = []
     slice_direction.extend(direction_x)
     slice_direction.extend(direction_y)
-    slice_direction.extend(direction_z*-1) #??
+    slice_direction.extend(direction_z*-1) # what???
     slice_direction = np.array(slice_direction)
 
 
