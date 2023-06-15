@@ -118,8 +118,7 @@ def main(mask_file,outdir,debug):
     if method == 'vectorize':
         # faster, but much more memory intensitve:
         props = regionprops(branch,intensity_image=bs_field)
-        #mapper_dict = {p.label:np.pi*(p.mean_intensity**2) for p in props}
-        mapper_dict = {p.label:np.pi*(p.max_intensity**2) for p in props}
+        mapper_dict = {p.label:np.pi*(p.mean_intensity**2) for p in props}
         print('area...')
         map_func = np.vectorize(lambda x: float(mapper_dict.get(x,0)))
         area = map_func(ws_branch)
@@ -130,7 +129,6 @@ def main(mask_file,outdir,debug):
                 continue
             bs_values = bs_field[branch==idx]
             tmp_radius = np.mean(bs_values)
-            #tmp_radius = np.max(bs_values)
             tmp_area = np.pi*(tmp_radius**2)
             area[ws_branch==idx]=tmp_area
     print(area.dtype)
