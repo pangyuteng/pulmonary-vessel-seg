@@ -32,7 +32,11 @@ def main(dist_folder,frangi_folder):
         for idx,mydict in main_dict.items():
             f.write(f'{idx}: dist, frangi<br>\n')
             for method in ['dist','frangi']:
-                mip_file = mydict[f'{method}_mip_file']
+                key = f'{method}_mip_file'
+                if key not in mydict.keys():
+                    print(f'file not found {key} for {idx}')
+                    continue
+                mip_file = mydict[key]
                 tgt_file = f'static/{method}-mip-{idx}.png'
                 shutil.copy(mip_file,tgt_file)
                 f.write(f'<img load="lazy" alt="..." src="{tgt_file}" width="256">\n')
