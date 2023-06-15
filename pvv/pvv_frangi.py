@@ -205,13 +205,28 @@ def estimate_radius(image_file,lung_file,vessel_file,outdir,debug):
     if debug:
         sitk.WriteImage(qia_obj,f"{outdir}/debug-watershed_labels.nii.gz")
 
-    print('regionprops...')
-    props = regionprops(branch,intensity_image=radius)
-    mapper_dict = {p.label:np.pi*(p.mean_intensity**2) for p in props}
+    method = 'naive'
+    idx_list = list(np.unique(branch))
+    th = 50000
+    if len(idx_list) < th:
+        method = 'vectorize'
 
-    print('area...')
-    map_func = np.vectorize(lambda x: float(mapper_dict.get(x,0)))
-    area = map_func(ws_branch)
+    print(f'regionprops... method: {method} since len(idx_list) {len(idx_list)} < {th}')
+    if method == 'vectorize':
+        props = regionprops(branch,intensity_image=radius)
+        mapper_dict = {p.label:np.pi*(p.mean_intensity**2) for p in props}
+        print('area...')
+        map_func = np.vectorize(lambda x: float(mapper_dict.get(x,0)))
+        area = map_func(ws_branch)
+    else:
+        area = np.zeros_like(ws_branch).astype(float)
+        for idx in tqdm(idx_list):
+            if idx == 0:
+                continue
+            radius_values = radius[branch==idx]
+            tmp_radius = np.mean(radius_values)
+            tmp_area = np.pi*(tmp_radius**2)
+            area[ws_branch==idx]=tmp_area
     print(area.dtype)
     qia_obj = sitk.GetImageFromArray(area)
     qia_obj.CopyInformation(image_obj)
