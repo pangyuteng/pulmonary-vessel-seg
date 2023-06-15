@@ -20,7 +20,7 @@ def resample_img(itk_image, out_spacing, is_label=False):
     resample.SetOutputDirection(itk_image.GetDirection())
     resample.SetOutputOrigin(itk_image.GetOrigin())
     resample.SetTransform(sitk.Transform())
-    resample.SetDefaultPixelValue(itk_image.GetPixelIDValue())
+    resample.SetDefaultPixelValue(0)
 
     if is_label:
         resample.SetInterpolator(sitk.sitkNearestNeighbor)
