@@ -47,7 +47,7 @@ def main(dist_folder,frangi_folder):
 
     os.makedirs('static',exist_ok=True)
     with open('viz.md','w') as f:
-        f.write(f'<img load="lazy" alt="..." src="pvv-dt-frang.png" width="256">\n')
+        f.write(f'<img load="lazy" alt="..." src="pvv-dt-frang.png" width="256"><br>\n')
         for idx,mydict in main_dict.items():
             f.write(f'{idx}: dist, frangi<br>\n')
             for method in ['dist','frangi']:
