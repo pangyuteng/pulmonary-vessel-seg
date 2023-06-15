@@ -232,8 +232,8 @@ def estimate_radius(image_file,lung_file,vessel_file,outdir,debug):
     if debug:
         sitk.WriteImage(qia_obj,f"{outdir}/debug-pvv.nii.gz")
 
-    qia_obj = resample_img(qia_obj, og_image_obj.GetSpacing(), is_label=True)
     lung_obj = sitk.ReadImage(lung_file)
+    qia_obj = sitk.Resample(qia_obj, lung_obj, sitk.Transform(), sitk.sitkNearestNeighbor, 0, qia_obj.GetPixelID())
 
     spacing = qia_obj.GetSpacing()
     cc_per_voxel = np.prod(spacing)*0.001
