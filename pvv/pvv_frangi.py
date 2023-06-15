@@ -232,7 +232,7 @@ def estimate_radius(image_file,lung_file,vessel_file,outdir,debug):
     if debug:
         sitk.WriteImage(qia_obj,f"{outdir}/debug-pvv.nii.gz")
 
-    qia_obj = resample_img(qia_obj, og_image_obj.GetSpacing(), is_label=True)
+    qia_obj = resample_img(qia_obj, og_image_obj.GetSpacing(), is_label=False)
     sitk.WriteImage(qia_obj,f"{outdir}/pvv.nii.gz")
     
     spacing = qia_obj.GetSpacing()
