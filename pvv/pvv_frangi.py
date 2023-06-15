@@ -232,12 +232,17 @@ def estimate_radius(image_file,lung_file,vessel_file,outdir,debug):
     if debug:
         sitk.WriteImage(qia_obj,f"{outdir}/debug-pvv.nii.gz")
 
-    qia_obj = resample_img(qia_obj, og_image_obj.GetSpacing(), is_label=False)
-    sitk.WriteImage(qia_obj,f"{outdir}/pvv.nii.gz")
-    
+    qia_obj = resample_img(qia_obj, og_image_obj.GetSpacing(), is_label=True)
+    lung_obj = sitk.ReadImage(lung_file)
+
     spacing = qia_obj.GetSpacing()
     cc_per_voxel = np.prod(spacing)*0.001
     pvv = sitk.GetArrayFromImage(qia_obj)
+    lung = sitk.GetArrayFromImage(lung_obj)
+    pvv[lung==0]=0 # resample is yielding non-0 values near image border.
+    qia_obj = sitk.GetImageFromArray(pvv)
+    qia_obj.CopyInformation(lung_obj)
+    sitk.WriteImage(qia_obj,f"{outdir}/pvv.nii.gz")
 
     print('mip...')
     print(np.unique(pvv))
