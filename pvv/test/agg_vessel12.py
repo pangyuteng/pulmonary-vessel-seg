@@ -34,8 +34,11 @@ def main(dist_folder,frangi_folder):
         ('pvv5-dt-prct','pvv5-frangi-prct'),
         ('pvv10-dt-prct','pvv10-frangi-prct'),
         ('pvv10+-dt-prct','pvv10+-frangi-prct')]:
+
         x_list.extend(rdf[key_dt])
         y_list.extend(rdf[key_frangi])
+        print('mean',key_dt,rdf[key_dt].mean(),key_frangi,rdf[key_frangi].mean())
+
     plt.scatter(x_list,y_list)
     plt.plot([0,1],[0,1],color='k',linewidth=1,label='line-of-identity')
     plt.xlabel('pvv (method: distance-transform)')
