@@ -24,8 +24,8 @@ def main(dist_folder,frangi_folder):
             main_dict[idx].update(mydict)
 
     mylist = list(main_dict.values())
-    cols = ['idx','pvv5-dt-prct','pvv10-dt-prct','pvv10+-dt-prct','pvv5-frangi-prct','pvv10-frangi-prct','pvv10+-frangi-prct','pvv5-dt-cc','pvv10-dt-cc','pvv10+-dt-cc','pvv5-frangi-cc','pvv10-frangi-cc','pvv10+-frangi-cc','hist']
-    rdf = pd.DataFrame(mylist,columns=cols)
+    cols = []
+    rdf = pd.DataFrame(mylist)#columns=cols)
     rdf.to_csv('results.csv',index=False,float_format='%.3f')
 
     x_list = []
