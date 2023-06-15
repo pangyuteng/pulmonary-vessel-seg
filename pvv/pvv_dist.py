@@ -69,24 +69,6 @@ def main(mask_file,outdir,debug):
     if debug:
         sitk.WriteImage(qia_obj,f"{outdir}/debug-bs_field.nii.gz")
 
-    arr = bs_field[np.where(bs_field>0)]
-    print(np.min(arr),np.max(arr))
-    hist, bin_edges = np.histogram(arr,bins=12,range=(0,6))
-    hist = np.round(hist,2)
-    hist = hist / np.sum(hist)
-    hist = hist.tolist()
-    hist_dict = {f'radius-lt-{k}mm':v for k,v in zip(bin_edges[1:],hist)}
-    print(hist_dict)
-    '''
-    # radius
-    >>> [np.round(r,2) for r in np.arange(0.6,5,.6)]
-    [0.6, 1.2, 1.8, 2.4, 3.0, 3.6, 4.2, 4.8]
-    # area
-    >>> [np.round(np.pi*(r**2),2) for r in np.arange(0.6,5,.6)]
-    [1.13, 4.52, 10.18, 18.1, 28.27, 40.72, 55.42, 72.38]
-
-    '''
-
     # with skeleton as input
     # for each point in skeleton
     # determine if part of edge (a branch) or node (intersection)
@@ -155,6 +137,24 @@ def main(mask_file,outdir,debug):
     if debug:
         sitk.WriteImage(qia_obj,f"{outdir}/debug-area.nii.gz")
     
+    arr = area[ws_branch>0]
+    print(np.min(arr),np.max(arr))
+    hist, bin_edges = np.histogram(arr,bins=20,range=(0,20))
+    hist = np.round(hist,2)
+    hist = hist / np.sum(hist)
+    hist = hist.tolist()
+    hist_dict = {f'area-lt-{k}mm2-dt':v for k,v in zip(bin_edges[1:],hist)}
+    print(hist_dict)
+    '''
+    # radius
+    >>> [np.round(r,2) for r in np.arange(0.6,5,.6)]
+    [0.6, 1.2, 1.8, 2.4, 3.0, 3.6, 4.2, 4.8]
+    # area
+    >>> [np.round(np.pi*(r**2),2) for r in np.arange(0.6,5,.6)]
+    [1.13, 4.52, 10.18, 18.1, 28.27, 40.72, 55.42, 72.38]
+
+    '''
+
     print('pvv...')
     pvv = np.zeros_like(area)
     pvv[np.logical_and(area>0,area<=5)]=1
@@ -187,9 +187,8 @@ def main(mask_file,outdir,debug):
         'pvv5-dt-cc': float(np.sum(pvv==1)*cc_per_voxel),
         'pvv10-dt-cc': float(np.sum(pvv==2)*cc_per_voxel),
         'pvv10+-dt-cc': float(np.sum(pvv==3)*cc_per_voxel),
-        'hist': hist,
     }
-    # TODO: add cc to above
+    mydict.update(hist_dict)
     
     with open(json_file,'w') as f:
         f.write(json.dumps(mydict))

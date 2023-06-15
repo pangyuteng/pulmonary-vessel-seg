@@ -233,6 +233,15 @@ def estimate_radius(image_file,lung_file,vessel_file,outdir,debug):
     if debug:
         sitk.WriteImage(qia_obj,f"{outdir}/debug-area.nii.gz")
 
+    arr = area[ws_branch>0]
+    print(np.min(arr),np.max(arr))
+    hist, bin_edges = np.histogram(arr,bins=20,range=(0,20))
+    hist = np.round(hist,2)
+    hist = hist / np.sum(hist)
+    hist = hist.tolist()
+    hist_dict = {f'area-lt-{k}mm2-frangi':v for k,v in zip(bin_edges[1:],hist)}
+    print(hist_dict)
+
     print('pvv...')
     pvv = np.zeros_like(area)
     pvv[np.logical_and(area>0,area<=5)]=1
@@ -275,6 +284,8 @@ def estimate_radius(image_file,lung_file,vessel_file,outdir,debug):
         'pvv10-frangi-cc': float(np.sum(pvv==2)*cc_per_voxel),
         'pvv10+-frangi-cc': float(np.sum(pvv==3)*cc_per_voxel),
     }
+    mydict.update(hist_dict)
+
     with open(json_file,'w') as f:
         f.write(json.dumps(mydict))
 
