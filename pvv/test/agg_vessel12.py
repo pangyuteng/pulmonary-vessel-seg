@@ -6,6 +6,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 import SimpleITK as sitk
+import matplotlib.pyplot as plt
 
 def main(dist_folder,frangi_folder):
     main_dict = {}
@@ -27,8 +28,26 @@ def main(dist_folder,frangi_folder):
     rdf = pd.DataFrame(mylist,columns=cols)
     rdf.to_csv('results.csv',index=False,float_format='%.3f')
 
+    x_list = []
+    y_list = []
+    for key_dt,key_frangi in [
+        ('pvv5-dt-prct','pvv5-frangi-prct'),
+        ('pvv10-dt-prct','pvv10-frangi-prct'),
+        ('pvv10+-dt-prct','pvv10+-frangi-prct')]:
+        x_list.extend(rdf[key_dt])
+        y_list.extend(rdf[key_frangi])
+    plt.scatter(x_list,y_list)
+    plt.plot([0,1],[0,1],color='k',linewidth=1,label='line-of-identity')
+    plt.xlabel('pvv (method: distance-transform)')
+    plt.ylabel('pvv (method: vesselness)')
+    plt.legend()
+    plt.grid(True)
+    plt.savefig('pvv-dt-frang.png')
+    plt.close()
+
     os.makedirs('static',exist_ok=True)
     with open('viz.md','w') as f:
+        f.write(f'<img load="lazy" alt="..." src="pvv-dt-frang.png" width="256">\n')
         for idx,mydict in main_dict.items():
             f.write(f'{idx}: dist, frangi<br>\n')
             for method in ['dist','frangi']:

@@ -1,3 +1,4 @@
+<img load="lazy" alt="..." src="pvv-dt-frang.png" width="256">
 01: dist, frangi<br>
 <img load="lazy" alt="..." src="static/dist-mip-01.png" width="256">
 <img load="lazy" alt="..." src="static/frangi-mip-01.png" width="256">
