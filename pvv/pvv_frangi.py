@@ -240,7 +240,10 @@ def estimate_radius(image_file,lung_file,vessel_file,outdir,debug):
     pvv = sitk.GetArrayFromImage(qia_obj)
 
     print('mip...')
+    print(np.unique(pvv))
     mip = np.max(pvv,axis=1)*80
+    mip = mip.astype(np.uint8)
+    print(np.unique(mip))
     mip_file = f"{outdir}/mip.png"
     imageio.imwrite(mip_file,mip)
 
