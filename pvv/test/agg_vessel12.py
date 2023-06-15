@@ -24,9 +24,31 @@ def main(dist_folder,frangi_folder):
             main_dict[idx].update(mydict)
 
     mylist = list(main_dict.values())
-    cols = []
-    rdf = pd.DataFrame(mylist)#columns=cols)
+    # idx
+    # pvv5-dt-prct,pvv10-dt-prct,pvv10+-dt-prct
+    # pvv5-dt-cc,pvv10-dt-cc,pvv10+-dt-cc
+    # area-lt-1.0mm2-dt,area-lt-2.0mm2-dt,area-lt-3.0mm2-dt,area-lt-4.0mm2-dt,area-lt-5.0mm2-dt,area-lt-6.0mm2-dt,area-lt-7.0mm2-dt,area-lt-8.0mm2-dt,area-lt-9.0mm2-dt,area-lt-10.0mm2-dt,area-lt-11.0mm2-dt,area-lt-12.0mm2-dt,area-lt-13.0mm2-dt,area-lt-14.0mm2-dt,area-lt-15.0mm2-dt,area-lt-16.0mm2-dt,area-lt-17.0mm2-dt,area-lt-18.0mm2-dt,area-lt-19.0mm2-dt,area-lt-20.0mm2-dt
+    # dist_mip_file
+    # pvv5-frangi-prct,pvv10-frangi-prct,pvv10+-frangi-prct
+    # pvv5-frangi-cc,pvv10-frangi-cc,pvv10+-frangi-cc
+    # area-lt-1.0mm2-frangi,area-lt-2.0mm2-frangi,area-lt-3.0mm2-frangi,area-lt-4.0mm2-frangi,area-lt-5.0mm2-frangi,area-lt-6.0mm2-frangi,area-lt-7.0mm2-frangi,area-lt-8.0mm2-frangi,area-lt-9.0mm2-frangi,area-lt-10.0mm2-frangi,area-lt-11.0mm2-frangi,area-lt-12.0mm2-frangi,area-lt-13.0mm2-frangi,area-lt-14.0mm2-frangi,area-lt-15.0mm2-frangi,area-lt-16.0mm2-frangi,area-lt-17.0mm2-frangi,area-lt-18.0mm2-frangi,area-lt-19.0mm2-frangi,area-lt-20.0mm2-frangi
+    # frangi_mip_file
+
+    rdf = pd.DataFrame(mylist)
     rdf.to_csv('results.csv',index=False,float_format='%.3f')
+    for n,row in rdf.iterrows():
+        col_str = 'area-lt-1.0mm2-dt,area-lt-2.0mm2-dt,area-lt-3.0mm2-dt,area-lt-4.0mm2-dt,area-lt-5.0mm2-dt,area-lt-6.0mm2-dt,area-lt-7.0mm2-dt,area-lt-8.0mm2-dt,area-lt-9.0mm2-dt,area-lt-10.0mm2-dt,area-lt-11.0mm2-dt,area-lt-12.0mm2-dt,area-lt-13.0mm2-dt,area-lt-14.0mm2-dt,area-lt-15.0mm2-dt,area-lt-16.0mm2-dt,area-lt-17.0mm2-dt,area-lt-18.0mm2-dt,area-lt-19.0mm2-dt,area-lt-20.0mm2-dt'
+        col_str = col_str.split(',')
+        plt.plot(row[col_str].tolist())
+        col_str = 'area-lt-1.0mm2-frangi,area-lt-2.0mm2-frangi,area-lt-3.0mm2-frangi,area-lt-4.0mm2-frangi,area-lt-5.0mm2-frangi,area-lt-6.0mm2-frangi,area-lt-7.0mm2-frangi,area-lt-8.0mm2-frangi,area-lt-9.0mm2-frangi,area-lt-10.0mm2-frangi,area-lt-11.0mm2-frangi,area-lt-12.0mm2-frangi,area-lt-13.0mm2-frangi,area-lt-14.0mm2-frangi,area-lt-15.0mm2-frangi,area-lt-16.0mm2-frangi,area-lt-17.0mm2-frangi,area-lt-18.0mm2-frangi,area-lt-19.0mm2-frangi,area-lt-20.0mm2-frangi'
+        col_str = col_str.split(',')
+        plt.plot(row[col_str].tolist())
+    
+    plt.ylabel('blood vessel volume(%)')
+    plt.xlabel('area(mm2)')
+    plt.grid(True)
+    plt.savefig('area-hist-dt-frang.png')
+    plt.close()
 
     x_list = []
     y_list = []
