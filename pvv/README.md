@@ -1,4 +1,54 @@
 
+# what is BV5, BV5-10, BV10+ ??
+
+
+
+# methodologies.
+
+
+# per methods - published data compared to out method...
+
+
+
+
+# actually compute
+
+
+
+
+
+area = pi*r^2
+
+area 5 mm^2 , r = np.sqrt(5/np.pi) = 1.26 mm
+
+area 10 mm^2 , r = np.sqrt(10/np.pi) = 1.78
+
+if voxel width is .6 mm^3  (BV5)
+
+|1|   radius ~ 0.5*0.6  = 0.3mm  (BV5)
+
+|1|1| radius ~ 1*0.6 = 0.6 mm  (BV5)
+
+|1|2|1| radius ~ 1.5*0.6 = 0.9 mm (BV5)
+
+|1|2|3|2|1| radius ~ 2.5*0.6 = 1.5 mm (BV5-10)
+
+|1|2|3|4|3|2|1| radius ~ 3.5*0.6 = 2.1 mm (BV10+)
+
+
+--
+
+|1|   radius ~ 1*0.6   --> 
+
+|1|1| radius ~ 1*0.6 = .6mm (BV5)
+
+|1|2|1| radius ~ 2*0.6 = 1.2 mm (BV5)
+
+|1|2|3|2|1| radius ~ 3*0.6 = 1.8 (BV5-10)
+
+|1|2|3|4|3|2|1| radius ~ 4*0.6 = 2.4 mm (BV10+)
+
+"Pulmonary vessels were automatically identified, segmented, and measured. Total blood vessel volume (TBV) and the aggregate vessel volume for vessels less than 5 mm(2) (BV5) were calculated for all lobes. The lobe-specific BV5 measures were normalized to the TBV of that lobe and the nonvascular tissue volume (BV5/T(issue)V) to calculate lobe-specific BV5/TBV and BV5/T(issue)V ratios"  https://pubmed.ncbi.nlm.nih.gov/23656466
 
 # published BV values
 
