@@ -49,15 +49,23 @@ def main(dist_folder,frangi_folder):
 
     x_list = []
     y_list = []
-    for key_dt,key_frangi in [
-        ('pvv5-dt-prct','pvv5-frangi-prct'),
-        ('pvv10-dt-prct','pvv10-frangi-prct'),
-        ('pvv10+-dt-prct','pvv10+-frangi-prct')]:
-
+    
+    for key_dt,key_frangi,unit in [
+        ('pvv5-dt-prct','pvv5-frangi-prct','fraction'),
+        ('pvv10-dt-prct','pvv10-frangi-prct','fraction'),
+        ('pvv10+-dt-prct','pvv10+-frangi-prct','fraction'),
+        ('pvv5-dt-cc','pvv5-frangi-cc','cc'),
+        ('pvv10-dt-cc','pvv10-frangi-cc','cc'),
+        ('pvv10+-dt-cc','pvv10+-frangi-cc','cc')]:
         x_list.extend(rdf[key_dt])
         y_list.extend(rdf[key_frangi])
-        print('mean',key_dt,rdf[key_dt].mean(),key_frangi,rdf[key_frangi].mean())
-
+        if unit == 'fraction':
+            unit = "prct"
+            print('mean',key_dt,(rdf[key_dt].mean()*100).round(2),unit,key_frangi,(rdf[key_frangi].mean()*100).round(2),unit)
+        else:
+            print('mean',key_dt,rdf[key_dt].mean().round(2),unit,key_frangi,rdf[key_frangi].mean().round(2),unit)
+    print(f'n={len(rdf)}')
+    
     plt.scatter(x_list,y_list)
     plt.plot([0,1],[0,1],color='k',linewidth=1,label='line-of-identity')
     plt.xlabel('pvv (method: distance-transform)')
