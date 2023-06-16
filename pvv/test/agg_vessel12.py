@@ -39,13 +39,14 @@ def main(dist_folder,frangi_folder):
     for n,row in rdf.iterrows():
         col_str = 'area-lt-1.0mm2-dt,area-lt-2.0mm2-dt,area-lt-3.0mm2-dt,area-lt-4.0mm2-dt,area-lt-5.0mm2-dt,area-lt-6.0mm2-dt,area-lt-7.0mm2-dt,area-lt-8.0mm2-dt,area-lt-9.0mm2-dt,area-lt-10.0mm2-dt,area-lt-11.0mm2-dt,area-lt-12.0mm2-dt,area-lt-13.0mm2-dt,area-lt-14.0mm2-dt,area-lt-15.0mm2-dt,area-lt-16.0mm2-dt,area-lt-17.0mm2-dt,area-lt-18.0mm2-dt,area-lt-19.0mm2-dt,area-lt-20.0mm2-dt'
         col_str = col_str.split(',')
-        plt.plot(row[col_str].tolist())
+        plt.plot(row[col_str].tolist(),color='blue',label=f'dt-{n}',alpha=0.5)
         col_str = 'area-lt-1.0mm2-frangi,area-lt-2.0mm2-frangi,area-lt-3.0mm2-frangi,area-lt-4.0mm2-frangi,area-lt-5.0mm2-frangi,area-lt-6.0mm2-frangi,area-lt-7.0mm2-frangi,area-lt-8.0mm2-frangi,area-lt-9.0mm2-frangi,area-lt-10.0mm2-frangi,area-lt-11.0mm2-frangi,area-lt-12.0mm2-frangi,area-lt-13.0mm2-frangi,area-lt-14.0mm2-frangi,area-lt-15.0mm2-frangi,area-lt-16.0mm2-frangi,area-lt-17.0mm2-frangi,area-lt-18.0mm2-frangi,area-lt-19.0mm2-frangi,area-lt-20.0mm2-frangi'
         col_str = col_str.split(',')
-        plt.plot(row[col_str].tolist())
+        plt.plot(row[col_str].tolist(),color='red',label=f'frangi-{n}',alpha=0.5)
     
     plt.ylabel('blood vessel volume(%)')
     plt.xlabel('area(mm2)')
+    plt.legend()
     plt.grid(True)
     plt.savefig('area-hist-dt-frang.png')
     plt.close()

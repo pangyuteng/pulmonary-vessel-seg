@@ -28,6 +28,7 @@
 <img load="lazy" alt="..." src="static/frangi-mip-09.png" width="256">
 <br>10: dist, frangi<br>
 <img load="lazy" alt="..." src="static/dist-mip-10.png" width="256">
+<img load="lazy" alt="..." src="static/frangi-mip-10.png" width="256">
 <br>11: dist, frangi<br>
 <img load="lazy" alt="..." src="static/dist-mip-11.png" width="256">
 <img load="lazy" alt="..." src="static/frangi-mip-11.png" width="256">
@@ -36,6 +37,7 @@
 <img load="lazy" alt="..." src="static/frangi-mip-12.png" width="256">
 <br>13: dist, frangi<br>
 <img load="lazy" alt="..." src="static/dist-mip-13.png" width="256">
+<img load="lazy" alt="..." src="static/frangi-mip-13.png" width="256">
 <br>14: dist, frangi<br>
 <img load="lazy" alt="..." src="static/dist-mip-14.png" width="256">
 <img load="lazy" alt="..." src="static/frangi-mip-14.png" width="256">
