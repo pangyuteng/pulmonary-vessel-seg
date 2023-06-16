@@ -57,19 +57,20 @@ def main(dist_folder,frangi_folder):
         ('pvv5-dt-cc','pvv5-frangi-cc','cc'),
         ('pvv10-dt-cc','pvv10-frangi-cc','cc'),
         ('pvv10+-dt-cc','pvv10+-frangi-cc','cc')]:
-        x_list.extend(rdf[key_dt])
-        y_list.extend(rdf[key_frangi])
+        if unit == 'cc':
+            x_list.extend(rdf[key_dt])
+            y_list.extend(rdf[key_frangi])
         if unit == 'fraction':
             unit = "prct"
             print('mean',key_dt,(rdf[key_dt].mean()*100).round(2),unit,key_frangi,(rdf[key_frangi].mean()*100).round(2),unit)
         else:
             print('mean',key_dt,rdf[key_dt].mean().round(2),unit,key_frangi,rdf[key_frangi].mean().round(2),unit)
     print(f'n={len(rdf)}')
-    
+
     plt.scatter(x_list,y_list)
     plt.plot([0,1],[0,1],color='k',linewidth=1,label='line-of-identity')
-    plt.xlabel('pvv (method: distance-transform)')
-    plt.ylabel('pvv (method: vesselness)')
+    plt.xlabel('pvv (cc, method: distance-transform)')
+    plt.ylabel('pvv (cc, method: vesselness)')
     plt.legend()
     plt.grid(True)
     plt.savefig('pvv-dt-frang.png')
