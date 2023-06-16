@@ -18,7 +18,7 @@
 + method "pvvx-dt"
     + segment pulunary vessels using TotalSementator
     + boundary-seeded distance-transform computed from vessel mask (bsfield)
-    + vessel banch and centerline is approximated
+    + vessel banch are identifeid and radius is estimated per branch.
         + by performing skeletonization from the vessel mask
         + identifying intersections from the vessel sekelton
         + connected component is then used to identify each branch centerline vessel radius
