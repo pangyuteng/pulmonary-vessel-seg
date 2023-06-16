@@ -3,7 +3,7 @@
 
 # published methodologies can be lumped to the below few methods.
 
-+ area from binary vessel masks - computed from axial slices. (we will skip this - but see https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10023743 for references)
++ area from binary vessel masks - computed from axial slices. (for references see https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10023743)
 
 + distance transform from binary vessel mask (ref https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10023743 https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7308498 )
 
@@ -26,6 +26,9 @@ mean pvv10+-dt-cc 22.3 cc pvv10+-frangi-cc 32.85 cc
 
 n=23
 ```
+
+<a href="test/viz.md">visualization of the resulting PVVX for Vessel12 dataset see </a>
+
 
 # published BV values
 
