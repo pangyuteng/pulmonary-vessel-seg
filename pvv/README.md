@@ -21,9 +21,11 @@
     + vessel banch are identifeid and radius is estimated per branch.
         + by performing skeletonization from the vessel mask
         + identifying intersections from the vessel sekelton
-        + connected component is then used to identify each branch centerline vessel radius
-        + the connected components can be watershed back into the vessel mask.
-        + each branch can be assigned to be PVV5,5-10,10+ using the cross-sectional area computed from the estimated radius per branch.
+        + once intersection points are removed, connected component can be performed to identify individual branch centerlines (each branch will have its own identifier).
+        + per branch centerline, vessel radius can be estimated as the mean 
+        value on the branch ceterline in the bsfield.
+        + the branch identifier can then be watershd back into the vessel mask.
+    + each branch can be assigned to be PVV5,5-10,10+ using the cross-sectional area computed from the estimated radius per branch.
 
 + method "pvvx-frangi" is similar except that the radius is estimated from the sigma of the max response from thefrangi's vesselness filter (objectness-filter in SimpleITK).
 
