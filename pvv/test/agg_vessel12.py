@@ -44,7 +44,7 @@ def main(dist_folder,frangi_folder):
     plt.xlabel('estimated vascular crossectional area (mm2)')
     plt.legend()
     plt.grid(True)
-    plt.savefig('area-hist-dt-frang.png')
+    plt.savefig('area-hist-dt-frangi.png')
     plt.close()
 
     x_list = []
@@ -70,7 +70,7 @@ def main(dist_folder,frangi_folder):
     os.makedirs('static',exist_ok=True)
     with open('viz.md','w') as f:
         f.write(f'<img load="lazy" alt="..." src="pvv-dt-frang.png" width="512"><br>\n')
-        f.write(f'<img load="lazy" alt="..." src="area-hist-dt-frang.png" width="512"><br>\n')
+        f.write(f'<img load="lazy" alt="..." src="area-hist-dt-frangi.png" width="512"><br>\n')
         for idx,mydict in main_dict.items():
             f.write(f'{idx}: dist, frangi<br>\n')
             for method in ['dist','frangi']:
