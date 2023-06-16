@@ -68,7 +68,7 @@ def main(dist_folder,frangi_folder):
     print(f'n={len(rdf)}')
 
     plt.scatter(x_list,y_list)
-    plt.plot([0,400],[0,400],color='k',linewidth=1,label='line-of-identity')
+    plt.plot([0,0],[400,400],color='k',linewidth=1,label='line-of-identity')
     plt.xlabel('pvv (cc, method: distance-transform)')
     plt.ylabel('pvv (cc, method: vesselness)')
     plt.legend()
