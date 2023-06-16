@@ -13,7 +13,19 @@
 
 + scale-space-particle (ref https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3670102)
 
-# using Vessel12 dataset we compute Blood-Volume-X BVX or Pulmonary-Vessel-like-Volume-X (PVVX)
+#### using Vessel12 dataset we compute Blood-Volume-X BVX or Pulmonary-Vessel-like-Volume-X (PVVX)
+
++ method "pvvx-dt"
+    + segment pulunary vessels using TotalSementator
+    + boundary-seeded distance-transform computed from vessel mask (bsfield)
+    + vessel banch and centerline is approximated
+        + by performing skeletonization from the vessel mask
+        + identifying intersections from the vessel sekelton
+        + connected component is then used to identify each branch centerline vessel radius
+        + the connected components can be watershed back into the vessel mask.
+        + each branch can be assigned to be PVV5,5-10,10+ using the cross-sectional area computed from the estimated radius per branch.
+
++ method "pvvx-frangi" is similar except that the radius is estimated from the sigma of the max response from thefrangi's vesselness filter (objectness-filter in SimpleITK).
 
 ```
 mean pvv5-dt-prct 83.35 prct pvv5-frangi-prct 78.87 prct
