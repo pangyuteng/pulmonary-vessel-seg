@@ -150,12 +150,10 @@ def estimate_radius(image_file,lung_file,vessel_file,outdir,debug):
             imageio.imsave(png_file,myarr)
             slice_png_list.append(png_file)
 
-        if p.label > 1000:
-            break
-
     with open(f'{outdir}/index.html','w') as f:
         for slice_png in slice_png_list:
-            mystr = f'<img loading="lazy" alt="...", scr="{slice_png}" width="256px" height="256px"/>\n'
+            slice_png = os.path.basename(slice_png)
+            mystr = f'<img loading="lazy" alt="..." src="{slice_png}" width="256px" height="256px"/>\n'
             f.write(mystr)
 
     print('area...')
