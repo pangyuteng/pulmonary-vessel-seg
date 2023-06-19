@@ -115,7 +115,7 @@ def get_slice_origin(slice_center,slice_normal,slice_radius):
     d = -a*x-b*y-c*z
     ox,oy,oz = slice_origin
 
-    print(a*ox+b*oy+c*oz+d,a*ox+b*oy+c*oz+d <= 1e-4)
+    #print(a*ox+b*oy+c*oz+d,a*ox+b*oy+c*oz+d <= 1e-4)
     assert(a*ox+b*oy+c*oz+d <= 1e-4)
 
     return tuple(slice_origin)
@@ -158,7 +158,7 @@ def extract_slice(itk_image,slice_center,slice_normal,slice_spacing,slice_radius
 
     itk_image = resample.Execute(itk_image)
     
-    if True:
+    if False:
         print('slice_origin patient space',slice_origin)
         print('slice_origin, patient space',itk_image.TransformContinuousIndexToPhysicalPoint([0,0,0]))
         print('slice_origin image space', itk_image.TransformPhysicalPointToContinuousIndex(slice_origin))
