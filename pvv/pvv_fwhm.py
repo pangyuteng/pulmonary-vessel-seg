@@ -11,7 +11,7 @@ from scipy.ndimage import distance_transform_edt
 from skimage.measure import label, regionprops
 from tqdm import tqdm
 import imageio
-from utils import resample_img,extract_slice
+from utils import resample_img,extract_slice,estimate_radius_fwhm
 
 
 '''
@@ -39,6 +39,7 @@ sigma = radius*2/2.355
 sigma = np.sqrt(area/pi)*2/2.355
 
 '''
+
 
 def estimate_radius(image_file,lung_file,vessel_file,outdir,debug):
     
@@ -146,15 +147,19 @@ def estimate_radius(image_file,lung_file,vessel_file,outdir,debug):
             is_label = False
             myslice = extract_slice(myimg_obj,slice_center,slice_normal,slice_spacing,slice_radius,is_label)
             myarr = sitk.GetArrayFromImage(myslice).squeeze().astype(np.uint8)
-            png_file = f'{outdir}/slice-{p.label}.png'
-            imageio.imsave(png_file,myarr)
-            slice_png_list.append(png_file)
+            if False:
+                png_file = f'{outdir}/slice-{p.label}.png'
+                imageio.imsave(png_file,myarr)
+                slice_png_list.append(png_file)
+            fwhm_x,fwhm_y = estimate_radius_fwhm(myarr.astype(float),0,255)
+            fwhm_dict[p.label]=np.mean([fwhm_x,fwhm_y])
 
-    with open(f'{outdir}/index.html','w') as f:
-        for slice_png in slice_png_list:
-            slice_png = os.path.basename(slice_png)
-            mystr = f'<img loading="lazy" alt="..." src="{slice_png}" width="256px" height="256px"/>\n'
-            f.write(mystr)
+    if False:
+        with open(f'{outdir}/index.html','w') as f:
+            for slice_png in slice_png_list:
+                slice_png = os.path.basename(slice_png)
+                mystr = f'<img loading="lazy" alt="..." src="{slice_png}" width="256px" height="256px"/>\n'
+                f.write(mystr)
 
     print('area...')
     map_func = np.vectorize(lambda x: float(bcsa_dict.get(x,0)))

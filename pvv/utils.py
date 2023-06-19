@@ -176,3 +176,40 @@ def extract_slice(itk_image,slice_center,slice_normal,slice_spacing,slice_radius
         print('GetSize',itk_image.GetSize())
         print('return!')
     return itk_image
+
+
+
+
+import scipy.optimize as opt
+# ref  https://gist.github.com/nvladimus/fc88abcece9c3e0dc9212c2adc93bfe7
+"""Function to fit, returns 2D gaussian function as 1D array"""
+def twoD_GaussianScaledAmp(xy, xo, yo, sigma_x, sigma_y, amplitude, offset):
+    (x, y) = xy
+    xo = float(xo)
+    yo = float(yo)    
+    g = offset + amplitude*np.exp( - (((x-xo)**2)/(2*sigma_x**2) + ((y-yo)**2)/(2*sigma_y**2)))
+    return g.ravel()
+
+"""Get FWHM(x,y) of a blob by 2D gaussian fitting
+Parameter:
+    img - image as numpy array
+Returns: 
+    FWHMs in pixels, along x and y axes.
+"""
+#def getFWHM_GaussianFitScaledAmp(img):
+def estimate_radius_fwhm(img,minval,maxval):
+    x = np.linspace(0, img.shape[1], img.shape[1])
+    y = np.linspace(0, img.shape[0], img.shape[0])
+    x, y = np.meshgrid(x, y)
+    #Parameters: xpos, ypos, sigmaX, sigmaY, amp, baseline
+    initial_guess = (img.shape[1]/2,img.shape[0]/2,10,10,1,0)
+    # subtract background and rescale image into [0,1], with floor clipping
+    img_scaled = ( (img - minval) / (maxval-minval)).clip(0,1)
+    popt, pcov = opt.curve_fit(twoD_GaussianScaledAmp, (x, y), 
+                               img_scaled.ravel(), p0=initial_guess,
+                               bounds = ((img.shape[1]*0.4, img.shape[0]*0.4, 1, 1, 0.5, -0.1),
+                                     (img.shape[1]*0.6, img.shape[0]*0.6, img.shape[1]/2, img.shape[0]/2, 1.5, 0.5)))
+    xcenter, ycenter, sigmaX, sigmaY, amp, offset = popt[0], popt[1], popt[2], popt[3], popt[4], popt[5]
+    FWHM_x = np.abs(4*sigmaX*np.sqrt(-0.5*np.log(0.5)))
+    FWHM_y = np.abs(4*sigmaY*np.sqrt(-0.5*np.log(0.5)))
+    return FWHM_x, FWHM_y
