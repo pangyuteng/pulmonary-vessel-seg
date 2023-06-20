@@ -287,7 +287,7 @@ def estimate_radius(image_file,lung_file,vessel_file,outdir,debug):
     mydict.update(hist_dict)
 
     with open(json_file,'w') as f:
-        f.write(json.dumps(mydict))
+        f.write(json.dumps(mydict, indent=4))
 
 
 if __name__ == "__main__":

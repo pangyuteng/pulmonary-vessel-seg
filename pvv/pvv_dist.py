@@ -191,7 +191,7 @@ def main(mask_file,outdir,debug):
     mydict.update(hist_dict)
     
     with open(json_file,'w') as f:
-        f.write(json.dumps(mydict))
+        f.write(json.dumps(mydict, indent=4))
     print('pvv_dist.py done')
 
 if __name__ == "__main__":
