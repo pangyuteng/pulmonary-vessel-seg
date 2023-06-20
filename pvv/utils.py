@@ -2,6 +2,8 @@ import sys
 import numpy as np
 import SimpleITK as sitk
 import imageio
+import scipy.optimize as opt
+import traceback
 
 def resample_img(itk_image, out_spacing, is_label=False):
     
@@ -120,7 +122,7 @@ def get_slice_origin(slice_center,slice_normal,slice_radius):
 
     return tuple(slice_origin)
 
-def extract_slice(itk_image,slice_center,slice_normal,slice_spacing,slice_radius,is_label):
+def extract_slice(itk_image,slice_center,slice_normal,slice_spacing,slice_radius,is_label,factor=3):
 
     image_normal = (0,0,1)
     rotation_matrix = vrrotvec(image_normal,slice_normal)
@@ -140,7 +142,6 @@ def extract_slice(itk_image,slice_center,slice_normal,slice_spacing,slice_radius
 
     slice_origin = get_slice_origin(slice_center,slice_normal,slice_radius)
     radius_voxel = int(np.array(slice_radius)/np.array(slice_spacing[0]))
-    factor = 2
     slice_size = (radius_voxel*factor,radius_voxel*factor,1)
     resample = sitk.ResampleImageFilter()
     
@@ -180,36 +181,76 @@ def extract_slice(itk_image,slice_center,slice_normal,slice_spacing,slice_radius
 
 
 
-import scipy.optimize as opt
-# ref  https://gist.github.com/nvladimus/fc88abcece9c3e0dc9212c2adc93bfe7
-"""Function to fit, returns 2D gaussian function as 1D array"""
-def twoD_GaussianScaledAmp(xy, xo, yo, sigma_x, sigma_y, amplitude, offset):
-    (x, y) = xy
-    xo = float(xo)
-    yo = float(yo)    
-    g = offset + amplitude*np.exp( - (((x-xo)**2)/(2*sigma_x**2) + ((y-yo)**2)/(2*sigma_y**2)))
-    return g.ravel()
+#
+# ref
+# https://en.wikipedia.org/wiki/Gaussian_function
+# https://en.wikipedia.org/wiki/Full_width_at_half_maximum
+# https://stackoverflow.com/questions/27539933/2d-gaussian-fit-for-intensities-at-certain-coordinates-in-python
+# https://www.astro.rug.nl/~vogelaar/Gaussians2D/2dgaussians.html
+#
 
-"""Get FWHM(x,y) of a blob by 2D gaussian fitting
-Parameter:
-    img - image as numpy array
-Returns: 
-    FWHMs in pixels, along x and y axes.
-"""
-#def getFWHM_GaussianFitScaledAmp(img):
-def estimate_radius_fwhm(img,minval,maxval):
-    x = np.linspace(0, img.shape[1], img.shape[1])
-    y = np.linspace(0, img.shape[0], img.shape[0])
-    x, y = np.meshgrid(x, y)
-    #Parameters: xpos, ypos, sigmaX, sigmaY, amp, baseline
-    initial_guess = (img.shape[1]/2,img.shape[0]/2,10,10,1,0)
-    # subtract background and rescale image into [0,1], with floor clipping
-    img_scaled = ( (img - minval) / (maxval-minval)).clip(0,1)
-    popt, pcov = opt.curve_fit(twoD_GaussianScaledAmp, (x, y), 
-                               img_scaled.ravel(), p0=initial_guess,
-                               bounds = ((img.shape[1]*0.4, img.shape[0]*0.4, 1, 1, 0.5, -0.1),
-                                     (img.shape[1]*0.6, img.shape[0]*0.6, img.shape[1]/2, img.shape[0]/2, 1.5, 0.5)))
-    xcenter, ycenter, sigmaX, sigmaY, amp, offset = popt[0], popt[1], popt[2], popt[3], popt[4], popt[5]
-    FWHM_x = np.abs(4*sigmaX*np.sqrt(-0.5*np.log(0.5)))
-    FWHM_y = np.abs(4*sigmaY*np.sqrt(-0.5*np.log(0.5)))
-    return FWHM_x, FWHM_y
+def gauss2d(xy, amp, x0, y0, sigma_x, sigma_y, theta):
+    x, y = xy
+    theta = np.radians(theta)
+    sigx2 = sigma_x**2
+    sigy2 = sigma_y**2
+    a = np.cos(theta)**2/(2*sigx2) + np.sin(theta)**2/(2*sigy2)
+    b = np.sin(theta)**2/(2*sigx2) + np.cos(theta)**2/(2*sigy2)
+    c = np.sin(2*theta)/(4*sigx2) - np.sin(2*theta)/(4*sigy2)
+    expo = -a*(x-x0)**2 - b*(y-y0)**2 - 2*c*(x-x0)*(y-y0)
+    return amp*np.exp(expo)
+
+def estimate_fwhm(img,appx_radius):
+
+    x = np.arange(0,img.shape[0],1)
+    y = np.arange(0,img.shape[1],1)
+    xy = np.meshgrid(x,y)
+    xy = [xy[0].ravel(),xy[1].ravel()]
+    zobs = img.ravel()
+
+    x_coord, y_coord = int(img.shape[0]/2), int(img.shape[1]/2)
+    intensity = img[x_coord,y_coord]
+    try:
+        appx_theta = 5
+        guess = [intensity, x_coord, y_coord, appx_radius, appx_radius, appx_theta]
+        print('guess',guess)
+        pred_params, uncert_cov = opt.curve_fit(gauss2d, xy, zobs, p0=guess)
+        zpred = gauss2d(xy, *pred_params)
+        rms = np.sqrt(np.mean((zobs - zpred)**2))
+        print('Initial params:', guess)
+        print('Predicted params:', pred_params)
+        print('Residual, RMS(obs - pred):', rms)
+        _,_,_,sigma_x,sigma_y,theta = pred_params
+        fwhm_x = 2*np.sqrt(2*np.log(2))*sigma_x
+        fwhm_y = 2*np.sqrt(2*np.log(2))*sigma_y
+        pred_radius = np.mean([fwhm_x, fwhm_y])
+        print("initial radius",appx_radius,"pred_radius",pred_radius)
+
+        return pred_radius
+    except:
+        traceback.print_exc()
+        return appx_radius
+
+if __name__ == "__main__":
+    
+
+    img = imageio.imread('outdir-fwhm/slice-9998.png')
+    x = np.arange(0,img.shape[0],1)
+    y = np.arange(0,img.shape[1],1)
+    xy = np.meshgrid(x,y)
+    xy = [xy[0].ravel(),xy[1].ravel()]
+    zobs = img.ravel()
+    appx_radius = 1
+    x_coord, y_coord = int(img.shape[0]/2), int(img.shape[1]/2)
+    intensity = img[x_coord,y_coord]
+    guess = [intensity, x_coord, y_coord, appx_radius, appx_radius, 1]
+    pred_params, uncert_cov = opt.curve_fit(gauss2d, xy, zobs, p0=guess)
+    zpred = gauss2d(xy, *pred_params)
+    print('Predicted params:', pred_params)
+    _,_,_,sigma_x,sigma_y,theta = pred_params
+
+    print('Residual, RMS(obs - pred):', np.sqrt(np.mean((zobs - zpred)**2)))
+    fwhm_x = 2*np.sqrt(2*np.log(2))*sigma_x
+    fwhm_y = 2*np.sqrt(2*np.log(2))*sigma_y
+    print(img.shape)
+    print(fwhm_x,fwhm_y)

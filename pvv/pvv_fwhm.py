@@ -11,7 +11,7 @@ from scipy.ndimage import distance_transform_edt
 from skimage.measure import label, regionprops
 from tqdm import tqdm
 import imageio
-from utils import resample_img,extract_slice,estimate_radius_fwhm
+from utils import resample_img,extract_slice,estimate_fwhm
 
 
 '''
@@ -134,7 +134,7 @@ def estimate_radius(image_file,lung_file,vessel_file,outdir,debug):
             slice_end = image_obj.TransformContinuousIndexToPhysicalPoint([int(myend[2]),int(myend[1]),int(myend[0])])
             slice_normal = np.array(slice_end)-np.array(slice_center)
             slice_spacing = (1,1,1)
-            slice_radius = p.mean_intensity*2
+            slice_radius = p.mean_intensity
             is_label = True
             #print(slice_center,slice_normal,slice_spacing,slice_radius,is_label)
             myslice = extract_slice(vessel_obj,slice_center,slice_normal,slice_spacing,slice_radius,is_label)
@@ -151,8 +151,9 @@ def estimate_radius(image_file,lung_file,vessel_file,outdir,debug):
                 png_file = f'{outdir}/slice-{p.label}.png'
                 imageio.imsave(png_file,myarr)
                 slice_png_list.append(png_file)
-            fwhm_x,fwhm_y = estimate_radius_fwhm(myarr.astype(float),0,255)
-            fwhm_dict[p.label]=np.mean([fwhm_x,fwhm_y])
+            
+            pred_radius = estimate_fwhm(myarr.astype(float),slice_radius)
+            fwhm_dict[p.label]=pred_radius
 
     if False:
         with open(f'{outdir}/index.html','w') as f:
@@ -168,7 +169,7 @@ def estimate_radius(image_file,lung_file,vessel_file,outdir,debug):
     qia_obj = sitk.GetImageFromArray(area)
     qia_obj.CopyInformation(image_obj)
     if debug:
-        sitk.WriteImage(qia_obj,f"{outdir}/debug-bcs-area.nii.gz")
+        sitk.WriteImage(qia_obj,f"{outdir}/debug-bcsa-area.nii.gz")
 
     print('pvv...')
     pvv = np.zeros_like(area)
@@ -182,28 +183,75 @@ def estimate_radius(image_file,lung_file,vessel_file,outdir,debug):
     qia_obj = sitk.GetImageFromArray(pvv)
     qia_obj.CopyInformation(image_obj)
     if debug:
-        sitk.WriteImage(qia_obj,f"{outdir}/debug-bcs-pvv.nii.gz")
+        sitk.WriteImage(qia_obj,f"{outdir}/debug-bcsa-pvv.nii.gz")
 
     qia_obj = resample_img(qia_obj, og_image_obj.GetSpacing(), is_label=True)
-    sitk.WriteImage(qia_obj,f"{outdir}/bcs-pvv.nii.gz")
+    sitk.WriteImage(qia_obj,f"{outdir}/bcsa-pvv.nii.gz")
     
     spacing = qia_obj.GetSpacing()
     cc_per_voxel = np.prod(spacing)*0.001
-    pvv = sitk.GetArrayFromImage(qia_obj)
+    pvv_bcsa = sitk.GetArrayFromImage(qia_obj)
+
+    print('mip...')
+    mip = (np.max(pvv_bcsa,axis=1)*80).astype(np.uint8)
+    mip_file = f"{outdir}/mip_bcsa.png"
+    imageio.imwrite(mip_file,mip)
+
+
+    mydict = {
+        'pvv5-bcsa-prct': float(np.sum(pvv_bcsa==1)/np.sum(pvv_bcsa>0)), # binary-cross-sectional-area
+        'pvv10-bcsa-prct': float(np.sum(pvv_bcsa==2)/np.sum(pvv_bcsa>0)),
+        'pvv10+-bcsa-prct': float(np.sum(pvv_bcsa==3)/np.sum(pvv_bcsa>0)),
+        'pvv5-bcsa-cc': float(np.sum(pvv_bcsa==1)*cc_per_voxel),
+        'pvv10-bcsa-cc': float(np.sum(pvv_bcsa==2)*cc_per_voxel),
+        'pvv10+-bcsa-cc': float(np.sum(pvv_bcsa==3)*cc_per_voxel),
+    }
+
+
+    print('area...')
+    map_func = np.vectorize(lambda x: float(fwhm_dict.get(x,0)))
+    area = map_func(ws_branch)
+    print(area.dtype)
+    qia_obj = sitk.GetImageFromArray(area)
+    qia_obj.CopyInformation(image_obj)
+    if debug:
+        sitk.WriteImage(qia_obj,f"{outdir}/debug-fwhm-area.nii.gz")
+
+    print('pvv...')
+    pvv = np.zeros_like(area)
+    pvv[np.logical_and(area>0,area<=5)]=1
+    pvv[np.logical_and(area>5,area<10)]=2
+    pvv[area>=10]=3
+    pvv = pvv.astype(np.int16)
+    qia_obj = sitk.GetImageFromArray(pvv)
+    qia_obj.CopyInformation(image_obj)
+
+    qia_obj = sitk.GetImageFromArray(pvv)
+    qia_obj.CopyInformation(image_obj)
+    if debug:
+        sitk.WriteImage(qia_obj,f"{outdir}/debug-fwhm-pvv.nii.gz")
+
+    qia_obj = resample_img(qia_obj, og_image_obj.GetSpacing(), is_label=True)
+    sitk.WriteImage(qia_obj,f"{outdir}/fwhm-pvv.nii.gz")
+    
+    spacing = qia_obj.GetSpacing()
+    cc_per_voxel = np.prod(spacing)*0.001
+    pvv_fwhm = sitk.GetArrayFromImage(qia_obj)
 
     print('mip...')
     mip = (np.max(pvv,axis=1)*80).astype(np.uint8)
-    mip_file = f"{outdir}/mip.png"
+    mip_file = f"{outdir}/mip_fwhm.png"
     imageio.imwrite(mip_file,mip)
 
-    mydict = {
-        'pvv5-bcsa-prct': float(np.sum(pvv==1)/np.sum(pvv>0)), # binary-cross-sectional-area
-        'pvv10-bcsa-prct': float(np.sum(pvv==2)/np.sum(pvv>0)),
-        'pvv10+-bcsa-prct': float(np.sum(pvv==3)/np.sum(pvv>0)),
-        'pvv5-bcsa-cc': float(np.sum(pvv==1)*cc_per_voxel),
-        'pvv10-bcsa-cc': float(np.sum(pvv==2)*cc_per_voxel),
-        'pvv10+-bcsa-cc': float(np.sum(pvv==3)*cc_per_voxel),
-    }
+    mydict.update({
+        'pvv5-bcsa-prct': float(np.sum(pvv_fwhm==1)/np.sum(pvv_fwhm>0)), # binary-cross-sectional-area
+        'pvv10-bcsa-prct': float(np.sum(pvv_fwhm==2)/np.sum(pvv_fwhm>0)),
+        'pvv10+-bcsa-prct': float(np.sum(pvv_fwhm==3)/np.sum(pvv_fwhm>0)),
+        'pvv5-bcsa-cc': float(np.sum(pvv_fwhm==1)*cc_per_voxel),
+        'pvv10-bcsa-cc': float(np.sum(pvv_fwhm==2)*cc_per_voxel),
+        'pvv10+-bcsa-cc': float(np.sum(pvv_fwhm==3)*cc_per_voxel),
+    })
+
     with open(json_file,'w') as f:
         f.write(json.dumps(mydict))
 
