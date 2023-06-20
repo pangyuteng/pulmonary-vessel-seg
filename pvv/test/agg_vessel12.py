@@ -46,9 +46,7 @@ def main(dist_folder,frangi_folder,fwhm_folder):
     for n,row in rdf.iterrows():
         x_tmp =  list(np.arange(2,22,2))
         method = row.method
-        #col_str = [f'area-lt-2.0mm2-{method}', 'area-lt-4.0mm2-{}', 'area-lt-6.0mm2-dt', 'area-lt-8.0mm2-dt', 'area-lt-10.0mm2-dt', 'area-lt-12.0mm2-dt', 'area-lt-14.0mm2-dt', 'area-lt-16.0mm2-dt', 'area-lt-18.0mm2-dt', 'area-lt-20.0mm2-{}']
         col_str = [x for x in row.keys() if 'area-lt' in x]
-        print(col_str)
         kwargs = dict(color=colormapper[method],alpha=0.5,)
         if row.idx == '01':
             kwargs['label']=method
@@ -66,12 +64,12 @@ def main(dist_folder,frangi_folder,fwhm_folder):
     y_list = []
     
     for key_dt,key_frangi,unit in [
-        ('pvv5-dt-prct','pvv5-frangi-prct','fraction'),
-        ('pvv10-dt-prct','pvv10-frangi-prct','fraction'),
-        ('pvv10+-dt-prct','pvv10+-frangi-prct','fraction'),
-        ('pvv5-dt-cc','pvv5-frangi-cc','cc'),
-        ('pvv10-dt-cc','pvv10-frangi-cc','cc'),
-        ('pvv10+-dt-cc','pvv10+-frangi-cc','cc')]:
+        ('pvv5-dist-prct','pvv5-frangi-prct','fraction'),
+        ('pvv10-dist-prct','pvv10-frangi-prct','fraction'),
+        ('pvv10+-dist-prct','pvv10+-frangi-prct','fraction'),
+        ('pvv5-dist-cc','pvv5-frangi-cc','cc'),
+        ('pvv10-dist-cc','pvv10-frangi-cc','cc'),
+        ('pvv10+-dist-cc','pvv10+-frangi-cc','cc')]:
         if unit == 'cc':
             x_list.extend(rdf[key_dt])
             y_list.extend(rdf[key_frangi])

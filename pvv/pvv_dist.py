@@ -181,12 +181,12 @@ def main(mask_file,outdir,debug):
     imageio.imwrite(mip_file,mip)
 
     mydict = {
-        'pvv5-dt-prct': float(np.sum(pvv==1)/np.sum(pvv>0)),
-        'pvv10-dt-prct': float(np.sum(pvv==2)/np.sum(pvv>0)),
-        'pvv10+-dt-prct': float(np.sum(pvv==3)/np.sum(pvv>0)),
-        'pvv5-dt-cc': float(np.sum(pvv==1)*cc_per_voxel),
-        'pvv10-dt-cc': float(np.sum(pvv==2)*cc_per_voxel),
-        'pvv10+-dt-cc': float(np.sum(pvv==3)*cc_per_voxel),
+        'pvv5-dist-prct': float(np.sum(pvv==1)/np.sum(pvv>0)),
+        'pvv10-dist-prct': float(np.sum(pvv==2)/np.sum(pvv>0)),
+        'pvv10+-dist-prct': float(np.sum(pvv==3)/np.sum(pvv>0)),
+        'pvv5-dist-cc': float(np.sum(pvv==1)*cc_per_voxel),
+        'pvv10-dist-cc': float(np.sum(pvv==2)*cc_per_voxel),
+        'pvv10+-dist-cc': float(np.sum(pvv==3)*cc_per_voxel),
     }
     mydict.update(hist_dict)
     
