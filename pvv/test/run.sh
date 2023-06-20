@@ -15,3 +15,7 @@ python pvv_dist.py $vessel_file $outdir True
 outdir=$code_dir/test/vessel12-frangi/${idx}
 mkdir -p $outdir
 python pvv_frangi.py $img_file $lung_file $vessel_file $outdir True
+
+outdir=$code_dir/test/vessel12-fwhm/${idx}
+mkdir -p $outdir
+python pvv_fwhm.py $img_file $vessel_file $outdir True
