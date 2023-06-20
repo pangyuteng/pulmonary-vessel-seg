@@ -30,7 +30,14 @@ def main(dist_folder,frangi_folder,fwhm_folder):
             myitem = {'idx':idx,'method':method,'mip_file':mip_file}
             with open(json_file,'r') as f:
                 mydict = json.loads(f.read())
-            myitem.update(mydict)
+                newdict = {}
+                for k,v in mydict.items():
+                    if 'area-lt' in k:
+                        nk = k.replace(f'-{method}','')
+                    else:
+                        nk = k
+                    newdict[nk]=v
+            myitem.update(newdict)
             mylist.append(myitem)
 
     rdf = pd.DataFrame(mylist)
@@ -41,8 +48,9 @@ def main(dist_folder,frangi_folder,fwhm_folder):
         method = row.method
         #col_str = [f'area-lt-2.0mm2-{method}', 'area-lt-4.0mm2-{}', 'area-lt-6.0mm2-dt', 'area-lt-8.0mm2-dt', 'area-lt-10.0mm2-dt', 'area-lt-12.0mm2-dt', 'area-lt-14.0mm2-dt', 'area-lt-16.0mm2-dt', 'area-lt-18.0mm2-dt', 'area-lt-20.0mm2-{}']
         col_str = [x for x in row.keys() if 'area-lt' in x]
+        print(col_str)
         kwargs = dict(color=colormapper[method],alpha=0.5,)
-        if row.idx == 0:
+        if row.idx == '01':
             kwargs['label']=method
         plt.plot(x_tmp,(100*row[col_str]).tolist(),**kwargs)
 
@@ -87,14 +95,14 @@ def main(dist_folder,frangi_folder,fwhm_folder):
     with open('viz.md','w') as f:
         f.write(f'<img load="lazy" alt="..." src="pvv-dist-frangi.png" width="512"><br>\n')
         f.write(f'<img load="lazy" alt="..." src="area-hist.png" width="512"><br>\n')
-        for idx,mydict in main_dict.items():
-            f.write(f'{idx}: dist, frangi<br>\n')
-            for method in ['dist','frangi']:
-                key = f'{method}_mip_file'
-                if key not in mydict.keys():
-                    print(f'file not found {key} for {idx}')
+        for idx in rdf['idx'].unique():
+            f.write(f'{idx}: dist, frangi, bcsa, fwhm<br>\n')
+            for method in ['dist','frangi','bcsa','fwhm']:
+                tmp = rdf[(rdf.idx==idx)&(rdf.method==method)]
+                if len(tmp)==0:
                     continue
-                mip_file = mydict[key]
+                mip_file = tmp['mip_file'].tolist()[0]
+                print(mip_file)
                 tgt_file = f'static/{method}-mip-{idx}.png'
                 shutil.copy(mip_file,tgt_file)
                 f.write(f'<img load="lazy" alt="..." src="{tgt_file}" width="256">\n')
