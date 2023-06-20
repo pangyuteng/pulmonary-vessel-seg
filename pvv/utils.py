@@ -211,6 +211,7 @@ def estimate_fwhm(img,appx_radius):
     x_coord, y_coord = int(img.shape[0]/2), int(img.shape[1]/2)
     intensity = img[x_coord,y_coord]
     try:
+
         appx_theta = 0 # no rotation
         guess = [intensity, x_coord, y_coord, appx_radius, appx_radius, appx_theta]
         pred_params, uncert_cov = opt.curve_fit(gauss2d, xy, zobs, p0=guess)
@@ -220,6 +221,10 @@ def estimate_fwhm(img,appx_radius):
         _,_,_,sigma_x,sigma_y,theta = pred_params
         fwhm_x = 2*np.sqrt(2*np.log(2))*sigma_x
         fwhm_y = 2*np.sqrt(2*np.log(2))*sigma_y
+
+        if fwhm_x/fwhm_y > 1.5 or fwhm_y/fwhm_x > 1.5:
+            raise ValueError("rejecting since not circular enough")
+
         pred_radius = np.mean([fwhm_x, fwhm_y])
 
         if False:
