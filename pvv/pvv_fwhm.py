@@ -173,7 +173,7 @@ def estimate_radius(image_file,vessel_file,outdir,debug):
     #map_func = np.vectorize(lambda x: float(bcsa_dict.get(x,0)))
     #area = map_func(ws_branch)
     #print(area.dtype)
-    area = watershed(vsl_mask*-1, bcsa_area, mask=vsl_mask>0)
+    area = watershed(vsl_mask*-1, bcsa_area.astype(np.int32), mask=vsl_mask>0)
     qia_obj = sitk.GetImageFromArray(area)
     qia_obj.CopyInformation(image_obj)
     if debug:
@@ -229,7 +229,7 @@ def estimate_radius(image_file,vessel_file,outdir,debug):
     print('area...')
     #map_func = np.vectorize(lambda x: float(fwhm_dict.get(x,0)))
     #area = map_func(ws_branch)
-    area = watershed(vsl_mask*-1, fwhm_area, mask=vsl_mask>0)
+    area = watershed(vsl_mask*-1, fwhm_area.astype(np.int32), mask=vsl_mask>0)
     print(area.dtype)
     qia_obj = sitk.GetImageFromArray(area)
     qia_obj.CopyInformation(image_obj)
