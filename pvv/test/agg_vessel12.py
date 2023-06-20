@@ -12,16 +12,16 @@ def main(dist_folder,frangi_folder,fwhm_folder):
     main_dict = {}
     for myfolder in [dist_folder,frangi_folder,fwhm_folder]:
         json_file_list = sorted(list([str(x) for x in Path(myfolder).rglob("*.json")]))
-        print(json_file_list)
+        print(len(json_file_list))
         for json_file in json_file_list:
             idx = os.path.basename(os.path.dirname(json_file))
-            if 'dist' in os.path.basename():
+            if 'dist' in os.path.basename(json_file):
                 method = 'dist'
-            elif 'frangi' in os.path.basename():
+            elif 'frangi' in os.path.basename(json_file):
                 method = 'frangi'
-            elif 'bcsa' in os.path.basename():
+            elif 'bcsa' in os.path.basename(json_file):
                 method = 'bcsa'
-            elif 'fwhm' in os.path.basename():
+            elif 'fwhm' in os.path.basename(json_file):
                 method = 'fwhm'
             else:
                 raise NotImplementedError()
@@ -38,18 +38,33 @@ def main(dist_folder,frangi_folder,fwhm_folder):
 
     rdf = pd.DataFrame(mylist)
     rdf.to_csv('results.csv',index=False,float_format='%.3f')
+    sys.exit(1)
     for n,row in rdf.iterrows():
         x_tmp =  list(np.arange(2,22,2))
         col_str = ['area-lt-2.0mm2-dt', 'area-lt-4.0mm2-dt', 'area-lt-6.0mm2-dt', 'area-lt-8.0mm2-dt', 'area-lt-10.0mm2-dt', 'area-lt-12.0mm2-dt', 'area-lt-14.0mm2-dt', 'area-lt-16.0mm2-dt', 'area-lt-18.0mm2-dt', 'area-lt-20.0mm2-dt']
-        kwargs = dict(color='blue',alpha=0.5)
-        if n == 0:
-            kwargs['label']='dt'
-        plt.plot(x_tmp,(100*row[col_str]).tolist(),**kwargs)
-        col_str = ['area-lt-2.0mm2-frangi', 'area-lt-4.0mm2-frangi', 'area-lt-6.0mm2-frangi', 'area-lt-8.0mm2-frangi', 'area-lt-10.0mm2-frangi', 'area-lt-12.0mm2-frangi', 'area-lt-14.0mm2-frangi', 'area-lt-16.0mm2-frangi', 'area-lt-18.0mm2-frangi', 'area-lt-20.0mm2-frangi']
         kwargs = dict(color='red',alpha=0.5)
+        if n == 0:
+            kwargs['label']='dist'
+        plt.plot(x_tmp,(100*row[col_str]).tolist(),**kwargs)
+
+        col_str = ['area-lt-2.0mm2-frangi', 'area-lt-4.0mm2-frangi', 'area-lt-6.0mm2-frangi', 'area-lt-8.0mm2-frangi', 'area-lt-10.0mm2-frangi', 'area-lt-12.0mm2-frangi', 'area-lt-14.0mm2-frangi', 'area-lt-16.0mm2-frangi', 'area-lt-18.0mm2-frangi', 'area-lt-20.0mm2-frangi']
+        kwargs = dict(color='green',alpha=0.5)
         if n == 0:
             kwargs['label']='frangi'
         plt.plot(x_tmp,(100*row[col_str]).tolist(),**kwargs)
+        
+        col_str = ['area-lt-2.0mm2-bcsa', 'area-lt-4.0mm2-bcsa', 'area-lt-6.0mm2-bcsa', 'area-lt-8.0mm2-bcsa', 'area-lt-10.0mm2-bcsa', 'area-lt-12.0mm2-bcsa', 'area-lt-14.0mm2-bcsa', 'area-lt-16.0mm2-bcsa', 'area-lt-18.0mm2-bcsa', 'area-lt-20.0mm2-bcsa']
+        kwargs = dict(color='blue',alpha=0.5)
+        if n == 0:
+            kwargs['label']='bcsa'
+        plt.plot(x_tmp,(100*row[col_str]).tolist(),**kwargs)
+
+        col_str = ['area-lt-2.0mm2-fwhm', 'area-lt-4.0mm2-fwhm', 'area-lt-6.0mm2-fwhm', 'area-lt-8.0mm2-fwhm', 'area-lt-10.0mm2-fwhm', 'area-lt-12.0mm2-fwhm', 'area-lt-14.0mm2-fwhm', 'area-lt-16.0mm2-fwhm', 'area-lt-18.0mm2-fwhm', 'area-lt-20.0mm2-fwhm']
+        kwargs = dict(color='orange',alpha=0.5)
+        if n == 0:
+            kwargs['label']='fwhm'
+        plt.plot(x_tmp,(100*row[col_str]).tolist(),**kwargs)
+
     plt.title("vessel12 dataset (n=23)")
     plt.ylabel('blood vessel volume(%)')
     plt.xlabel('estimated vascular crossectional area (mm2)')
@@ -105,11 +120,9 @@ def main(dist_folder,frangi_folder,fwhm_folder):
             f.write('<br>')
 
 if __name__ == "__main__":
-    dist_folder = sys.argv[1]
-    frangi_folder = sys.argv[2]
-    main(dist_folder,frangi_folder)
+    main('vessel12-dist','vessel12-frangi','vessel12-fwhm')
 
 """
 docker run -it -u $(id -u):$(id -g) -w $PWD pangyuteng/ml:latest bash
-python agg_vessel12.py vessel12-dist vessel12-frangi
+python agg_vessel12.py
 """
