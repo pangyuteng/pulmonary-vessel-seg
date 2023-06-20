@@ -9,9 +9,12 @@
 
 + compute cross-sectional area from binary vessel mask (ref https://pubmed.ncbi.nlm.nih.gov/35334245)
 
-+ radius can be estimated using Frangi's multi-scale vesselness filter (ref https://link.springer.com/chapter/10.1007/bfb0056195 )
-
 + scale-space-particle (ref https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3670102)
+
++ radius can be estimated using Frangi's multi-scale vesselness filter (ref https://link.springer.com/chapter/10.1007/bfb0056195 , Quantification of pulmonary vessel
+diameter in low-dose CT images  https://doi.org/10.1117/12.2081602 )
+
++ radius can be derived also by assuming a length and fix radius per branch. (ref EA Chadwick — Vessel Network Extraction via micro-CT Imaging: A Foundation for Modelling Lung De- and Recellularization, see article for skeletn pruning methods, and branching/network analysis https://www.proquest.com/docview/2323128018 https://doi.org/10.1371/journal.pcbi.1008930 )
 
 #### using Vessel12 dataset we compute Blood-Volume-X BVX or Pulmonary-Vessel-like-Volume-X (PVVX)
 
@@ -121,18 +124,12 @@ BV5/TBV 58% , BV>10/TBV 28% (normal, N = 15)
 
 method summary: scale-space-particle (Chest Imaging Platform)
 
++ Nam, Ju Gang, et al. "Automatic pulmonary vessel segmentation on noncontrast chest CT: deep learning algorithm developed using spatiotemporally matched virtual noncontrast images and low-keV contrast-enhanced vessel maps." European Radiology 31.12 (2021): 9012-9021.
 
-+ Shimizu, Kaoruko, et al. "Relationships of computed tomography-based small vessel indices of the lungs with ventilation heterogeneity and high transfer coefficients in non-smokers with asthma." Frontiers in physiology 14 (2023): 1137603.
+https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8131193/
 
-https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10014854
+PVV5/TBV 63% (Gold 1, n=166)
 
-did not report BV5/TBV, reported BV5 ~125 mL (non-smokers n=117)
-
-
-
-+ "Automatic pulmonary vessel segmentation on noncontrast chest CT: deep learning algorithm developed using spatiotemporally matched virtual noncontrast images and low-keV contrast-enhanced vessel maps"
-
-    + PVV5 63% (Gold 1)
 # Blood Volume (BVx) algos
 
 + scale-space-particles

@@ -44,7 +44,6 @@ sigma = np.sqrt(area/pi)*2/2.355
 def estimate_radius(image_file,vessel_file,outdir,debug):
     
     os.makedirs(outdir,exist_ok=True)
-    pvv_file = os.path.join(outdir,'pvv.nii.gz')
     bcsa_json_file = os.path.join(outdir,'results-bcsa.json')
     fwhm_json_file = os.path.join(outdir,'results-fwhm.json')
     if os.path.exists(bcsa_json_file) and os.path.exists(fwhm_json_file):
@@ -114,7 +113,7 @@ def estimate_radius(image_file,vessel_file,outdir,debug):
     ws_branch = watershed(vsl_mask*-1, branch, mask=vsl_mask>0)
     ws_branch = ws_branch.astype(np.int16)
 
-    qia_obj = sitk.GetImageFromArray(ws_branch)
+    qia_obj = sitk.GetImageFromArray(ws_branch.astype(np.uint8))
     qia_obj.CopyInformation(image_obj)
     if debug:
         sitk.WriteImage(qia_obj,f"{outdir}/debug-watershed_labels.nii.gz")
@@ -284,7 +283,7 @@ def estimate_radius(image_file,vessel_file,outdir,debug):
 
     with open(fwhm_json_file,'w') as f:
         f.write(json.dumps(mydict, indent=4))
-
+    print('pvv_fwhm.py done')
 
 if __name__ == "__main__":
     image_file = sys.argv[1]

@@ -22,7 +22,6 @@ from utils import resample_img
 def main(mask_file,outdir,debug):
     os.makedirs(outdir,exist_ok=True)
     
-    pvv_file = os.path.join(outdir,'pvv.nii.gz')
     json_file = os.path.join(outdir,'results-dist.json')
     if os.path.exists(json_file):
         print(f'skip! {json_file} found')
@@ -168,7 +167,7 @@ def main(mask_file,outdir,debug):
     
     print('resample...')
     qia_obj = sitk.Resample(qia_obj, og_mask_obj, sitk.Transform(), sitk.sitkNearestNeighbor, 0, mask_obj.GetPixelID())
-    sitk.WriteImage(qia_obj,pvv_file)
+    sitk.WriteImage(qia_obj,f"{outdir}/dist-pvv.nii.gz")
 
     spacing = qia_obj.GetSpacing()
     cc_per_voxel = np.prod(spacing)*0.001

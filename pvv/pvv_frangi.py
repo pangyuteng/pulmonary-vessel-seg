@@ -61,7 +61,6 @@ sigma = np.sqrt(area/pi)*2/2.355
 def estimate_radius(image_file,lung_file,vessel_file,outdir,debug):
     
     os.makedirs(outdir,exist_ok=True)    
-    pvv_file = os.path.join(outdir,'pvv.nii.gz')
     json_file = os.path.join(outdir,'results-frangi.json')
     if os.path.exists(json_file):
         print(f'skip! {json_file} found')
@@ -266,7 +265,7 @@ def estimate_radius(image_file,lung_file,vessel_file,outdir,debug):
     pvv[lung==0]=0 # resample is yielding non-0 values near image border.
     qia_obj = sitk.GetImageFromArray(pvv)
     qia_obj.CopyInformation(lung_obj)
-    sitk.WriteImage(qia_obj,f"{outdir}/pvv.nii.gz")
+    sitk.WriteImage(qia_obj,f"{outdir}/frangi-pvv.nii.gz")
 
     print('mip...')
     print(np.unique(pvv))
@@ -288,7 +287,7 @@ def estimate_radius(image_file,lung_file,vessel_file,outdir,debug):
 
     with open(json_file,'w') as f:
         f.write(json.dumps(mydict, indent=4))
-
+    print('pvv_frangi.py done')
 
 if __name__ == "__main__":
     image_file = sys.argv[1]
