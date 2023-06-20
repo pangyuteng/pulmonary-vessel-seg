@@ -138,7 +138,8 @@ def main(mask_file,outdir,debug):
     
     arr = area[ws_branch>0]
     print(np.min(arr),np.max(arr))
-    hist, bin_edges = np.histogram(arr,bins=10,range=(0,20))
+    bin_num = 20
+    hist, bin_edges = np.histogram(arr,bins=bin_num,range=(0,20))
     hist = np.round(hist,2)
     hist = hist / np.sum(hist)
     hist = hist.tolist()
