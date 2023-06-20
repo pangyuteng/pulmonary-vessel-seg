@@ -143,7 +143,7 @@ def main(mask_file,outdir,debug):
     hist = np.round(hist,2)
     hist = hist / np.sum(hist)
     hist = hist.tolist()
-    hist_dict = {f'area-lt-{k}mm2-dt':v for k,v in zip(bin_edges[1:],hist)}
+    hist_dict = {f'area-lt-{k}mm2-dist':v for k,v in zip(bin_edges[1:],hist)}
     print(hist_dict)
     '''
     # radius

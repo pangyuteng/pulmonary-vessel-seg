@@ -9,7 +9,7 @@ import SimpleITK as sitk
 import matplotlib.pyplot as plt
 
 def main(dist_folder,frangi_folder,fwhm_folder):
-    main_dict = {}
+    mylist = []
     for myfolder in [dist_folder,frangi_folder,fwhm_folder]:
         json_file_list = sorted(list([str(x) for x in Path(myfolder).rglob("*.json")]))
         print(len(json_file_list))
@@ -27,42 +27,23 @@ def main(dist_folder,frangi_folder,fwhm_folder):
                 raise NotImplementedError()
 
             mip_file = os.path.join(os.path.dirname(json_file),f'mip_{method}.png')
-            if idx not in main_dict.keys():
-                main_dict[idx]={'idx':idx}
+            myitem = {'idx':idx,'method':method,'mip_file':mip_file}
             with open(json_file,'r') as f:
                 mydict = json.loads(f.read())
-            mydict[f'{method}_mip_file']=mip_file
-            main_dict[idx].update(mydict)
-
-    mylist = list(main_dict.values())
+            myitem.update(mydict)
+            mylist.append(myitem)
 
     rdf = pd.DataFrame(mylist)
     rdf.to_csv('results.csv',index=False,float_format='%.3f')
-    sys.exit(1)
+    colormapper = dict(dist='red',frangi='green',bcsa='blue',fwhm='orange')
     for n,row in rdf.iterrows():
         x_tmp =  list(np.arange(2,22,2))
-        col_str = ['area-lt-2.0mm2-dt', 'area-lt-4.0mm2-dt', 'area-lt-6.0mm2-dt', 'area-lt-8.0mm2-dt', 'area-lt-10.0mm2-dt', 'area-lt-12.0mm2-dt', 'area-lt-14.0mm2-dt', 'area-lt-16.0mm2-dt', 'area-lt-18.0mm2-dt', 'area-lt-20.0mm2-dt']
-        kwargs = dict(color='red',alpha=0.5)
-        if n == 0:
-            kwargs['label']='dist'
-        plt.plot(x_tmp,(100*row[col_str]).tolist(),**kwargs)
-
-        col_str = ['area-lt-2.0mm2-frangi', 'area-lt-4.0mm2-frangi', 'area-lt-6.0mm2-frangi', 'area-lt-8.0mm2-frangi', 'area-lt-10.0mm2-frangi', 'area-lt-12.0mm2-frangi', 'area-lt-14.0mm2-frangi', 'area-lt-16.0mm2-frangi', 'area-lt-18.0mm2-frangi', 'area-lt-20.0mm2-frangi']
-        kwargs = dict(color='green',alpha=0.5)
-        if n == 0:
-            kwargs['label']='frangi'
-        plt.plot(x_tmp,(100*row[col_str]).tolist(),**kwargs)
-        
-        col_str = ['area-lt-2.0mm2-bcsa', 'area-lt-4.0mm2-bcsa', 'area-lt-6.0mm2-bcsa', 'area-lt-8.0mm2-bcsa', 'area-lt-10.0mm2-bcsa', 'area-lt-12.0mm2-bcsa', 'area-lt-14.0mm2-bcsa', 'area-lt-16.0mm2-bcsa', 'area-lt-18.0mm2-bcsa', 'area-lt-20.0mm2-bcsa']
-        kwargs = dict(color='blue',alpha=0.5)
-        if n == 0:
-            kwargs['label']='bcsa'
-        plt.plot(x_tmp,(100*row[col_str]).tolist(),**kwargs)
-
-        col_str = ['area-lt-2.0mm2-fwhm', 'area-lt-4.0mm2-fwhm', 'area-lt-6.0mm2-fwhm', 'area-lt-8.0mm2-fwhm', 'area-lt-10.0mm2-fwhm', 'area-lt-12.0mm2-fwhm', 'area-lt-14.0mm2-fwhm', 'area-lt-16.0mm2-fwhm', 'area-lt-18.0mm2-fwhm', 'area-lt-20.0mm2-fwhm']
-        kwargs = dict(color='orange',alpha=0.5)
-        if n == 0:
-            kwargs['label']='fwhm'
+        method = row.method
+        #col_str = [f'area-lt-2.0mm2-{method}', 'area-lt-4.0mm2-{}', 'area-lt-6.0mm2-dt', 'area-lt-8.0mm2-dt', 'area-lt-10.0mm2-dt', 'area-lt-12.0mm2-dt', 'area-lt-14.0mm2-dt', 'area-lt-16.0mm2-dt', 'area-lt-18.0mm2-dt', 'area-lt-20.0mm2-{}']
+        col_str = [x for x in row.keys() if 'area-lt' in x]
+        kwargs = dict(color=colormapper[method],alpha=0.5,)
+        if row.idx == 0:
+            kwargs['label']=method
         plt.plot(x_tmp,(100*row[col_str]).tolist(),**kwargs)
 
     plt.title("vessel12 dataset (n=23)")
@@ -70,7 +51,7 @@ def main(dist_folder,frangi_folder,fwhm_folder):
     plt.xlabel('estimated vascular crossectional area (mm2)')
     plt.legend()
     plt.grid(True)
-    plt.savefig('area-hist-dt-frangi.png')
+    plt.savefig('area-hist.png')
     plt.close()
 
     x_list = []
@@ -99,13 +80,13 @@ def main(dist_folder,frangi_folder,fwhm_folder):
     plt.ylabel('pvv (cc, method: vesselness)')
     plt.legend()
     plt.grid(True)
-    plt.savefig('pvv-dt-frang.png')
+    plt.savefig('pvv-dist-frangi.png')
     plt.close()
 
     os.makedirs('static',exist_ok=True)
     with open('viz.md','w') as f:
-        f.write(f'<img load="lazy" alt="..." src="pvv-dt-frang.png" width="512"><br>\n')
-        f.write(f'<img load="lazy" alt="..." src="area-hist-dt-frangi.png" width="512"><br>\n')
+        f.write(f'<img load="lazy" alt="..." src="pvv-dist-frangi.png" width="512"><br>\n')
+        f.write(f'<img load="lazy" alt="..." src="area-hist.png" width="512"><br>\n')
         for idx,mydict in main_dict.items():
             f.write(f'{idx}: dist, frangi<br>\n')
             for method in ['dist','frangi']:
