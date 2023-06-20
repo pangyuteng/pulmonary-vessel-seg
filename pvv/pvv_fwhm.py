@@ -178,6 +178,15 @@ def estimate_radius(image_file,vessel_file,outdir,debug):
     if debug:
         sitk.WriteImage(qia_obj,f"{outdir}/debug-bcsa-area.nii.gz")
 
+    arr = area[ws_branch>0]
+    print(np.min(arr),np.max(arr))
+    hist, bin_edges = np.histogram(arr,bins=10,range=(0,20))
+    hist = np.round(hist,2)
+    hist = hist / np.sum(hist)
+    hist = hist.tolist()
+    hist_dict = {f'area-lt-{k}mm2-bcsa':v for k,v in zip(bin_edges[1:],hist)}
+    print(hist_dict)
+
     print('pvv...')
     pvv = np.zeros_like(area)
     pvv[np.logical_and(area>0,area<=5)]=1
@@ -213,7 +222,7 @@ def estimate_radius(image_file,vessel_file,outdir,debug):
         'pvv10-bcsa-cc': float(np.sum(pvv_bcsa==2)*cc_per_voxel),
         'pvv10+-bcsa-cc': float(np.sum(pvv_bcsa==3)*cc_per_voxel),
     }
-
+    mydict.update(hist_dict)
 
     print('area...')
     #map_func = np.vectorize(lambda x: float(fwhm_dict.get(x,0)))
@@ -224,6 +233,16 @@ def estimate_radius(image_file,vessel_file,outdir,debug):
     qia_obj.CopyInformation(image_obj)
     if debug:
         sitk.WriteImage(qia_obj,f"{outdir}/debug-fwhm-area.nii.gz")
+
+    arr = area[ws_branch>0]
+    print(np.min(arr),np.max(arr))
+    hist, bin_edges = np.histogram(arr,bins=10,range=(0,20))
+    hist = np.round(hist,2)
+    hist = hist / np.sum(hist)
+    hist = hist.tolist()
+    hist_dict = {f'area-lt-{k}mm2-fwhm':v for k,v in zip(bin_edges[1:],hist)}
+    print(hist_dict)
+
 
     print('pvv...')
     pvv = np.zeros_like(area)
@@ -259,6 +278,7 @@ def estimate_radius(image_file,vessel_file,outdir,debug):
         'pvv10-fwhm-cc': float(np.sum(pvv_fwhm==2)*cc_per_voxel),
         'pvv10+-fwhm-cc': float(np.sum(pvv_fwhm==3)*cc_per_voxel),
     })
+    mydict.update(hist_dict)
 
     with open(json_file,'w') as f:
         f.write(json.dumps(mydict))
