@@ -213,18 +213,21 @@ def estimate_fwhm(img,appx_radius):
     try:
         appx_theta = 5
         guess = [intensity, x_coord, y_coord, appx_radius, appx_radius, appx_theta]
-        print('guess',guess)
         pred_params, uncert_cov = opt.curve_fit(gauss2d, xy, zobs, p0=guess)
         zpred = gauss2d(xy, *pred_params)
+
         rms = np.sqrt(np.mean((zobs - zpred)**2))
-        print('Initial params:', guess)
-        print('Predicted params:', pred_params)
-        print('Residual, RMS(obs - pred):', rms)
         _,_,_,sigma_x,sigma_y,theta = pred_params
         fwhm_x = 2*np.sqrt(2*np.log(2))*sigma_x
         fwhm_y = 2*np.sqrt(2*np.log(2))*sigma_y
         pred_radius = np.mean([fwhm_x, fwhm_y])
-        print("initial radius",appx_radius,"pred_radius",pred_radius)
+
+        if False:
+            print('guess',guess)
+            print('Initial params:', guess)
+            print('Predicted params:', pred_params)
+            print('Residual, RMS(obs - pred):', rms)
+            print("initial radius",appx_radius,"pred_radius",pred_radius)
 
         return pred_radius
     except:

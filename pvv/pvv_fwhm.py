@@ -133,7 +133,7 @@ def estimate_radius(image_file,lung_file,vessel_file,outdir,debug):
             slice_center = image_obj.TransformContinuousIndexToPhysicalPoint([int(mystart[2]),int(mystart[1]),int(mystart[0])])
             slice_end = image_obj.TransformContinuousIndexToPhysicalPoint([int(myend[2]),int(myend[1]),int(myend[0])])
             slice_normal = np.array(slice_end)-np.array(slice_center)
-            slice_spacing = (1,1,1)
+            slice_spacing = (1,1,1) # out of laziness, maintain voxel size at 1mm^3
             slice_radius = p.mean_intensity
             is_label = True
             #print(slice_center,slice_normal,slice_spacing,slice_radius,is_label)
@@ -141,7 +141,7 @@ def estimate_radius(image_file,lung_file,vessel_file,outdir,debug):
             myarr = sitk.GetArrayFromImage(myslice).squeeze().astype(np.uint8)
             mylabel = label(myarr)
             cidx=int(mylabel.shape[0]/2)
-            myarea = np.sum(mylabel==mylabel[cidx,cidx]) # mm^2
+            myarea = np.sum(mylabel==mylabel[cidx,cidx]) # mm^2 # because slice spacing is 1x1 mm^2
             # this is not FWHM YET.
             bcsa_dict[p.label] = myarea
             is_label = False
@@ -153,7 +153,7 @@ def estimate_radius(image_file,lung_file,vessel_file,outdir,debug):
                 slice_png_list.append(png_file)
             
             pred_radius = estimate_fwhm(myarr.astype(float),slice_radius)
-            fwhm_dict[p.label]=pred_radius
+            fwhm_dict[p.label]=np.pi * (pred_radius**2)
 
     if False:
         with open(f'{outdir}/index.html','w') as f:
@@ -244,12 +244,12 @@ def estimate_radius(image_file,lung_file,vessel_file,outdir,debug):
     imageio.imwrite(mip_file,mip)
 
     mydict.update({
-        'pvv5-bcsa-prct': float(np.sum(pvv_fwhm==1)/np.sum(pvv_fwhm>0)), # binary-cross-sectional-area
-        'pvv10-bcsa-prct': float(np.sum(pvv_fwhm==2)/np.sum(pvv_fwhm>0)),
-        'pvv10+-bcsa-prct': float(np.sum(pvv_fwhm==3)/np.sum(pvv_fwhm>0)),
-        'pvv5-bcsa-cc': float(np.sum(pvv_fwhm==1)*cc_per_voxel),
-        'pvv10-bcsa-cc': float(np.sum(pvv_fwhm==2)*cc_per_voxel),
-        'pvv10+-bcsa-cc': float(np.sum(pvv_fwhm==3)*cc_per_voxel),
+        'pvv5-fwhm-prct': float(np.sum(pvv_fwhm==1)/np.sum(pvv_fwhm>0)), # binary-cross-sectional-area
+        'pvv10-fwhm-prct': float(np.sum(pvv_fwhm==2)/np.sum(pvv_fwhm>0)),
+        'pvv10+-fwhm-prct': float(np.sum(pvv_fwhm==3)/np.sum(pvv_fwhm>0)),
+        'pvv5-fwhm-cc': float(np.sum(pvv_fwhm==1)*cc_per_voxel),
+        'pvv10-fwhm-cc': float(np.sum(pvv_fwhm==2)*cc_per_voxel),
+        'pvv10+-fwhm-cc': float(np.sum(pvv_fwhm==3)*cc_per_voxel),
     })
 
     with open(json_file,'w') as f:
