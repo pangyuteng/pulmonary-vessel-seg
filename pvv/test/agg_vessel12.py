@@ -63,21 +63,31 @@ def main(dist_folder,frangi_folder,fwhm_folder):
     x_list = []
     y_list = []
     
-    for key_dt,key_frangi,unit in [
-        ('pvv5-dist-prct','pvv5-frangi-prct','fraction'),
-        ('pvv10-dist-prct','pvv10-frangi-prct','fraction'),
-        ('pvv10+-dist-prct','pvv10+-frangi-prct','fraction'),
-        ('pvv5-dist-cc','pvv5-frangi-cc','cc'),
-        ('pvv10-dist-cc','pvv10-frangi-cc','cc'),
-        ('pvv10+-dist-cc','pvv10+-frangi-cc','cc')]:
+    for key_dt,key_frangi,key_bcsa,key_fwhm,unit in [
+        ('pvv5-dist-prct','pvv5-frangi-prct','pvv5-bcsa-prct','pvv5-fwhm-prct','fraction'),
+        ('pvv10-dist-prct','pvv10-frangi-prct','pvv10-bcsa-prct','pvv10-fwhm-prct','fraction'),
+        ('pvv10+-dist-prct','pvv10+-frangi-prct','pvv10+-bcsa-prct','pvv10+-fwhm-prct','fraction'),
+        ('pvv5-dist-cc','pvv5-frangi-cc','pvv5-bcsa-cc','pvv5-fwhm-cc','cc'),
+        ('pvv10-dist-cc','pvv10-frangi-cc','pvv10-bcsa-cc','pvv10-fwhm-cc','cc'),
+        ('pvv10+-dist-cc','pvv10+-frangi-cc','pvv10+-bcsa-cc','pvv10+-fwhm-cc','cc')]:
         if unit == 'cc':
             x_list.extend(rdf[key_dt])
             y_list.extend(rdf[key_frangi])
         if unit == 'fraction':
             unit = "prct"
-            print('mean',key_dt,(rdf[key_dt].mean()*100).round(2),unit,key_frangi,(rdf[key_frangi].mean()*100).round(2),unit)
+            print('mean',
+                key_dt,(rdf[key_dt].mean()*100).round(2),unit,
+                key_frangi,(rdf[key_frangi].mean()*100).round(2),unit,
+                key_bcsa,(rdf[key_bcsa].mean()*100).round(2),unit,
+                key_fwhm,(rdf[key_fwhm].mean()*100).round(2),unit
+            )
         else:
-            print('mean',key_dt,rdf[key_dt].mean().round(2),unit,key_frangi,rdf[key_frangi].mean().round(2),unit)
+            print('mean',
+            key_dt,rdf[key_dt].mean().round(2),unit,
+            key_frangi,rdf[key_frangi].mean().round(2),unit,
+            key_bcsa,rdf[key_bcsa].mean().round(2),unit,
+            key_fwhm,rdf[key_fwhm].mean().round(2),unit
+        )
     print(f'n={len(rdf)}')
 
     plt.scatter(x_list,y_list)
@@ -100,7 +110,6 @@ def main(dist_folder,frangi_folder,fwhm_folder):
                 if len(tmp)==0:
                     continue
                 mip_file = tmp['mip_file'].tolist()[0]
-                print(mip_file)
                 tgt_file = f'static/{method}-mip-{idx}.png'
                 shutil.copy(mip_file,tgt_file)
                 f.write(f'<img load="lazy" alt="..." src="{tgt_file}" width="256">\n')

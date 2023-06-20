@@ -60,11 +60,6 @@
 <img load="lazy" alt="..." src="static/frangi-mip-12.png" width="256">
 <img load="lazy" alt="..." src="static/bcsa-mip-12.png" width="256">
 <img load="lazy" alt="..." src="static/fwhm-mip-12.png" width="256">
-<br>13: dist, frangi, bcsa, fwhm<br>
-<img load="lazy" alt="..." src="static/dist-mip-13.png" width="256">
-<img load="lazy" alt="..." src="static/frangi-mip-13.png" width="256">
-<img load="lazy" alt="..." src="static/bcsa-mip-13.png" width="256">
-<img load="lazy" alt="..." src="static/fwhm-mip-13.png" width="256">
 <br>14: dist, frangi, bcsa, fwhm<br>
 <img load="lazy" alt="..." src="static/dist-mip-14.png" width="256">
 <img load="lazy" alt="..." src="static/frangi-mip-14.png" width="256">
@@ -115,4 +110,8 @@
 <img load="lazy" alt="..." src="static/frangi-mip-23.png" width="256">
 <img load="lazy" alt="..." src="static/bcsa-mip-23.png" width="256">
 <img load="lazy" alt="..." src="static/fwhm-mip-23.png" width="256">
+<br>13: dist, frangi, bcsa, fwhm<br>
+<img load="lazy" alt="..." src="static/frangi-mip-13.png" width="256">
+<img load="lazy" alt="..." src="static/bcsa-mip-13.png" width="256">
+<img load="lazy" alt="..." src="static/fwhm-mip-13.png" width="256">
 <br>
