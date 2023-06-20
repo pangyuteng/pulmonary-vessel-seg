@@ -41,7 +41,7 @@ sigma = np.sqrt(area/pi)*2/2.355
 '''
 
 
-def estimate_radius(image_file,lung_file,vessel_file,outdir,debug):
+def estimate_radius(image_file,vessel_file,outdir,debug):
     
     os.makedirs(outdir,exist_ok=True)
     pvv_file = os.path.join(outdir,'pvv.nii.gz')
@@ -51,16 +51,13 @@ def estimate_radius(image_file,lung_file,vessel_file,outdir,debug):
         return
 
     og_image_obj = sitk.ReadImage(image_file)
-    lung_obj = sitk.ReadImage(lung_file)
     vessel_obj = sitk.ReadImage(vessel_file)
     
     out_spacing = [1.0,1.0,1.0]
     image_obj = resample_img(og_image_obj, out_spacing, is_label=False)
-    lung_obj = resample_img(lung_obj, out_spacing, is_label=True)
     vessel_obj = resample_img(vessel_obj, out_spacing, is_label=True)
 
     image = sitk.GetArrayFromImage(image_obj)
-    lung_mask = sitk.GetArrayFromImage(lung_obj)
     vsl_mask = sitk.GetArrayFromImage(vessel_obj)
 
     spacing = image_obj.GetSpacing()
@@ -269,11 +266,10 @@ def estimate_radius(image_file,lung_file,vessel_file,outdir,debug):
 
 if __name__ == "__main__":
     image_file = sys.argv[1]
-    lung_file = sys.argv[2]
-    vessel_file = sys.argv[3]
-    outdir = sys.argv[4]
-    debug = ast.literal_eval(sys.argv[5])
-    estimate_radius(image_file,lung_file,vessel_file,outdir,debug)
+    vessel_file = sys.argv[2]
+    outdir = sys.argv[3]
+    debug = ast.literal_eval(sys.argv[4])
+    estimate_radius(image_file,vessel_file,outdir,debug)
 
 """
 
@@ -281,6 +277,6 @@ docker run -it -u $(id -u):$(id -g) -w $PWD \
     -v /cvibraid:/cvibraid -v /radraid:/radraid \
     pangyuteng/ml:latest bash
 
-python pvv_fwhm.py img.nii.gz lung.nii.gz wasserthal.nii.gz outdir-fwhm True
+python pvv_fwhm.py img.nii.gz wasserthal.nii.gz outdir-fwhm True
 
 """
