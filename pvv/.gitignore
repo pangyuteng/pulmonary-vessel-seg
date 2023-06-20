@@ -3,6 +3,7 @@ __pycache__
 *.png
 outdir-dt
 outdir-frangi
+outdir-fwhm
 graph.gpickle
 skeleton.txt
 tabb/*

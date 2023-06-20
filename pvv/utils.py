@@ -222,7 +222,7 @@ def estimate_fwhm(img,appx_radius):
         fwhm_y = 2*np.sqrt(2*np.log(2))*sigma_y
         pred_radius = np.mean([fwhm_x, fwhm_y])
 
-        if True:
+        if False:
             print('guess',guess)
             print('Initial params:', guess)
             print('Predicted params:', pred_params)
@@ -231,7 +231,8 @@ def estimate_fwhm(img,appx_radius):
 
         return pred_radius
     except:
-        traceback.print_exc()
+        if False:
+            traceback.print_exc()
         return appx_radius
 
 if __name__ == "__main__":

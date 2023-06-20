@@ -122,6 +122,8 @@ def estimate_radius(image_file,lung_file,vessel_file,outdir,debug):
         sitk.WriteImage(qia_obj,f"{outdir}/debug-watershed_labels.nii.gz")
     
     props = regionprops(branch,intensity_image=bs_field)
+    bcsa_area = np.zeros_like(branch.astype(np.float))
+    fwhm_area = np.zeros_like(branch.astype(np.float))
     bcsa_dict = {}
     fwhm_dict = {}
     slice_png_list = []
@@ -129,21 +131,26 @@ def estimate_radius(image_file,lung_file,vessel_file,outdir,debug):
         for n,coord in enumerate(p.coords[:-1]):
             mystart = p.coords[n]
             myend = p.coords[n+1]
-            #print(mystart,myend)
             slice_center = image_obj.TransformContinuousIndexToPhysicalPoint([int(mystart[2]),int(mystart[1]),int(mystart[0])])
             slice_end = image_obj.TransformContinuousIndexToPhysicalPoint([int(myend[2]),int(myend[1]),int(myend[0])])
             slice_normal = np.array(slice_end)-np.array(slice_center)
             slice_spacing = (1,1,1) # out of laziness, maintain voxel size at 1mm^3
             slice_radius = p.mean_intensity
-            is_label = True
+            
             #print(slice_center,slice_normal,slice_spacing,slice_radius,is_label)
+
+            ##### estimate area from cross-sectional area of vessel mask ('binary-cross-sectional-area')
+            is_label = True
             myslice = extract_slice(vessel_obj,slice_center,slice_normal,slice_spacing,slice_radius,is_label)
             myarr = sitk.GetArrayFromImage(myslice).squeeze().astype(np.uint8)
             mylabel = label(myarr)
             cidx=int(mylabel.shape[0]/2)
             myarea = np.sum(mylabel==mylabel[cidx,cidx]) # mm^2 # because slice spacing is 1x1 mm^2
-            # this is not FWHM YET.
             bcsa_dict[p.label] = myarea
+            bcsa_area[coord[0],coord[1],coord[2]] = myarea
+
+            ##### estimate area using fwhm
+            
             is_label = False
             myslice = extract_slice(myimg_obj,slice_center,slice_normal,slice_spacing,slice_radius,is_label)
             myarr = sitk.GetArrayFromImage(myslice).squeeze().astype(np.uint8)
@@ -153,7 +160,9 @@ def estimate_radius(image_file,lung_file,vessel_file,outdir,debug):
                 slice_png_list.append(png_file)
             
             pred_radius = estimate_fwhm(myarr.astype(float),slice_radius)
-            fwhm_dict[p.label]=np.pi * (pred_radius**2)
+            myarea = np.pi * (pred_radius**2)
+            fwhm_dict[p.label] = myarea
+            fwhm_area[coord[0],coord[1],coord[2]] = myarea
 
     if False:
         with open(f'{outdir}/index.html','w') as f:
@@ -163,9 +172,10 @@ def estimate_radius(image_file,lung_file,vessel_file,outdir,debug):
                 f.write(mystr)
 
     print('area...')
-    map_func = np.vectorize(lambda x: float(bcsa_dict.get(x,0)))
-    area = map_func(ws_branch)
-    print(area.dtype)
+    #map_func = np.vectorize(lambda x: float(bcsa_dict.get(x,0)))
+    #area = map_func(ws_branch)
+    #print(area.dtype)
+    area = watershed(vsl_mask*-1, bcsa_area, mask=vsl_mask>0)
     qia_obj = sitk.GetImageFromArray(area)
     qia_obj.CopyInformation(image_obj)
     if debug:
@@ -209,8 +219,9 @@ def estimate_radius(image_file,lung_file,vessel_file,outdir,debug):
 
 
     print('area...')
-    map_func = np.vectorize(lambda x: float(fwhm_dict.get(x,0)))
-    area = map_func(ws_branch)
+    #map_func = np.vectorize(lambda x: float(fwhm_dict.get(x,0)))
+    #area = map_func(ws_branch)
+    area = watershed(vsl_mask*-1, fwhm_area, mask=vsl_mask>0)
     print(area.dtype)
     qia_obj = sitk.GetImageFromArray(area)
     qia_obj.CopyInformation(image_obj)
