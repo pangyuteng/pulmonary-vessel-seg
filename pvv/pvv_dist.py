@@ -23,7 +23,7 @@ def main(mask_file,outdir,debug):
     os.makedirs(outdir,exist_ok=True)
     
     pvv_file = os.path.join(outdir,'pvv.nii.gz')
-    json_file = os.path.join(outdir,'results-dt.json')
+    json_file = os.path.join(outdir,'results-dist.json')
     if os.path.exists(json_file):
         print(f'skip! {json_file} found')
         return
@@ -177,7 +177,7 @@ def main(mask_file,outdir,debug):
     
     print('mip...')
     mip = np.max(pvv,axis=1)*80
-    mip_file = f"{outdir}/mip.png"
+    mip_file = f"{outdir}/mip_dist.png"
     imageio.imwrite(mip_file,mip)
 
     mydict = {

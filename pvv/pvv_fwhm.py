@@ -45,9 +45,10 @@ def estimate_radius(image_file,vessel_file,outdir,debug):
     
     os.makedirs(outdir,exist_ok=True)
     pvv_file = os.path.join(outdir,'pvv.nii.gz')
-    json_file = os.path.join(outdir,'results-fwhm.json')
-    if os.path.exists(json_file):
-        print(f'skip! {json_file} found')
+    bcsa_json_file = os.path.join(outdir,'results-bcsa.json')
+    fwhm_json_file = os.path.join(outdir,'results-fwhm.json')
+    if os.path.exists(bcsa_json_file) and os.path.exists(fwhm_json_file):
+        print(f'skip! {bcsa_json_file} {fwhm_json_file} found')
         return
 
     og_image_obj = sitk.ReadImage(image_file)
@@ -213,7 +214,6 @@ def estimate_radius(image_file,vessel_file,outdir,debug):
     mip_file = f"{outdir}/mip_bcsa.png"
     imageio.imwrite(mip_file,mip)
 
-
     mydict = {
         'pvv5-bcsa-prct': float(np.sum(pvv_bcsa==1)/np.sum(pvv_bcsa>0)), # binary-cross-sectional-area
         'pvv10-bcsa-prct': float(np.sum(pvv_bcsa==2)/np.sum(pvv_bcsa>0)),
@@ -223,6 +223,8 @@ def estimate_radius(image_file,vessel_file,outdir,debug):
         'pvv10+-bcsa-cc': float(np.sum(pvv_bcsa==3)*cc_per_voxel),
     }
     mydict.update(hist_dict)
+    with open(bcsa_json_file,'w') as f:
+        f.write(json.dumps(mydict, indent=4))
 
     print('area...')
     #map_func = np.vectorize(lambda x: float(fwhm_dict.get(x,0)))
@@ -270,17 +272,17 @@ def estimate_radius(image_file,vessel_file,outdir,debug):
     mip_file = f"{outdir}/mip_fwhm.png"
     imageio.imwrite(mip_file,mip)
 
-    mydict.update({
+    mydict = {
         'pvv5-fwhm-prct': float(np.sum(pvv_fwhm==1)/np.sum(pvv_fwhm>0)), # binary-cross-sectional-area
         'pvv10-fwhm-prct': float(np.sum(pvv_fwhm==2)/np.sum(pvv_fwhm>0)),
         'pvv10+-fwhm-prct': float(np.sum(pvv_fwhm==3)/np.sum(pvv_fwhm>0)),
         'pvv5-fwhm-cc': float(np.sum(pvv_fwhm==1)*cc_per_voxel),
         'pvv10-fwhm-cc': float(np.sum(pvv_fwhm==2)*cc_per_voxel),
         'pvv10+-fwhm-cc': float(np.sum(pvv_fwhm==3)*cc_per_voxel),
-    })
+    }
     mydict.update(hist_dict)
 
-    with open(json_file,'w') as f:
+    with open(fwhm_json_file,'w') as f:
         f.write(json.dumps(mydict, indent=4))
 
 

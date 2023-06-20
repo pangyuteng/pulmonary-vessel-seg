@@ -8,14 +8,25 @@ import pandas as pd
 import SimpleITK as sitk
 import matplotlib.pyplot as plt
 
-def main(dist_folder,frangi_folder):
+def main(dist_folder,frangi_folder,fwhm_folder):
     main_dict = {}
-    for method,myfolder in [('dist',dist_folder),('frangi',frangi_folder)]:
+    for myfolder in [dist_folder,frangi_folder,fwhm_folder]:
         json_file_list = sorted(list([str(x) for x in Path(myfolder).rglob("*.json")]))
         print(json_file_list)
         for json_file in json_file_list:
             idx = os.path.basename(os.path.dirname(json_file))
-            mip_file = os.path.join(os.path.dirname(json_file),'mip.png')
+            if 'dist' in os.path.basename():
+                method = 'dist'
+            elif 'frangi' in os.path.basename():
+                method = 'frangi'
+            elif 'bcsa' in os.path.basename():
+                method = 'bcsa'
+            elif 'fwhm' in os.path.basename():
+                method = 'fwhm'
+            else:
+                raise NotImplementedError()
+
+            mip_file = os.path.join(os.path.dirname(json_file),f'mip_{method}.png')
             if idx not in main_dict.keys():
                 main_dict[idx]={'idx':idx}
             with open(json_file,'r') as f:

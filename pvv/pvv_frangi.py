@@ -273,7 +273,7 @@ def estimate_radius(image_file,lung_file,vessel_file,outdir,debug):
     mip = np.max(pvv,axis=1)*80
     mip = mip.astype(np.uint8)
     print(np.unique(mip))
-    mip_file = f"{outdir}/mip.png"
+    mip_file = f"{outdir}/mip_frangi.png"
     imageio.imwrite(mip_file,mip)
 
     mydict = {
