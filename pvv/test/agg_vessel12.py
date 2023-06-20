@@ -44,7 +44,8 @@ def main(dist_folder,frangi_folder,fwhm_folder):
     rdf.to_csv('results.csv',index=False,float_format='%.3f')
     colormapper = dict(dist='red',frangi='green',bcsa='blue',fwhm='orange')
     for n,row in rdf.iterrows():
-        x_tmp =  list(np.arange(2,22,2))
+        #x_tmp =  list(np.arange(2,22,2))
+        x_tmp =  list(np.arange(1,21,1))
         method = row.method
         col_str = [x for x in row.keys() if 'area-lt' in x]
         kwargs = dict(color=colormapper[method],alpha=0.5,)
