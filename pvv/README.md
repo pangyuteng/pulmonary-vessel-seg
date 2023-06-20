@@ -7,7 +7,7 @@
 
 + distance transform from binary vessel mask (ref https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10023743 https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7308498 )
 
-+ compute cross-sectional area of binary vessel mask (ref https://pubmed.ncbi.nlm.nih.gov/35334245)
++ compute cross-sectional area from binary vessel mask (ref https://pubmed.ncbi.nlm.nih.gov/35334245)
 
 + radius can be estimated using Frangi's multi-scale vesselness filter (ref https://link.springer.com/chapter/10.1007/bfb0056195 )
 
@@ -15,8 +15,11 @@
 
 #### using Vessel12 dataset we compute Blood-Volume-X BVX or Pulmonary-Vessel-like-Volume-X (PVVX)
 
+
++ we used TotalSementator to first segment the lung vessels.
+
 + method "pvvx-dt"
-    + segment pulunary vessels using TotalSementator
+    + segment pulmonary vessels using 
     + boundary-seeded distance-transform computed from vessel mask (bsfield)
     + vessel banch are identifeid and radius is estimated per branch.
         + by performing skeletonization from the vessel mask
@@ -27,16 +30,26 @@
         + the branch identifier can then be watershd back into the vessel mask.
     + each branch can be assigned to be PVV5,5-10,10+ using the cross-sectional area computed from the estimated radius per branch.
 
-+ method "pvvx-frangi" is similar except that the radius is estimated from the sigma of the max response from thefrangi's vesselness filter (objectness-filter in SimpleITK).
++ method "pvvx-frangi" is similar except that the radius is estimated from the sigma of the max response from thefrangi's vesselness filter (objectness-filter in SimpleITK) - using the binary vessel mask.
+
++ method "pvvx-bcsa" estimates the radius from the cross-sectional area at each vessel cross section normal to the vessel direction - using the binary vessel mask.
+
++ method "pvvx-fwhm" estimates the radius from the cross-sectional area at each vessel cross section normal to the vessel direction - using the actual image - and fitting a 2d-gaussian to derive sigma_x,y - and then the radius.
+
+
+
+from the cross-sectional area from the vessel mask - centerline is obtained from the skeleton of the vessel mask.
+
 
 ```
-mean pvv5-dt-prct 83.35 prct pvv5-frangi-prct 78.87 prct
-mean pvv10-dt-prct 9.91 prct pvv10-frangi-prct 11.18 prct
-mean pvv10+-dt-prct 6.74 prct pvv10+-frangi-prct 9.95 prct
+mean pvv5-dist-prct 83.35 prct pvv5-frangi-prct 78.87 prct pvv5-bcsa-prct 55.18 prct pvv5-fwhm-prct 52.92 prct
+mean pvv10-dist-prct 9.91 prct pvv10-frangi-prct 11.18 prct pvv10-bcsa-prct 38.28 prct pvv10-fwhm-prct 5.89 prct
+mean pvv10+-dist-prct 6.74 prct pvv10+-frangi-prct 9.95 prct pvv10+-bcsa-prct 6.55 prct pvv10+-fwhm-prct 41.19 prct
 
-mean pvv5-dt-cc 276.19 cc pvv5-frangi-cc 259.07 cc
-mean pvv10-dt-cc 32.33 cc pvv10-frangi-cc 36.2 cc
-mean pvv10+-dt-cc 22.3 cc pvv10+-frangi-cc 32.85 cc
+mean pvv5-dist-cc 276.19 cc pvv5-frangi-cc 259.07 cc pvv5-bcsa-cc 176.47 cc pvv5-fwhm-cc 169.17 cc
+mean pvv10-dist-cc 32.33 cc pvv10-frangi-cc 36.2 cc pvv10-bcsa-cc 124.02 cc pvv10-fwhm-cc 18.69 cc
+mean pvv10+-dist-cc 22.3 cc pvv10+-frangi-cc 32.85 cc pvv10+-bcsa-cc 21.07 cc pvv10+-fwhm-cc 133.7 cc
+
 
 n=23
 ```
@@ -68,13 +81,13 @@ https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7381940
 
 BV5/TBV: 57% , BV5-10/TBV:20% , BV>10/TBV:23% ( normal n=107 )
 
-method summary: compute cross-sectional area of binary vessel mask
+method summary: compute cross-sectional area from binary vessel mask
 
 + Morris, Michael F., et al. "Altered pulmonary blood volume distribution as a biomarker for predicting outcomes in COVID-19 disease." European Respiratory Journal 58.3 (2021).
 
 BV5/TBV: 30%, BV5-10/TBV: 25%, BV10/TBV: 45% (covid negative, n=195)
 
-method summary: compute cross-sectional area of binary vessel mask
+method summary: compute cross-sectional area from binary vessel mask
 
 + Poletti, Julien, et al. "Automated lung vessel segmentation reveals blood vessel volume redistribution in viral pneumonia." European Journal of Radiology 150 (2022): 110259.
 
@@ -82,7 +95,7 @@ https://pubmed.ncbi.nlm.nih.gov/35334245
 
 BV5/TBV: 18.4%, BV5-10/TBV: 70.8%, BV10/TBV: 10.8% (normal, n=248)
 
-method summary: compute cross-sectional area of binary vessel mask
+method summary: compute cross-sectional area from binary vessel mask
 
 + Estépar, Raúl San José, et al. "Computed tomographic measures of pulmonary vascular morphology in smokers and their clinical implications." American journal of respiratory and critical care medicine 188.2 (2013): 231-239.
 

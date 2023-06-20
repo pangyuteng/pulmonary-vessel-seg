@@ -1,4 +1,6 @@
 <img load="lazy" alt="..." src="pvv-dist-frangi.png" width="512"><br>
+<img load="lazy" alt="..." src="pvv-dist-bcsa.png" width="512"><br>
+<img load="lazy" alt="..." src="pvv-dist-fwhm.png" width="512"><br>
 <img load="lazy" alt="..." src="area-hist.png" width="512"><br>
 01: dist, frangi, bcsa, fwhm<br>
 <img load="lazy" alt="..." src="static/dist-mip-01.png" width="256">

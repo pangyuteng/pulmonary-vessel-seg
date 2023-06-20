@@ -60,8 +60,7 @@ def main(dist_folder,frangi_folder,fwhm_folder):
     plt.savefig('area-hist.png')
     plt.close()
 
-    x_list = []
-    y_list = []
+    x_list,y_list,z_list,w_list = [],[],[],[]
     
     for key_dt,key_frangi,key_bcsa,key_fwhm,unit in [
         ('pvv5-dist-prct','pvv5-frangi-prct','pvv5-bcsa-prct','pvv5-fwhm-prct','fraction'),
@@ -71,8 +70,13 @@ def main(dist_folder,frangi_folder,fwhm_folder):
         ('pvv10-dist-cc','pvv10-frangi-cc','pvv10-bcsa-cc','pvv10-fwhm-cc','cc'),
         ('pvv10+-dist-cc','pvv10+-frangi-cc','pvv10+-bcsa-cc','pvv10+-fwhm-cc','cc')]:
         if unit == 'cc':
-            x_list.extend(rdf[key_dt])
-            y_list.extend(rdf[key_frangi])
+            for tmpkey in [key_dt,key_frangi,key_bcsa,key_fwhm]:
+                tmpdf = rdf[rdf[tmpkey].notnull()]
+            # bad programming 
+            x_list.append(rdf[key_dt].dropna())
+            y_list.append(rdf[key_frangi].dropna())
+            z_list.extend(rdf[key_bcsa].dropna())
+            w_list.extend(rdf[key_fwhm].dropna())
         if unit == 'fraction':
             unit = "prct"
             print('mean',
@@ -89,19 +93,38 @@ def main(dist_folder,frangi_folder,fwhm_folder):
             key_fwhm,rdf[key_fwhm].mean().round(2),unit
         )
     print(f'n={len(rdf)}')
-
     plt.scatter(x_list,y_list)
     plt.plot([0,400],[0,400],color='k',linewidth=1,label='line-of-identity')
     plt.xlabel('pvv (cc, method: distance-transform)')
-    plt.ylabel('pvv (cc, method: vesselness)')
+    plt.ylabel('pvv (cc, method: frangi vesselness)')
     plt.legend()
     plt.grid(True)
     plt.savefig('pvv-dist-frangi.png')
     plt.close()
 
+    plt.scatter(x_list,z_list)
+    plt.plot([0,400],[0,400],color='k',linewidth=1,label='line-of-identity')
+    plt.xlabel('pvv (cc, method: distance-transform)')
+    plt.ylabel('pvv (cc, method: binary-cross-section-area)')
+    plt.legend()
+    plt.grid(True)
+    plt.savefig('pvv-dist-bcsa.png')
+    plt.close()
+
+    plt.scatter(x_list,w_list)
+    plt.plot([0,400],[0,400],color='k',linewidth=1,label='line-of-identity')
+    plt.xlabel('pvv (cc, method: distance-transform)')
+    plt.ylabel('pvv (cc, method: fwhm)')
+    plt.legend()
+    plt.grid(True)
+    plt.savefig('pvv-dist-fwhm.png')
+    plt.close()
+
     os.makedirs('static',exist_ok=True)
     with open('viz.md','w') as f:
         f.write(f'<img load="lazy" alt="..." src="pvv-dist-frangi.png" width="512"><br>\n')
+        f.write(f'<img load="lazy" alt="..." src="pvv-dist-bcsa.png" width="512"><br>\n')
+        f.write(f'<img load="lazy" alt="..." src="pvv-dist-fwhm.png" width="512"><br>\n')
         f.write(f'<img load="lazy" alt="..." src="area-hist.png" width="512"><br>\n')
         for idx in rdf['idx'].unique():
             f.write(f'{idx}: dist, frangi, bcsa, fwhm<br>\n')
