@@ -211,7 +211,7 @@ def estimate_fwhm(img,appx_radius):
     x_coord, y_coord = int(img.shape[0]/2), int(img.shape[1]/2)
     intensity = img[x_coord,y_coord]
     try:
-        appx_theta = 5
+        appx_theta = 0 # no rotation
         guess = [intensity, x_coord, y_coord, appx_radius, appx_radius, appx_theta]
         pred_params, uncert_cov = opt.curve_fit(gauss2d, xy, zobs, p0=guess)
         zpred = gauss2d(xy, *pred_params)
@@ -222,7 +222,7 @@ def estimate_fwhm(img,appx_radius):
         fwhm_y = 2*np.sqrt(2*np.log(2))*sigma_y
         pred_radius = np.mean([fwhm_x, fwhm_y])
 
-        if False:
+        if True:
             print('guess',guess)
             print('Initial params:', guess)
             print('Predicted params:', pred_params)
