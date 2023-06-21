@@ -67,8 +67,10 @@ n=23
         + "blood vessel bv5 bv10"
         + "pvv5 pulmonary"
 
+
+
 | method* | PVV5/TBV (%) | PVV10/TBV (%) | PVV10+/TBV (%) | sample size | link |
-| -------- | ------- | ------- | ------- | ------- |
+| -------- | ------- | ------- | ------- | ------- | ------- |
 | dist  | 83.35 | 9.91 | 6.74 | vessel12, n=23 | NA |
 | frangi | 78.87 | 11.18 | 9.95 | vessel12, n=23 | NA |
 | dist ** | 2 | 11 | 85 | control, n=59 | [John 2023](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10023743) |
@@ -79,6 +81,7 @@ n=23
 | scale-space-particle | 62 | 12 | NA | normal, n=237 | [Samuel 2018](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6034125) |
 | scale-space-particle | 58 | NA | 28 | normal, n=15 | [Rahaghi 2016](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4860553) |
 | bcsa? | 63 | NA | NA | Gold1, n=166 | [Nam 2021](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8131193) |
+
 
 * ```
 dist : distance-transform
