@@ -45,13 +45,12 @@ from the cross-sectional area from the vessel mask - centerline is obtained from
 
 
 ```
-mean pvv5-dist-prct 83.35 prct pvv5-frangi-prct 78.87 prct pvv5-bcsa-prct 55.18 prct pvv5-fwhm-prct 52.92 prct
-mean pvv10-dist-prct 9.91 prct pvv10-frangi-prct 11.18 prct pvv10-bcsa-prct 38.28 prct pvv10-fwhm-prct 5.89 prct
-mean pvv10+-dist-prct 6.74 prct pvv10+-frangi-prct 9.95 prct pvv10+-bcsa-prct 6.55 prct pvv10+-fwhm-prct 41.19 prct
-
-mean pvv5-dist-cc 276.19 cc pvv5-frangi-cc 259.07 cc pvv5-bcsa-cc 176.47 cc pvv5-fwhm-cc 169.17 cc
-mean pvv10-dist-cc 32.33 cc pvv10-frangi-cc 36.2 cc pvv10-bcsa-cc 124.02 cc pvv10-fwhm-cc 18.69 cc
-mean pvv10+-dist-cc 22.3 cc pvv10+-frangi-cc 32.85 cc pvv10+-bcsa-cc 21.07 cc pvv10+-fwhm-cc 133.7 cc
+mean pvv5-dist-prct 83.35 prct pvv5-frangi-prct 78.87 prct pvv5-bcsa-prct 57.72 prct pvv5-fwhm-prct 24.03 prct
+mean pvv10-dist-prct 9.91 prct pvv10-frangi-prct 11.18 prct pvv10-bcsa-prct 35.73 prct pvv10-fwhm-prct 14.62 prct
+mean pvv10+-dist-prct 6.74 prct pvv10+-frangi-prct 9.95 prct pvv10+-bcsa-prct 6.54 prct pvv10+-fwhm-prct 61.35 prct
+mean pvv5-dist-cc 276.19 cc pvv5-frangi-cc 259.07 cc pvv5-bcsa-cc 169.09 cc pvv5-fwhm-cc 69.0 cc
+mean pvv10-dist-cc 32.33 cc pvv10-frangi-cc 36.2 cc pvv10-bcsa-cc 105.83 cc pvv10-fwhm-cc 41.67 cc
+mean pvv10+-dist-cc 22.3 cc pvv10+-frangi-cc 32.85 cc pvv10+-bcsa-cc 19.34 cc pvv10+-fwhm-cc 183.58 cc
 
 
 n=23
@@ -60,7 +59,7 @@ n=23
 <a href="test/viz.md">visualization of the resulting PVVX for Vessel12 dataset see </a>
 
 
-# published BV values
+# published BV values compared to above values.
 
     ### keywords used:
 
@@ -68,13 +67,31 @@ n=23
         + "blood vessel bv5 bv10"
         + "pvv5 pulmonary"
 
-    ### values:
+| method* | PVV5/TBV (%) | PVV10/TBV (%) | PVV10+/TBV (%) | sample size | link |
+| -------- | ------- | ------- | ------- | ------- |
+| dist  | 83.35 | 9.91 | 6.74 | vessel12, n=23 | NA |
+| frangi | 78.87 | 11.18 | 9.95 | vessel12, n=23 | NA |
+| dist ** | 2 | 11 | 85 | control, n=59 | [John 2023](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10023743) |
+| bcsa | 57 | 20 | 23 | normal, n=107 | [Lins 2020](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7381940) |
+| bcsa | 30 | 25 | 45 | covid negative, n=195 | [Morris 2021](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7908189) |
+| bcsa | 18.4 | 70.8 | 10.8 | normal, n=248 | [Poletti 2022](https://pubmed.ncbi.nlm.nih.gov/35334245) |
+| scale-space-particle | 58 | NA | NA | control, n=85 | [Estépar 2013](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3778757) |
+| scale-space-particle | 62 | 12 | NA | normal, n=237 | [Samuel 2018](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6034125) |
+| scale-space-particle | 58 | NA | 28 | normal, n=15 | [Rahaghi 2016](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4860553) |
+| bcsa? | 63 | NA | NA | Gold1, n=166 | [Nam 2021](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8131193) |
+
+* ```
+dist : distance-transform
+frangi : radius from max response of vesselness filter with varying sigma
+scale-space-particle : 
+```
+** hmmm?
 
 + John, Joyce, et al. "Pulmonary vessel volume in idiopathic pulmonary fibrosis compared with healthy controls aged> 50 years." Scientific Reports 13.1 (2023): 4422.
 
 https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10023743
 
-BV5/TBV: 2% , BV5-10/TBV:11% , BV>10/TBV:85% ( control n=59 ) ??? OUTLIER VALUE!!
+BV5/TBV: 2% , BV5-10/TBV:11% , BV>10/TBV:85% ( control, n=59 ) ??? OUTLIER VALUE!!
 
 method summary: distance transform from binary vessel mask
 
@@ -82,11 +99,13 @@ method summary: distance transform from binary vessel mask
 
 https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7381940
 
-BV5/TBV: 57% , BV5-10/TBV:20% , BV>10/TBV:23% ( normal n=107 )
+BV5/TBV: 57% , BV5-10/TBV:20% , BV>10/TBV:23% ( normal, n=107 )
 
 method summary: compute cross-sectional area from binary vessel mask
 
 + Morris, Michael F., et al. "Altered pulmonary blood volume distribution as a biomarker for predicting outcomes in COVID-19 disease." European Respiratory Journal 58.3 (2021).
+
+https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7908189/
 
 BV5/TBV: 30%, BV5-10/TBV: 25%, BV10/TBV: 45% (covid negative, n=195)
 
@@ -126,9 +145,13 @@ method summary: scale-space-particle (Chest Imaging Platform)
 
 + Nam, Ju Gang, et al. "Automatic pulmonary vessel segmentation on noncontrast chest CT: deep learning algorithm developed using spatiotemporally matched virtual noncontrast images and low-keV contrast-enhanced vessel maps." European Radiology 31.12 (2021): 9012-9021.
 
-https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8131193/
+https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8131193
 
 PVV5/TBV 63% (Gold 1, n=166)
+
+method summary: compute cross-sectional area from binary vessel mask?
+
+
 
 # Blood Volume (BVx) algos
 
