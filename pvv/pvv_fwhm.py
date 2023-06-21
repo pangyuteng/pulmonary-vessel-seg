@@ -139,7 +139,7 @@ def estimate_radius(image_file,vessel_file,outdir,debug):
 
             ##### estimate area from cross-sectional area of vessel mask ('binary-cross-sectional-area')
             is_label = True
-            myslice = extract_slice(vessel_obj,slice_center,slice_normal,slice_spacing,slice_radius,is_label)
+            myslice = extract_slice(vessel_obj,slice_center,slice_normal,slice_spacing,slice_radius,is_label,factor=3)
             myarr = sitk.GetArrayFromImage(myslice).squeeze().astype(np.uint8)
             mylabel = label(myarr)
             cidx=int(mylabel.shape[0]/2)
@@ -152,7 +152,7 @@ def estimate_radius(image_file,vessel_file,outdir,debug):
             ##### estimate area using fwhm
             
             is_label = False
-            myslice = extract_slice(myimg_obj,slice_center,slice_normal,slice_spacing,slice_radius,is_label)
+            myslice = extract_slice(myimg_obj,slice_center,slice_normal,slice_spacing,slice_radius,is_label,factor=4)
             myarr = sitk.GetArrayFromImage(myslice).squeeze().astype(np.uint8)
 
             pred_radius, pred_mask = estimate_fwhm(myarr.astype(float),slice_radius)
@@ -172,7 +172,7 @@ def estimate_radius(image_file,vessel_file,outdir,debug):
                 myarr = np.expand_dims(myarr,axis=-1)
                 tmp = np.concatenate([pred_mask,myarr,myarr],axis=-1)
                 png_file = f'{outdir}/slice-mask-{p.label}.png'
-                imageio.imsave(png_file,pred_mask)
+                imageio.imsave(png_file,tmp)
                 mask_png_list.append(png_file)
 
         if p.label > 100:
@@ -190,8 +190,9 @@ def estimate_radius(image_file,vessel_file,outdir,debug):
         with open(f'{outdir}/index-alt.html','w') as f:
             for slice_png,mask_png in zip(slice_png_list,mask_png_list):
                 mask_png = os.path.basename(mask_png)
-                mystr = f'<img loading="lazy" alt="..." src="{mask_png}" width="256px" height="256px"/><br>\n'
+                mystr = f'<img loading="lazy" alt="..." src="{mask_png}" width="256px" height="256px"/>\n'
                 f.write(mystr)
+
     print('area...')
     map_func = np.vectorize(lambda x: float(np.mean(bcsa_dict.get(x,[0]))))
     area = map_func(ws_branch)
