@@ -123,8 +123,10 @@ def estimate_radius(image_file,vessel_file,outdir,debug):
     fwhm_area = np.zeros_like(branch.astype(np.float))
     bcsa_dict = {}
     fwhm_dict = {}
+    binary_png_list = []
     slice_png_list = []
     mask_png_list = []
+    counter = 0
     for p in tqdm(sorted(props,key=lambda x: x.mean_intensity,reverse=True)):
         for n,coord in enumerate(p.coords[:-1]):
             mystart = p.coords[n]
@@ -132,6 +134,11 @@ def estimate_radius(image_file,vessel_file,outdir,debug):
             slice_center = image_obj.TransformContinuousIndexToPhysicalPoint([int(mystart[2]),int(mystart[1]),int(mystart[0])])
             slice_end = image_obj.TransformContinuousIndexToPhysicalPoint([int(myend[2]),int(myend[1]),int(myend[0])])
             slice_normal = np.array(slice_end)-np.array(slice_center)
+
+            #slice_normal = np.diff(p.coords,axis=0)
+            #slice_normal = np.mean(slice_normal,axis=0)
+            #print(slice_normal,slice_normalOG)
+            
             slice_spacing = (1,1,1) # out of laziness, maintain voxel size at 1mm^3
             slice_radius = p.mean_intensity
             
@@ -139,8 +146,14 @@ def estimate_radius(image_file,vessel_file,outdir,debug):
 
             ##### estimate area from cross-sectional area of vessel mask ('binary-cross-sectional-area')
             is_label = True
-            myslice = extract_slice(vessel_obj,slice_center,slice_normal,slice_spacing,slice_radius,is_label,factor=3)
+            factor = 5
+            myslice = extract_slice(vessel_obj,slice_center,slice_normal,slice_spacing,slice_radius,is_label,factor=factor)
             myarr = sitk.GetArrayFromImage(myslice).squeeze().astype(np.uint8)
+
+            if True:
+                png_file = f'{outdir}/slice-binary-{p.label}.png'
+                imageio.imsave(png_file,255*myarr)
+                binary_png_list.append(png_file)
             mylabel = label(myarr)
             cidx=int(mylabel.shape[0]/2)
             myarea = np.sum(mylabel==mylabel[cidx,cidx]) # mm^2 # because slice spacing is 1x1 mm^2
@@ -152,12 +165,16 @@ def estimate_radius(image_file,vessel_file,outdir,debug):
             ##### estimate area using fwhm
             
             is_label = False
-            myslice = extract_slice(myimg_obj,slice_center,slice_normal,slice_spacing,slice_radius,is_label,factor=4)
+            factor = 5
+            slice_spacing = (1,1,1)
+            slice_radius_init = slice_radius
+            radius_factor = 1
+            myslice = extract_slice(myimg_obj,slice_center,slice_normal,slice_spacing,slice_radius,is_label,factor=factor)
             myarr = sitk.GetArrayFromImage(myslice).squeeze().astype(np.uint8)
 
-            pred_radius, pred_mask = estimate_fwhm(myarr.astype(float),slice_radius)
+            pred_radius, pred_mask = estimate_fwhm(myarr.astype(float),slice_radius_init)
             
-            myarea = np.pi * (pred_radius**2)
+            myarea = np.pi * ((pred_radius*radius_factor)**2)
             if p.label not in fwhm_dict.keys():
                 fwhm_dict[p.label] = []
             fwhm_dict[p.label].append(myarea)
@@ -174,21 +191,36 @@ def estimate_radius(image_file,vessel_file,outdir,debug):
                 png_file = f'{outdir}/slice-mask-{p.label}.png'
                 imageio.imsave(png_file,tmp)
                 mask_png_list.append(png_file)
-
-        if p.label > 1000:
-            break
+        #counter += 1
+        #if counter > 1000:
+        #    break
 
     if True:
         with open(f'{outdir}/index.html','w') as f:
-            for slice_png,mask_png in zip(slice_png_list,mask_png_list):
+            for slice_png,mask_png,binary_png in zip(slice_png_list,mask_png_list,binary_png_list):
+                binary_png = os.path.basename(binary_png)
                 slice_png = os.path.basename(slice_png)
                 mask_png = os.path.basename(mask_png)
                 mystr = f'<img loading="lazy" alt="..." src="{slice_png}" width="256px" height="256px"/>\n'
                 f.write(mystr)
-                mystr = f'<img loading="lazy" alt="..." src="{mask_png}" width="256px" height="256px"/><br>\n'
+                # fwhm
+                mystr = f'<img loading="lazy" alt="..." src="{mask_png}" width="256px" height="256px"/>\n'
                 f.write(mystr)
-        with open(f'{outdir}/index-alt.html','w') as f:
-            for slice_png,mask_png in zip(slice_png_list,mask_png_list):
+                # bcsa
+                mystr = f'<img loading="lazy" alt="..." src="{binary_png}" width="256px" height="256px"/><br>\n'
+                f.write(mystr)
+                
+        with open(f'{outdir}/index-bcsa.html','w') as f:
+            for slice_png,mask_png,binary_png in zip(slice_png_list,mask_png_list,binary_png_list):
+                binary_png = os.path.basename(binary_png)
+                slice_png = os.path.basename(slice_png)
+                mask_png = os.path.basename(mask_png)
+                mystr = f'<img loading="lazy" alt="..." src="{binary_png}" width="256px" height="256px"/>\n'
+                f.write(mystr)
+        with open(f'{outdir}/index-fwhm.html','w') as f:
+            for slice_png,mask_png,binary_png in zip(slice_png_list,mask_png_list,binary_png_list):
+                binary_png = os.path.basename(binary_png)
+                slice_png = os.path.basename(slice_png)
                 mask_png = os.path.basename(mask_png)
                 mystr = f'<img loading="lazy" alt="..." src="{mask_png}" width="256px" height="256px"/>\n'
                 f.write(mystr)
