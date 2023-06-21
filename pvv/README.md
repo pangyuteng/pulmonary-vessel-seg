@@ -76,19 +76,22 @@ n=23
 | dist ** | 2 | 11 | 85 | control, n=59 | [John 2023](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10023743) |
 | bcsa | 57 | 20 | 23 | normal, n=107 | [Lins 2020](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7381940) |
 | bcsa | 30 | 25 | 45 | covid negative, n=195 | [Morris 2021](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7908189) |
-| bcsa | 18.4 | 70.8 | 10.8 | normal, n=248 | [Poletti 2022](https://pubmed.ncbi.nlm.nih.gov/35334245) |
+| bcsa | 18 | 71 | 11 | normal, n=248 | [Poletti 2022](https://pubmed.ncbi.nlm.nih.gov/35334245) |
 | scale-space-particle | 58 | NA | NA | control, n=85 | [Estépar 2013](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3778757) |
 | scale-space-particle | 62 | 12 | NA | normal, n=237 | [Samuel 2018](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6034125) |
 | scale-space-particle | 58 | NA | 28 | normal, n=15 | [Rahaghi 2016](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4860553) |
 | bcsa? | 63 | NA | NA | Gold1, n=166 | [Nam 2021](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8131193) |
 
 
-* ```
+`*`
+
+```
 dist : distance-transform
 frangi : radius from max response of vesselness filter with varying sigma
 scale-space-particle : 
 ```
-** hmmm?
+
+`**`  hmmm?
 
 + John, Joyce, et al. "Pulmonary vessel volume in idiopathic pulmonary fibrosis compared with healthy controls aged> 50 years." Scientific Reports 13.1 (2023): 4422.
 
