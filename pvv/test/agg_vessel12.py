@@ -123,9 +123,6 @@ def main(dist_folder,frangi_folder,fwhm_folder):
 
     os.makedirs('static',exist_ok=True)
     with open('viz.md','w') as f:
-        f.write(f'<img load="lazy" alt="..." src="pvv-dist-frangi.png" width="512"><br>\n')
-        f.write(f'<img load="lazy" alt="..." src="pvv-dist-bcsa.png" width="512"><br>\n')
-        f.write(f'<img load="lazy" alt="..." src="pvv-dist-fwhm.png" width="512"><br>\n')
         f.write(f'<img load="lazy" alt="..." src="area-hist.png" width="512"><br>\n')
         for idx in rdf['idx'].unique():
             f.write(f'{idx}: dist, frangi, bcsa, fwhm<br>\n')

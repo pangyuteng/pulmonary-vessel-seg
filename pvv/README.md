@@ -88,7 +88,7 @@ n=23
 ```
 dist : distance-transform
 frangi : radius from max response of vesselness filter with varying sigma
-scale-space-particle : 
+scale-space-particle : https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3670102
 ```
 
 `**`  hmmm?
