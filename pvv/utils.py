@@ -233,12 +233,14 @@ def estimate_fwhm(img,appx_radius):
             print('Predicted params:', pred_params)
             print('Residual, RMS(obs - pred):', rms)
             print("initial radius",appx_radius,"pred_radius",pred_radius)
-
-        return pred_radius
+        
+        pred_mask = np.reshape(zpred,img.shape)
+        pred_mask = 255*(pred_mask > pred_params[0])
+        return pred_radius, pred_mask.astype(np.uint8)
     except:
         if False:
             traceback.print_exc()
-        return appx_radius
+        return appx_radius, np.zeros_like(img).astype(np.uint8)
 
 if __name__ == "__main__":
     

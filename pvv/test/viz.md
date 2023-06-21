@@ -25,6 +25,8 @@
 <br>05: dist, frangi, bcsa, fwhm<br>
 <img load="lazy" alt="..." src="static/dist-mip-05.png" width="256">
 <img load="lazy" alt="..." src="static/frangi-mip-05.png" width="256">
+<img load="lazy" alt="..." src="static/bcsa-mip-05.png" width="256">
+<img load="lazy" alt="..." src="static/fwhm-mip-05.png" width="256">
 <br>06: dist, frangi, bcsa, fwhm<br>
 <img load="lazy" alt="..." src="static/dist-mip-06.png" width="256">
 <img load="lazy" alt="..." src="static/frangi-mip-06.png" width="256">
@@ -53,9 +55,13 @@
 <br>11: dist, frangi, bcsa, fwhm<br>
 <img load="lazy" alt="..." src="static/dist-mip-11.png" width="256">
 <img load="lazy" alt="..." src="static/frangi-mip-11.png" width="256">
+<img load="lazy" alt="..." src="static/bcsa-mip-11.png" width="256">
+<img load="lazy" alt="..." src="static/fwhm-mip-11.png" width="256">
 <br>12: dist, frangi, bcsa, fwhm<br>
 <img load="lazy" alt="..." src="static/dist-mip-12.png" width="256">
 <img load="lazy" alt="..." src="static/frangi-mip-12.png" width="256">
+<img load="lazy" alt="..." src="static/bcsa-mip-12.png" width="256">
+<img load="lazy" alt="..." src="static/fwhm-mip-12.png" width="256">
 <br>13: dist, frangi, bcsa, fwhm<br>
 <img load="lazy" alt="..." src="static/dist-mip-13.png" width="256">
 <img load="lazy" alt="..." src="static/frangi-mip-13.png" width="256">
@@ -84,6 +90,8 @@
 <br>18: dist, frangi, bcsa, fwhm<br>
 <img load="lazy" alt="..." src="static/dist-mip-18.png" width="256">
 <img load="lazy" alt="..." src="static/frangi-mip-18.png" width="256">
+<img load="lazy" alt="..." src="static/bcsa-mip-18.png" width="256">
+<img load="lazy" alt="..." src="static/fwhm-mip-18.png" width="256">
 <br>19: dist, frangi, bcsa, fwhm<br>
 <img load="lazy" alt="..." src="static/dist-mip-19.png" width="256">
 <img load="lazy" alt="..." src="static/frangi-mip-19.png" width="256">
@@ -98,9 +106,12 @@
 <img load="lazy" alt="..." src="static/dist-mip-21.png" width="256">
 <img load="lazy" alt="..." src="static/frangi-mip-21.png" width="256">
 <img load="lazy" alt="..." src="static/bcsa-mip-21.png" width="256">
+<img load="lazy" alt="..." src="static/fwhm-mip-21.png" width="256">
 <br>22: dist, frangi, bcsa, fwhm<br>
 <img load="lazy" alt="..." src="static/dist-mip-22.png" width="256">
 <img load="lazy" alt="..." src="static/frangi-mip-22.png" width="256">
+<img load="lazy" alt="..." src="static/bcsa-mip-22.png" width="256">
+<img load="lazy" alt="..." src="static/fwhm-mip-22.png" width="256">
 <br>23: dist, frangi, bcsa, fwhm<br>
 <img load="lazy" alt="..." src="static/dist-mip-23.png" width="256">
 <img load="lazy" alt="..." src="static/frangi-mip-23.png" width="256">

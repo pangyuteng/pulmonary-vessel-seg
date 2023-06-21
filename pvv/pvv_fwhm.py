@@ -124,6 +124,7 @@ def estimate_radius(image_file,vessel_file,outdir,debug):
     bcsa_dict = {}
     fwhm_dict = {}
     slice_png_list = []
+    mask_png_list = []
     for p in tqdm(props):
         for n,coord in enumerate(p.coords[:-1]):
             mystart = p.coords[n]
@@ -143,7 +144,9 @@ def estimate_radius(image_file,vessel_file,outdir,debug):
             mylabel = label(myarr)
             cidx=int(mylabel.shape[0]/2)
             myarea = np.sum(mylabel==mylabel[cidx,cidx]) # mm^2 # because slice spacing is 1x1 mm^2
-            bcsa_dict[p.label] = myarea
+            if p.label not in bcsa_dict.keys():
+                bcsa_dict[p.label] = []
+            bcsa_dict[p.label].append(myarea)
             bcsa_area[coord[0],coord[1],coord[2]] = myarea
 
             ##### estimate area using fwhm
@@ -151,28 +154,41 @@ def estimate_radius(image_file,vessel_file,outdir,debug):
             is_label = False
             myslice = extract_slice(myimg_obj,slice_center,slice_normal,slice_spacing,slice_radius,is_label)
             myarr = sitk.GetArrayFromImage(myslice).squeeze().astype(np.uint8)
-            if False:
+
+            pred_radius, pred_mask = estimate_fwhm(myarr.astype(float),slice_radius)
+            
+            myarea = np.pi * (pred_radius**2)
+            if p.label not in fwhm_dict.keys():
+                fwhm_dict[p.label] = []
+            fwhm_dict[p.label].append(myarea)
+            fwhm_area[coord[0],coord[1],coord[2]] = myarea
+
+            if True:
                 png_file = f'{outdir}/slice-{p.label}.png'
                 imageio.imsave(png_file,myarr)
                 slice_png_list.append(png_file)
-            
-            pred_radius = estimate_fwhm(myarr.astype(float),slice_radius)
-            myarea = np.pi * (pred_radius**2)
-            fwhm_dict[p.label] = myarea
-            fwhm_area[coord[0],coord[1],coord[2]] = myarea
+                #pred_mask = np.expand_dims(pred_mask,axis=-1)
+                #myarr = np.expand_dims(myarr,axis=-1)
+                #tmp = np.concatenate([pred_mask,myarr,myarr],axis=-1)
+                png_file = f'{outdir}/slice-mask-{p.label}.png'
+                imageio.imsave(png_file,pred_mask)
+                mask_png_list.append(png_file)
 
-    if False:
+    if True:
         with open(f'{outdir}/index.html','w') as f:
-            for slice_png in slice_png_list:
+            for slice_png,mask_png in zip(slice_png_list,mask_png_list):
                 slice_png = os.path.basename(slice_png)
+                mask_png = os.path.basename(mask_png)
                 mystr = f'<img loading="lazy" alt="..." src="{slice_png}" width="256px" height="256px"/>\n'
+                mystr = f'<img loading="lazy" alt="..." src="{mask_png}" width="256px" height="256px"/>\n'
                 f.write(mystr)
 
     print('area...')
-    #map_func = np.vectorize(lambda x: float(bcsa_dict.get(x,0)))
-    #area = map_func(ws_branch)
-    #print(area.dtype)
-    area = watershed(vsl_mask*-1, bcsa_area.astype(np.int32), mask=vsl_mask>0)
+    map_func = np.vectorize(lambda x: float(np.mean(bcsa_dict.get(x,[0]))))
+    area = map_func(ws_branch)
+    #area = watershed(vsl_mask*-1, bcsa_area.astype(np.int32), mask=vsl_mask>0)
+    
+    print(area.dtype)
     qia_obj = sitk.GetImageFromArray(area)
     qia_obj.CopyInformation(image_obj)
     if debug:
@@ -227,9 +243,10 @@ def estimate_radius(image_file,vessel_file,outdir,debug):
         f.write(json.dumps(mydict, indent=4))
 
     print('area...')
-    #map_func = np.vectorize(lambda x: float(fwhm_dict.get(x,0)))
-    #area = map_func(ws_branch)
-    area = watershed(vsl_mask*-1, fwhm_area.astype(np.int32), mask=vsl_mask>0)
+    map_func = np.vectorize(lambda x: float(np.mean(fwhm_dict.get(x,[0]))))
+    area = map_func(ws_branch)
+    # area = watershed(vsl_mask*-1, fwhm_area.astype(np.int32), mask=vsl_mask>0)
+
     print(area.dtype)
     qia_obj = sitk.GetImageFromArray(area)
     qia_obj.CopyInformation(image_obj)
