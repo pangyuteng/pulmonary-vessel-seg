@@ -167,12 +167,16 @@ def estimate_radius(image_file,vessel_file,outdir,debug):
                 png_file = f'{outdir}/slice-{p.label}.png'
                 imageio.imsave(png_file,myarr)
                 slice_png_list.append(png_file)
-                #pred_mask = np.expand_dims(pred_mask,axis=-1)
-                #myarr = np.expand_dims(myarr,axis=-1)
-                #tmp = np.concatenate([pred_mask,myarr,myarr],axis=-1)
+                print(np.unique(pred_mask))
+                pred_mask = np.expand_dims(pred_mask,axis=-1)
+                myarr = np.expand_dims(myarr,axis=-1)
+                tmp = np.concatenate([pred_mask,myarr,myarr],axis=-1)
                 png_file = f'{outdir}/slice-mask-{p.label}.png'
                 imageio.imsave(png_file,pred_mask)
                 mask_png_list.append(png_file)
+
+        if p.label > 100:
+            break
 
     if True:
         with open(f'{outdir}/index.html','w') as f:
@@ -180,9 +184,14 @@ def estimate_radius(image_file,vessel_file,outdir,debug):
                 slice_png = os.path.basename(slice_png)
                 mask_png = os.path.basename(mask_png)
                 mystr = f'<img loading="lazy" alt="..." src="{slice_png}" width="256px" height="256px"/>\n'
-                mystr = f'<img loading="lazy" alt="..." src="{mask_png}" width="256px" height="256px"/>\n'
                 f.write(mystr)
-
+                mystr = f'<img loading="lazy" alt="..." src="{mask_png}" width="256px" height="256px"/><br>\n'
+                f.write(mystr)
+        with open(f'{outdir}/index-alt.html','w') as f:
+            for slice_png,mask_png in zip(slice_png_list,mask_png_list):
+                mask_png = os.path.basename(mask_png)
+                mystr = f'<img loading="lazy" alt="..." src="{mask_png}" width="256px" height="256px"/><br>\n'
+                f.write(mystr)
     print('area...')
     map_func = np.vectorize(lambda x: float(np.mean(bcsa_dict.get(x,[0]))))
     area = map_func(ws_branch)

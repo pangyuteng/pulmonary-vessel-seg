@@ -235,7 +235,7 @@ def estimate_fwhm(img,appx_radius):
             print("initial radius",appx_radius,"pred_radius",pred_radius)
         
         pred_mask = np.reshape(zpred,img.shape)
-        pred_mask = 255*(pred_mask > pred_params[0])
+        pred_mask = 255*(pred_mask > pred_params[0]/2)
         return pred_radius, pred_mask.astype(np.uint8)
     except:
         if False:
