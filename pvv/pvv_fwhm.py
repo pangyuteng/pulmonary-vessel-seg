@@ -125,7 +125,7 @@ def estimate_radius(image_file,vessel_file,outdir,debug):
     fwhm_dict = {}
     slice_png_list = []
     mask_png_list = []
-    for p in tqdm(props):
+    for p in tqdm(sorted(props,key=lambda x: x.mean_intensity,reverse=True)):
         for n,coord in enumerate(p.coords[:-1]):
             mystart = p.coords[n]
             myend = p.coords[n+1]
@@ -175,7 +175,7 @@ def estimate_radius(image_file,vessel_file,outdir,debug):
                 imageio.imsave(png_file,tmp)
                 mask_png_list.append(png_file)
 
-        if p.label > 100:
+        if p.label > 1000:
             break
 
     if True:
@@ -194,9 +194,9 @@ def estimate_radius(image_file,vessel_file,outdir,debug):
                 f.write(mystr)
 
     print('area...')
-    map_func = np.vectorize(lambda x: float(np.mean(bcsa_dict.get(x,[0]))))
-    area = map_func(ws_branch)
-    #area = watershed(vsl_mask*-1, bcsa_area.astype(np.int32), mask=vsl_mask>0)
+    # map_func = np.vectorize(lambda x: float(np.mean(bcsa_dict.get(x,[0]))))
+    # area = map_func(ws_branch)
+    area = watershed(vsl_mask*-1, bcsa_area.astype(np.int32), mask=vsl_mask>0)
     
     print(area.dtype)
     qia_obj = sitk.GetImageFromArray(area)
@@ -253,9 +253,9 @@ def estimate_radius(image_file,vessel_file,outdir,debug):
         f.write(json.dumps(mydict, indent=4))
 
     print('area...')
-    map_func = np.vectorize(lambda x: float(np.mean(fwhm_dict.get(x,[0]))))
-    area = map_func(ws_branch)
-    # area = watershed(vsl_mask*-1, fwhm_area.astype(np.int32), mask=vsl_mask>0)
+    # map_func = np.vectorize(lambda x: float(np.mean(fwhm_dict.get(x,[0]))))
+    # area = map_func(ws_branch)
+    area = watershed(vsl_mask*-1, fwhm_area.astype(np.int32), mask=vsl_mask>0)
 
     print(area.dtype)
     qia_obj = sitk.GetImageFromArray(area)
