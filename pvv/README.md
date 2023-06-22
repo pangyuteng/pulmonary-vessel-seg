@@ -9,7 +9,7 @@
 
 + scale-space-particle (ref https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3670102)
 
-+ radius can be estimated using Frangi's multi-scale vesselness filter (ref https://link.springer.com/chapter/10.1007/bfb0056195 , Quantification of pulmonary vessel
++ radius can be estimated using Frangi's multi-scale vesselness filter (ref https://link.springer.com/chapter/10.1007/bfb0056195 , https://www.sciencedirect.com/science/article/pii/S107731420090866X , Quantification of pulmonary vessel
 diameter in low-dose CT images  https://doi.org/10.1117/12.2081602 )
 
 + radius can be derived also by assuming a length and fix radius per branch. (ref EA Chadwick — Vessel Network Extraction via micro-CT Imaging: A Foundation for Modelling Lung De- and Recellularization, see article for skeletn pruning methods, and branching/network analysis https://www.proquest.com/docview/2323128018 https://doi.org/10.1371/journal.pcbi.1008930 )
