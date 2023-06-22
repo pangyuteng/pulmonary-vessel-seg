@@ -60,6 +60,15 @@ diameter in low-dose CT images  https://doi.org/10.1117/12.2081602 )
 ![screenshot](./static/case-0-pvv10+.png)
 
 
+
+        + vessel distribution, dataset VESSEL12 (n=12) compared to published data (Lins 2020)
+
+![dist](./static/area-hist.png)
+
+![dist](./static/lins-2020-fig1.PNG)
+
+
+
 # published BV values compared to above values.
 
     ### keywords used:
