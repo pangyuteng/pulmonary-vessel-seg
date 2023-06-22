@@ -43,21 +43,21 @@ diameter in low-dose CT images  https://doi.org/10.1117/12.2081602 )
           cross-sectional area 1.31mm^2 (bottom left)
           category: PVV5 (bottom right)
 
-        ![screenshot](./static/case-0-pvv5.png)
+![screenshot](./static/case-0-pvv5.png)
 
         + manually measured radius 1.86mm (top left, diameter 3.739mm)
           radius from `dist`: 1.8mm (top right)
           cross-sectional area 8.97mm^2 (bottom left)
           category: PVV10 (bottom right)
 
-        ![screenshot](./static/case-0-pvv10.png)
+![screenshot](./static/case-0-pvv10.png)
 
         + manually measured radius 2.06mm (top left, diameter 5.124mm)
           radius from `dist`: 2.4mm (top right)
           cross-sectional area 15.23mm^2 (bottom left)
           category: PVV10 (bottom right)
 
-        ![screenshot](./static/case-0-pvv10+.png)
+![screenshot](./static/case-0-pvv10+.png)
 
 
 # published BV values compared to above values.
