@@ -15,11 +15,13 @@ diameter in low-dose CT images  https://doi.org/10.1117/12.2081602 ) (`frangi` i
 
     + screenshot of measurement using ruler tool and measurements derived from methods `dist` and `frangi`.
 
-![screenshot](static/case01-dist-frangi.png)
+![screenshot](./static/case01-dist-frangi.png)
 
 + more screenshots of ruler measurements compared to `dist` derived measurements.
 
-![screenshot](static/case01-dist-frangi.png)
+![screenshot](./static/case-0-pvv5.png)
+![screenshot](./static/case-0-pvv10.png)
+![screenshot](./static/case-0-pvv10+.png)
 
 
 + compute cross-sectional area from binary vessel mask (ref https://pubmed.ncbi.nlm.nih.gov/35334245) (`bcsa` in short)
