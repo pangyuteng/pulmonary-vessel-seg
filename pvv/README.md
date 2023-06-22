@@ -1,30 +1,26 @@
 
 # published methods for computing BV5 or PVV5 can be lumped to the below few categories.
 
-+ distance transform from binary vessel mask - using boundary as seeds, distance transformed values at skeltonized location can be used to estaimate radius. (ref https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10023743 https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7308498 ) (`dist` in short)
++ euclidean distance transform from binary vessel mask - distance transformed values at skeletonized locations can be used to estaimate radius. (ref https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10023743 https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7308498 )
 
     + implementation: see `pvv_dist.py`
-
+    
+    + this method will be referred to `dist` in below.
 
 + radius can be estimated using Frangi's multi-scale vesselness filter (ref https://link.springer.com/chapter/10.1007/bfb0056195 , https://www.sciencedirect.com/science/article/pii/S107731420090866X , Quantification of pulmonary vessel
-diameter in low-dose CT images  https://doi.org/10.1117/12.2081602 ) (`frangi` in short)
+diameter in low-dose CT images  https://doi.org/10.1117/12.2081602 )
 
+    + note we compute vesselness from binary mask, since vessel segmentation is already obtained.  if you actually want to compute vesselnessness from original chest ct image, alpha,beta,gamma,denoising needs to be tweaked - expect argmax to be noisy.
+    
     + implementation: see `pvv_frangi.py`
-    + note we compute vesselness from binary mask, since vessel segmentation is already obtained, alpha,beta,gamma,denoising needs to be tweaked, if you actually want to compute vesselnessness from original chest ct image.
 
+    + this method will be referred to `frangi` in below.
 
-    + screenshot of measurement using ruler tool and measurements derived from methods `dist` and `frangi`.
++ compute cross-sectional area from binary vessel mask from crossectional mask normal to vessel tangent (ref https://pubmed.ncbi.nlm.nih.gov/35334245) (`bcsa` in short)
 
-![screenshot](./static/case01-dist-frangi.png)
+    + work-in-progress implementation: see `pvv_fwhm.py`
 
-+ more screenshots of ruler measurements compared to `dist` derived measurements.
-
-![screenshot](./static/case-0-pvv5.png)
-![screenshot](./static/case-0-pvv10.png)
-![screenshot](./static/case-0-pvv10+.png)
-
-
-+ compute cross-sectional area from binary vessel mask (ref https://pubmed.ncbi.nlm.nih.gov/35334245) (`bcsa` in short)
++ compute cross-sectional by fitting 2d gaussian from crossectional image normal to vessel tangent. (`fwhm` in short)
 
     + work-in-progress implementation: see `pvv_fwhm.py`
 
@@ -33,6 +29,36 @@ diameter in low-dose CT images  https://doi.org/10.1117/12.2081602 ) (`frangi` i
 + vascular crossectional area estimated from axial slices of vascular masks. (for references see https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10023743 )
 
 + radius can be derived also by assuming a length and fix radius per branch. (ref EA Chadwick — Vessel Network Extraction via micro-CT Imaging: A Foundation for Modelling Lung De- and Recellularization, see article for skeletn pruning methods, and branching/network analysis https://www.proquest.com/docview/2323128018 https://doi.org/10.1371/journal.pcbi.1008930 )
+
+
+
+    + screenshot of comparing measurements using itksnap ruler tool and those derived from methods `dist` and `frangi`.
+
+![screenshot](./static/case01-dist-frangi.png)
+
+    + more screenshot of comparing measurements using itksnap ruler tool and those derived from methods `dist` and `frangi` for different vessel caliber.
+
+        + manually measured radius 0.73mm (top left, diameter 1.46mm)
+          radius from `dist`: 0.6mm (top right)
+          cross-sectional area 1.31mm^2 (bottom left)
+          category: PVV5 (bottom right)
+
+        ![screenshot](./static/case-0-pvv5.png)
+
+        + manually measured radius 1.86mm (top left, diameter 3.739mm)
+          radius from `dist`: 1.8mm (top right)
+          cross-sectional area 8.97mm^2 (bottom left)
+          category: PVV10 (bottom right)
+
+        ![screenshot](./static/case-0-pvv10.png)
+
+        + manually measured radius 2.06mm (top left, diameter 5.124mm)
+          radius from `dist`: 2.4mm (top right)
+          cross-sectional area 15.23mm^2 (bottom left)
+          category: PVV10 (bottom right)
+
+        ![screenshot](./static/case-0-pvv10+.png)
+
 
 # published BV values compared to above values.
 
