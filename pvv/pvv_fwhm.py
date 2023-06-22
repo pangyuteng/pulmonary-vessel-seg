@@ -146,11 +146,11 @@ def estimate_radius(image_file,vessel_file,outdir,debug):
 
             ##### estimate area from cross-sectional area of vessel mask ('binary-cross-sectional-area')
             is_label = True
-            factor = 5
+            factor = 3
             myslice = extract_slice(vessel_obj,slice_center,slice_normal,slice_spacing,slice_radius,is_label,factor=factor)
             myarr = sitk.GetArrayFromImage(myslice).squeeze().astype(np.uint8)
 
-            if True:
+            if False:
                 png_file = f'{outdir}/slice-binary-{p.label}.png'
                 imageio.imsave(png_file,255*myarr)
                 binary_png_list.append(png_file)
@@ -165,7 +165,7 @@ def estimate_radius(image_file,vessel_file,outdir,debug):
             ##### estimate area using fwhm
             
             is_label = False
-            factor = 5
+            factor = 3
             slice_spacing = (1,1,1)
             slice_radius_init = slice_radius
             radius_factor = 1
@@ -180,7 +180,7 @@ def estimate_radius(image_file,vessel_file,outdir,debug):
             fwhm_dict[p.label].append(myarea)
             fwhm_area[coord[0],coord[1],coord[2]] = myarea
 
-            if True:
+            if False:
                 png_file = f'{outdir}/slice-{p.label}.png'
                 imageio.imsave(png_file,myarr)
                 slice_png_list.append(png_file)
@@ -191,11 +191,13 @@ def estimate_radius(image_file,vessel_file,outdir,debug):
                 png_file = f'{outdir}/slice-mask-{p.label}.png'
                 imageio.imsave(png_file,tmp)
                 mask_png_list.append(png_file)
-        #counter += 1
-        #if counter > 1000:
-        #    break
 
-    if True:
+        if False:
+            counter += 1
+            if counter > 1000:
+            break
+
+    if False:
         with open(f'{outdir}/index.html','w') as f:
             for slice_png,mask_png,binary_png in zip(slice_png_list,mask_png_list,binary_png_list):
                 binary_png = os.path.basename(binary_png)

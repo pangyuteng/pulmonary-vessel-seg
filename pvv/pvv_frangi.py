@@ -85,18 +85,23 @@ def estimate_radius(image_file,lung_file,vessel_file,outdir,debug):
     
     min_val,max_val = -1000,1000
     image = image.astype(np.float)
-    image = (image-min_val)/(max_val-min_val)
-    image = image.clip(0,1)
-    image = 255*image
-    image[lung_mask==0]=0
+    image = 255*(image-min_val)/(max_val-min_val)
+    image = image.clip(0,255)
+
     myimg_obj = sitk.GetImageFromArray(image)
     myimg_obj.CopyInformation(image_obj)
     if debug:
         sitk.WriteImage(myimg_obj,f"{outdir}/debug-myimg.nii.gz")
 
-    #radius_list = [r for r in np.linspace(0.25,5,10)]
+    # sigma_list = list( np.arange(1,10,1) )
+    # radius_list = [s*2.355/2 for s in sigma_list ]
+
+    # fwhm = diamter = r*2 = 2.355*sigma
+    # sigma = r*2/2.355
+    # r = sigma*2.355/2
     radius_list = [0.3,0.5,0.75,1,1.1,1.3,1.4,1.75,2,3,4] # tweaked so 2 or more r can be mapped to the 3 classes of pvv.
     sigma_list = [r*2/2.355 for r in radius_list]
+
     arr_list = []
     for radius_mm,sigma_mm in zip(radius_list,sigma_list):
         print(f'sigma: {sigma_mm}')
@@ -113,6 +118,8 @@ def estimate_radius(image_file,lung_file,vessel_file,outdir,debug):
         # pvv varies obviously if you opt to use image_obj or vessel_obj
         # 
         smoothed = gaussian.Execute(vessel_obj)
+        # typically you would provide image_obj, but we already segmented the vessels.
+        # so we use frangi's vesselness filters to estimate radius.
 
         '''
         ref. on sitk.ObjectnessMeasureImageFilter
@@ -147,15 +154,21 @@ def estimate_radius(image_file,lung_file,vessel_file,outdir,debug):
         min_val,max_val = np.min(tmp_arr[vsl_mask==1]),np.max(tmp_arr[vsl_mask==1])
         tmp_arr = (tmp_arr-min_val)/(max_val-min_val)
         arr_list.append(tmp_arr)
-        new_obj = sitk.GetImageFromArray(tmp_arr)
-        new_obj.CopyInformation(tmp_obj)
-        if debug:
+
+        if debug and False:
+            new_obj = sitk.GetImageFromArray(tmp_arr)
+            new_obj.CopyInformation(tmp_obj)
             sitk.WriteImage(new_obj,f"{outdir}/debug-radius-{radius_mm:06.2f}.nii.gz")
+
+    if debug:
+        arr = np.max(np.array(arr_list),axis=0)
+        new_obj = sitk.GetImageFromArray(arr)
+        new_obj.CopyInformation(tmp_obj)
+        sitk.WriteImage(new_obj,f"{outdir}/debug-frangi.nii.gz")
 
     arr = np.argmax(np.array(arr_list),axis=0)
     arr = arr.astype(np.int16)
     arr[vsl_mask==0]=-1
-    print(np.unique(arr))
     mapper_dict = {n:r for n,r in enumerate(radius_list)}
     map_func = np.vectorize(lambda x: float(mapper_dict.get(x,0)))
     radius = map_func(arr)
@@ -165,6 +178,7 @@ def estimate_radius(image_file,lung_file,vessel_file,outdir,debug):
     qia_obj.CopyInformation(image_obj)
     if debug:
         sitk.WriteImage(qia_obj,f"{outdir}/debug-radius.nii.gz")
+    print(np.unique(arr))
 
     print('skeletonize...')
     skeleton = skeletonize(vsl_mask)
