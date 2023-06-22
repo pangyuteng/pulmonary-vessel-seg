@@ -225,7 +225,7 @@ def estimate_fwhm(img,appx_radius):
         if fwhm_x/fwhm_y > 1.5 or fwhm_y/fwhm_x > 1.5:
             raise ValueError("rejecting since not circular enough")
 
-        pred_radius = np.mean([fwhm_x, fwhm_y])
+        pred_radius = np.mean([fwhm_x, fwhm_y])/2
 
         if False:
             print('guess',guess)
