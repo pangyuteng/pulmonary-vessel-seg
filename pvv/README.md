@@ -1,6 +1,4 @@
 
-# what is BV5, BV5-10, BV10+ ??
-
 # published methodologies can be lumped to the below few methods.
 
 + area from binary vessel masks - computed from axial slices. (for references see https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10023743)
@@ -15,49 +13,6 @@
 diameter in low-dose CT images  https://doi.org/10.1117/12.2081602 )
 
 + radius can be derived also by assuming a length and fix radius per branch. (ref EA Chadwick — Vessel Network Extraction via micro-CT Imaging: A Foundation for Modelling Lung De- and Recellularization, see article for skeletn pruning methods, and branching/network analysis https://www.proquest.com/docview/2323128018 https://doi.org/10.1371/journal.pcbi.1008930 )
-
-#### using Vessel12 dataset we compute Blood-Volume-X BVX or Pulmonary-Vessel-like-Volume-X (PVVX)
-
-
-+ we used TotalSementator to first segment the lung vessels.
-
-+ method "pvvx-dt"
-    + segment pulmonary vessels using 
-    + boundary-seeded distance-transform computed from vessel mask (bsfield)
-    + vessel banch are identifeid and radius is estimated per branch.
-        + by performing skeletonization from the vessel mask
-        + identifying intersections from the vessel sekelton
-        + once intersection points are removed, connected component can be performed to identify individual branch centerlines (each branch will have its own identifier).
-        + per branch centerline, vessel radius can be estimated as the mean 
-        value on the branch ceterline in the bsfield.
-        + the branch identifier can then be watershd back into the vessel mask.
-    + each branch can be assigned to be PVV5,5-10,10+ using the cross-sectional area computed from the estimated radius per branch.
-
-+ method "pvvx-frangi" is similar except that the radius is estimated from the sigma of the max response from thefrangi's vesselness filter (objectness-filter in SimpleITK) - using the binary vessel mask.
-
-+ method "pvvx-bcsa" estimates the radius from the cross-sectional area at each vessel cross section normal to the vessel direction - using the binary vessel mask.
-
-+ method "pvvx-fwhm" estimates the radius from the cross-sectional area at each vessel cross section normal to the vessel direction - using the actual image - and fitting a 2d-gaussian to derive sigma_x,y - and then the radius.
-
-
-
-from the cross-sectional area from the vessel mask - centerline is obtained from the skeleton of the vessel mask.
-
-
-```
-mean pvv5-dist-prct 83.35 prct pvv5-frangi-prct 78.87 prct pvv5-bcsa-prct 57.72 prct pvv5-fwhm-prct 24.03 prct
-mean pvv10-dist-prct 9.91 prct pvv10-frangi-prct 11.18 prct pvv10-bcsa-prct 35.73 prct pvv10-fwhm-prct 14.62 prct
-mean pvv10+-dist-prct 6.74 prct pvv10+-frangi-prct 9.95 prct pvv10+-bcsa-prct 6.54 prct pvv10+-fwhm-prct 61.35 prct
-mean pvv5-dist-cc 276.19 cc pvv5-frangi-cc 259.07 cc pvv5-bcsa-cc 169.09 cc pvv5-fwhm-cc 69.0 cc
-mean pvv10-dist-cc 32.33 cc pvv10-frangi-cc 36.2 cc pvv10-bcsa-cc 105.83 cc pvv10-fwhm-cc 41.67 cc
-mean pvv10+-dist-cc 22.3 cc pvv10+-frangi-cc 32.85 cc pvv10+-bcsa-cc 19.34 cc pvv10+-fwhm-cc 183.58 cc
-
-
-n=23
-```
-
-<a href="test/viz.md">visualization of the resulting PVVX for Vessel12 dataset see </a>
-
 
 # published BV values compared to above values.
 
@@ -158,16 +113,53 @@ PVV5/TBV 63% (Gold 1, n=166)
 method summary: compute cross-sectional area from binary vessel mask?
 
 
+#### using Vessel12 dataset we compute Blood-Volume-X BVX or Pulmonary-Vessel-like-Volume-X (PVVX)
 
-# Blood Volume (BVx) algos
 
-+ scale-space-particles
++ we used TotalSementator to first segment the lung vessels.
+
++ method "pvvx-dt"
+    + boundary-seeded distance-transform computed from vessel mask (bsfield)
+    + vessel banch are identifeid and radius is estimated per branch.
+        + by performing skeletonization from the vessel mask
+        + identifying intersections from the vessel skeleton
+        + once intersection points are removed, connected component can be performed to identify individual branch centerlines (each branch will have its own identifier).
+        + per branch centerline, vessel radius can be estimated as the mean 
+        value on the branch ceterline in the bsfield.
+        + the branch identifier can then be watershd back into the vessel mask.
+    + each branch can be assigned to be PVV5,5-10,10+ using the cross-sectional area computed from the estimated radius per branch.
+
++ method "pvvx-frangi" is similar except that the radius is estimated from the sigma of the max response from frangi's vesselness filter (objectness-filter in SimpleITK) - using the binary vessel mask.
+
++ WIP method "pvvx-bcsa" estimates the radius from the cross-sectional area at each vessel cross section normal to the vessel direction - using the binary vessel mask.
+
++ WIP method "pvvx-fwhm" estimates the radius from the cross-sectional area at each vessel cross section normal to the vessel direction - using the actual image - and fitting a 2d-gaussian to derive sigma_x,y, and sigmas are used to estimate radius.
 
 ```
+mean pvv5-dist-prct 83.35 prct pvv5-frangi-prct 78.87 prct pvv5-bcsa-prct 57.72 prct pvv5-fwhm-prct 24.03 prct
+mean pvv10-dist-prct 9.91 prct pvv10-frangi-prct 11.18 prct pvv10-bcsa-prct 35.73 prct pvv10-fwhm-prct 14.62 prct
+mean pvv10+-dist-prct 6.74 prct pvv10+-frangi-prct 9.95 prct pvv10+-bcsa-prct 6.54 prct pvv10+-fwhm-prct 61.35 prct
+mean pvv5-dist-cc 276.19 cc pvv5-frangi-cc 259.07 cc pvv5-bcsa-cc 169.09 cc pvv5-fwhm-cc 69.0 cc
+mean pvv10-dist-cc 32.33 cc pvv10-frangi-cc 36.2 cc pvv10-bcsa-cc 105.83 cc pvv10-fwhm-cc 41.67 cc
+mean pvv10+-dist-cc 22.3 cc pvv10+-frangi-cc 32.85 cc pvv10+-bcsa-cc 19.34 cc pvv10+-fwhm-cc 183.58 cc
+
+
+n=23
+
+```
+
+<a href="test/viz.md">visualization of the resulting PVVX for Vessel12 dataset see </a>
+
+
+
+## misc notes.
+
+```
+
+scale-space-particles
+
 San Jose Estepar RRJ, Krissian K, Schultz T, Washko GR, Kindlmann GL.Computational vascular morphometry for the assessment of pulmonary vascular disease based on scale-space particles. In: Biomedical Imaging (ISBI), 2012 9th IEEE International Symposium on. IEEE; 2012. pp. 1479–1482
 https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3670102
-
-"The particle system solution is computed iteratively to minimize the system energy, which is a sum of inter-particle energy and energy associated with a particle’s location within the image domain. The inter-particle energy is a quartic polynomial with a tunable potential well, chosen to quickly induce regular sampling. The potential well also serves the purpose of making particle population control (adding particles to fill gaps in the vessel sampling) part of the same over-all energy minimization that moves particles into a uniform sampling. Particles are removed when the strength of the ridge line feature (as quantified by the middle Hessian eigenvalue λ2) falls below a pre-specified threshold that depends on image contrast. Following the general guidelines of [6], particle system computation proceeds in three steps: densely and uniformly sampling the two-dimensional manifold swept out in scale-space by the ridge lines, moving points to the scale of maximal feature strength, and then redistributing points to create a uniform vessel sampling."
 
 https://pubmed.ncbi.nlm.nih.gov/23656466
 https://www.atsjournals.org/doi/full/10.1164/rccm.201301-0162OC
@@ -179,32 +171,19 @@ https://github.com/acil-bwh/ChestImagingPlatform/issues/34
 docker pull acilbwh/chestimagingplatform:1.5
 
 
-```
 
 + distance transform
 
-```
-
 https://www.nature.com/articles/s41598-023-31470-6
-
-pvv_dist.py
-
-```
 
 
 + hessian vesselness 
-```
+
 https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7381940
 
 pvv_frangi.py
 
 ```
-
-
-
-
-
-# misc notes
 
 ```
 
