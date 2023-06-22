@@ -195,7 +195,7 @@ def estimate_radius(image_file,vessel_file,outdir,debug):
         if False:
             counter += 1
             if counter > 1000:
-            break
+                break
 
     if False:
         with open(f'{outdir}/index.html','w') as f:
