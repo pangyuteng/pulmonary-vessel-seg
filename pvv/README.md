@@ -1,16 +1,34 @@
 
-# published methodologies can be lumped to the below few methods.
+# published methods for computing BV5 or PVV5 can be lumped to the below few categories.
 
-+ area from binary vessel masks - computed from axial slices. (for references see https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10023743)
++ distance transform from binary vessel mask - using boundary as seeds, distance transformed values at skeltonized location can be used to estaimate radius. (ref https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10023743 https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7308498 ) (`dist` in short)
 
-+ distance transform from binary vessel mask (ref https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10023743 https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7308498 )
+    + implementation: see `pvv_dist.py`
 
-+ compute cross-sectional area from binary vessel mask (ref https://pubmed.ncbi.nlm.nih.gov/35334245)
+
++ radius can be estimated using Frangi's multi-scale vesselness filter (ref https://link.springer.com/chapter/10.1007/bfb0056195 , https://www.sciencedirect.com/science/article/pii/S107731420090866X , Quantification of pulmonary vessel
+diameter in low-dose CT images  https://doi.org/10.1117/12.2081602 ) (`frangi` in short)
+
+    + implementation: see `pvv_frangi.py`
+    + note we compute vesselness from binary mask, since vessel segmentation is already obtained, alpha,beta,gamma,denoising needs to be tweaked, if you actually want to compute vesselnessness from original chest ct image.
+
+
+    + screenshot of measurement using ruler tool and measurements derived from methods `dist` and `frangi`.
+
+![screenshot](static/case01-dist-frangi.png)
+
++ more screenshots of ruler measurements compared to `dist` derived measurements.
+
+![screenshot](static/case01-dist-frangi.png)
+
+
++ compute cross-sectional area from binary vessel mask (ref https://pubmed.ncbi.nlm.nih.gov/35334245) (`bcsa` in short)
+
+    + work-in-progress implementation: see `pvv_fwhm.py`
 
 + scale-space-particle (ref https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3670102)
 
-+ radius can be estimated using Frangi's multi-scale vesselness filter (ref https://link.springer.com/chapter/10.1007/bfb0056195 , https://www.sciencedirect.com/science/article/pii/S107731420090866X , Quantification of pulmonary vessel
-diameter in low-dose CT images  https://doi.org/10.1117/12.2081602 )
++ vascular crossectional area estimated from axial slices of vascular masks. (for references see https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10023743 )
 
 + radius can be derived also by assuming a length and fix radius per branch. (ref EA Chadwick — Vessel Network Extraction via micro-CT Imaging: A Foundation for Modelling Lung De- and Recellularization, see article for skeletn pruning methods, and branching/network analysis https://www.proquest.com/docview/2323128018 https://doi.org/10.1371/journal.pcbi.1008930 )
 
@@ -42,11 +60,13 @@ diameter in low-dose CT images  https://doi.org/10.1117/12.2081602 )
 
 ```
 dist : distance-transform
-frangi : radius from max response of vesselness filter with varying sigma
+frangi : radius from max response of vesselness filter with varying sigma - computed from vessel mask
 scale-space-particle : https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3670102
 ```
 
 `**`  hmmm?
+
+<hr>
 
 + John, Joyce, et al. "Pulmonary vessel volume in idiopathic pulmonary fibrosis compared with healthy controls aged> 50 years." Scientific Reports 13.1 (2023): 4422.
 
@@ -136,12 +156,13 @@ method summary: compute cross-sectional area from binary vessel mask?
 + WIP method "pvvx-fwhm" estimates the radius from the cross-sectional area at each vessel cross section normal to the vessel direction - using the actual image - and fitting a 2d-gaussian to derive sigma_x,y, and sigmas are used to estimate radius.
 
 ```
-mean pvv5-dist-prct 83.35 prct pvv5-frangi-prct 78.87 prct pvv5-bcsa-prct 57.72 prct pvv5-fwhm-prct 24.03 prct
-mean pvv10-dist-prct 9.91 prct pvv10-frangi-prct 11.18 prct pvv10-bcsa-prct 35.73 prct pvv10-fwhm-prct 14.62 prct
-mean pvv10+-dist-prct 6.74 prct pvv10+-frangi-prct 9.95 prct pvv10+-bcsa-prct 6.54 prct pvv10+-fwhm-prct 61.35 prct
-mean pvv5-dist-cc 276.19 cc pvv5-frangi-cc 259.07 cc pvv5-bcsa-cc 169.09 cc pvv5-fwhm-cc 69.0 cc
-mean pvv10-dist-cc 32.33 cc pvv10-frangi-cc 36.2 cc pvv10-bcsa-cc 105.83 cc pvv10-fwhm-cc 41.67 cc
-mean pvv10+-dist-cc 22.3 cc pvv10+-frangi-cc 32.85 cc pvv10+-bcsa-cc 19.34 cc pvv10+-fwhm-cc 183.58 cc
+
+mean pvv5-dist-prct 83.35 prct pvv5-frangi-prct 78.87 prct pvv5-bcsa-prct 55.18 prct pvv5-fwhm-prct 62.34 prct
+mean pvv10-dist-prct 9.91 prct pvv10-frangi-prct 11.18 prct pvv10-bcsa-prct 38.28 prct pvv10-fwhm-prct 20.42 prct
+mean pvv10+-dist-prct 6.74 prct pvv10+-frangi-prct 9.95 prct pvv10+-bcsa-prct 6.55 prct pvv10+-fwhm-prct 17.24 prct
+mean pvv5-dist-cc 276.19 cc pvv5-frangi-cc 259.07 cc pvv5-bcsa-cc 176.47 cc pvv5-fwhm-cc 198.8 cc
+mean pvv10-dist-cc 32.33 cc pvv10-frangi-cc 36.2 cc pvv10-bcsa-cc 124.02 cc pvv10-fwhm-cc 67.22 cc
+mean pvv10+-dist-cc 22.3 cc pvv10+-frangi-cc 32.85 cc pvv10+-bcsa-cc 21.07 cc pvv10+-fwhm-cc 55.54 cc
 
 
 n=23
