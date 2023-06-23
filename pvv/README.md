@@ -65,8 +65,9 @@ diameter in low-dose CT images  https://doi.org/10.1117/12.2081602 )
 
 ![dist](./static/area-hist.png)
 
-![dist](./static/lins-2020-fig1.PNG)
+![dist](./static/lins-2020-fig1.png)
 
+![dist](./static/estapar-2013-fig1.png)
 
 
 # published BV values compared to above values.
@@ -96,14 +97,20 @@ diameter in low-dose CT images  https://doi.org/10.1117/12.2081602 )
 `*`
 
 ```
-dist : distance-transform
-frangi : radius from max response of vesselness filter with varying sigma - computed from vessel mask
+dist : distance-transform from vascular mask
+frangi : radius from max response of vesselness filter with varying sigma - ** computed from vessel mask **
+bcsa: cross-sectional area computed from vascular mask
 scale-space-particle : https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3670102
 ```
 
 `**`  hmmm?
 
++ for visualization of the resulting PVVX for Vessel12 dataset see: <a href="test/viz.md">`test/viz.md`</a>.
+
+
 <hr>
+
+#### below was formatted to above table
 
 + John, Joyce, et al. "Pulmonary vessel volume in idiopathic pulmonary fibrosis compared with healthy controls aged> 50 years." Scientific Reports 13.1 (2023): 4422.
 
@@ -170,7 +177,10 @@ PVV5/TBV 63% (Gold 1, n=166)
 method summary: compute cross-sectional area from binary vessel mask?
 
 
-#### using Vessel12 dataset we compute Blood-Volume-X BVX or Pulmonary-Vessel-like-Volume-X (PVVX)
+
+# misc notes.
+
+##### using Vessel12 dataset we compute Blood-Volume-X BVX or Pulmonary-Vessel-like-Volume-X (PVVX)
 
 
 + we used TotalSementator to first segment the lung vessels.
@@ -206,11 +216,6 @@ n=23
 
 ```
 
-<a href="test/viz.md">visualization of the resulting PVVX for Vessel12 dataset see </a>
-
-
-
-## misc notes.
 
 ```
 
