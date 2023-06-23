@@ -102,6 +102,13 @@ def main_fwhm(image_file,vessel_file,outdir,debug):
     counter = 0
     for p in tqdm(sorted(props,key=lambda x: x.mean_intensity,reverse=True)):
         for n,coord in enumerate(p.coords[:-1]):
+
+
+            # TODO:
+            # vessel tangent estimated from adjacent skeleton points is flawed since skeleton is discrete.
+            # skeleton needs to be smoothed/pruned/clean-up then
+            # can be consider to be used as vessel centerlines and derive slice normal
+
             mystart = p.coords[n]
             myend = p.coords[n+1]
             slice_center = image_obj.TransformContinuousIndexToPhysicalPoint([int(mystart[2]),int(mystart[1]),int(mystart[0])])
