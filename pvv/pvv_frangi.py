@@ -58,7 +58,7 @@ sigma = np.sqrt(area/pi)*2/2.355
 
 '''
 
-def estimate_radius(image_file,lung_file,vessel_file,outdir,debug):
+def main_frangi(image_file,lung_file,vessel_file,outdir,debug):
     
     os.makedirs(outdir,exist_ok=True)    
     json_file = os.path.join(outdir,'results-frangi.json')
@@ -310,7 +310,7 @@ if __name__ == "__main__":
     vessel_file = sys.argv[3]
     outdir = sys.argv[4]
     debug = ast.literal_eval(sys.argv[5])
-    estimate_radius(image_file,lung_file,vessel_file,outdir,debug)
+    main_frangi(image_file,lung_file,vessel_file,outdir,debug)
 
 """
 

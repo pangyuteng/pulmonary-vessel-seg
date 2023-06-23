@@ -181,6 +181,32 @@ def extract_slice(itk_image,slice_center,slice_normal,slice_spacing,slice_radius
 
 
 
+'''
+https://en.wikipedia.org/wiki/Normal_distribution
+https://en.wikipedia.org/wiki/Full_width_at_half_maximum
+assuming vessel intensity can be fitted with a guassian distribution curve
+we can use FWHM as diameter.
+so if we have a sigma of 1mm, then diameter would be 2.355*1 mm
+
+“BVX”, where “X” indicates a range of vessel sizes in mm2 (BV5 is the volume of blood contained in
+vessels between 1.25 and 5 mm2 cross-sectional area, BV5-10
+between 5 and 10 mm2, and BV10 > 10 mm2)
+https://journals.physiology.org/doi/pdf/10.1152/japplphysiol.00458.2022
+
+approximate diameter using FWHM which is ~ 2.355*sigma
+https://en.wikipedia.org/wiki/Full_width_at_half_maximum
+
+diameter = 2*radius = 2.355*sigma
+
+radius = sigma*2.355/2
+area = pi*(radius^2)
+
+radius = np.sqrt(area/pi)
+sigma = radius*2/2.355
+sigma = np.sqrt(area/pi)*2/2.355
+
+'''
+
 #
 # ref
 # https://en.wikipedia.org/wiki/Gaussian_function
@@ -200,7 +226,7 @@ def gauss2d(xy, amp, x0, y0, sigma_x, sigma_y, theta):
     expo = -a*(x-x0)**2 - b*(y-y0)**2 - 2*c*(x-x0)*(y-y0)
     return amp*np.exp(expo)
 
-def estimate_fwhm(img,appx_radius):
+def estimate_radius_fwhm(img,appx_radius):
 
     x = np.arange(0,img.shape[0],1)
     y = np.arange(0,img.shape[1],1)

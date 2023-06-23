@@ -11,37 +11,10 @@ from scipy.ndimage import distance_transform_edt
 from skimage.measure import label, regionprops
 from tqdm import tqdm
 import imageio
-from utils import resample_img,extract_slice,estimate_fwhm
+from utils import resample_img,extract_slice,estimate_radius_fwhm
 
 
-'''
-https://en.wikipedia.org/wiki/Normal_distribution
-https://en.wikipedia.org/wiki/Full_width_at_half_maximum
-assuming vessel intensity can be fitted with a guassian distribution curve
-we can use FWHM as diameter.
-so if we have a sigma of 1mm, then diameter would be 2.355*1 mm
-
-“BVX”, where “X” indicates a range of vessel sizes in mm2 (BV5 is the volume of blood contained in
-vessels between 1.25 and 5 mm2 cross-sectional area, BV5-10
-between 5 and 10 mm2, and BV10 > 10 mm2)
-https://journals.physiology.org/doi/pdf/10.1152/japplphysiol.00458.2022
-
-approximate diameter using FWHM which is ~ 2.355*sigma
-https://en.wikipedia.org/wiki/Full_width_at_half_maximum
-
-diameter = 2*radius = 2.355*sigma
-
-radius = sigma*2.355/2
-area = pi*(radius^2)
-
-radius = np.sqrt(area/pi)
-sigma = radius*2/2.355
-sigma = np.sqrt(area/pi)*2/2.355
-
-'''
-
-
-def estimate_radius(image_file,vessel_file,outdir,debug):
+def main_fwhm(image_file,vessel_file,outdir,debug):
     
     os.makedirs(outdir,exist_ok=True)
     bcsa_json_file = os.path.join(outdir,'results-bcsa.json')
@@ -172,7 +145,7 @@ def estimate_radius(image_file,vessel_file,outdir,debug):
             myslice = extract_slice(myimg_obj,slice_center,slice_normal,slice_spacing,slice_radius,is_label,factor=factor)
             myarr = sitk.GetArrayFromImage(myslice).squeeze().astype(np.uint8)
 
-            pred_radius, pred_mask = estimate_fwhm(myarr.astype(float),slice_radius_init)
+            pred_radius, pred_mask = estimate_radius_fwhm(myarr.astype(float),slice_radius_init)
             
             myarea = np.pi * ((pred_radius*radius_factor)**2)
             if p.label not in fwhm_dict.keys():
@@ -352,7 +325,7 @@ if __name__ == "__main__":
     vessel_file = sys.argv[2]
     outdir = sys.argv[3]
     debug = ast.literal_eval(sys.argv[4])
-    estimate_radius(image_file,vessel_file,outdir,debug)
+    main_fwhm(image_file,vessel_file,outdir,debug)
 
 """
 

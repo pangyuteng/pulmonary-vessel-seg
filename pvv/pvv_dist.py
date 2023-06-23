@@ -19,7 +19,7 @@ from utils import resample_img
 #  BVV computation https://www.nature.com/articles/s41598-023-31470-6
 #
 
-def main(mask_file,outdir,debug):
+def main_pvv(mask_file,outdir,debug):
     os.makedirs(outdir,exist_ok=True)
     
     json_file = os.path.join(outdir,'results-dist.json')
@@ -198,7 +198,7 @@ if __name__ == "__main__":
     mask_file = sys.argv[1]
     outdir = sys.argv[2]
     debug = ast.literal_eval(sys.argv[3])
-    main(mask_file,outdir,debug)
+    main_pvv(mask_file,outdir,debug)
 
 """
 
