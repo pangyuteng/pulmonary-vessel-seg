@@ -61,11 +61,14 @@ diameter in low-dose CT images  https://doi.org/10.1117/12.2081602 )
 
 
 
-        + vessel distribution, dataset VESSEL12 (n=12) compared to published data (Lins 2020)
+        + vessel distribution by caliber, dataset VESSEL12 (n=12) compared to published data (Lins 2020 and Estapar 2013)
 
 ![dist](./static/area-hist.png)
 
+        + vessel distribution by caliber, Lins 2020:
 ![dist](./static/lins-2020-fig1.png)
+
+        + vessel distribution by caliber, Estapar 2013:
 
 ![dist](./static/estapar-2013-fig1.png)
 
