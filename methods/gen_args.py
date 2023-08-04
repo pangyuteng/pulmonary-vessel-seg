@@ -25,14 +25,16 @@ for n,row in df.iterrows():
 with open('wasserthal.args','w') as f:
     for n,x in enumerate(mylist):
         vsl = os.path.join(x['output_folder_path'],'wasserthal.nii.gz')
-        myline = f"na {x['nifti_image_path']} {x['totalseg_folder']} {vsl}\n"
-        f.write(myline)
+        if not os.path.exists(vsl):
+            myline = f"na {x['nifti_image_path']} {x['totalseg_folder']} {vsl}\n"
+            f.write(myline)
 
 with open('knopczynski.args','w') as f:
     for n,x in enumerate(mylist):
         vsl = os.path.join(x['output_folder_path'],'knopczynski.nii.gz')
-        myline = f"{x['nifti_image_path']} {vsl} {x['nifti_lung_path']}\n"
-        f.write(myline)
+        if not os.path.exists(vsl):
+            myline = f"{x['nifti_image_path']} {vsl} {x['nifti_lung_path']}\n"
+            f.write(myline)
 
 with open('viz.args','w') as f:
     for n,x in enumerate(mylist):
