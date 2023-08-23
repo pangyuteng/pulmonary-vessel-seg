@@ -21,10 +21,10 @@ from utils import resample_img
 
 def main_pvv(mask_file,outdir,debug):
     os.makedirs(outdir,exist_ok=True)
-    
+    mip_file = os.path.join(outdir,'mip_dist.png')
     json_file = os.path.join(outdir,'results-dist.json')
-    if os.path.exists(json_file):
-        print(f'skip! {json_file} found')
+    if os.path.exists(json_file) and os.path.exists(mip_file):
+        print(f'skip! {json_file} {mip_file} found')
         return
 
     print('ReadMask...')
@@ -177,7 +177,6 @@ def main_pvv(mask_file,outdir,debug):
     
     print('mip...')
     mip = np.max(pvv,axis=1)*80
-    mip_file = f"{outdir}/mip_dist.png"
     imageio.imwrite(mip_file,mip)
 
     mydict = {
