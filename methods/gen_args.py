@@ -38,8 +38,11 @@ with open('knopczynski.args','w') as f:
 
 with open('viz.args','w') as f:
     for n,x in enumerate(mylist):
-        myline = f"{x['output_folder_path']}\n"
-        f.write(myline)
+        vsl_file = os.path.join(x['output_folder_path'],'vessel.json')
+        info_file = os.path.join(x['output_folder_path'],'info.json')
+        if not os.path.exists(vsl_file) or not os.path.exists(info_file):
+            myline = f"{x['output_folder_path']}\n"
+            f.write(myline)
 
 """
 python gen_args.py tl.csv
