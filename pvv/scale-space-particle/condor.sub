@@ -1,6 +1,6 @@
 
 universe = docker
-docker_image = acilbwh/chestimagingplatform:latest bash
+docker_image = acilbwh/chestimagingplatform:latest
 docker_pull_policy = always
 
 executable = run.sh
