@@ -1,3 +1,5 @@
+#!/bin/bash
+
 echo $1
 
 cd /cvibraid/cvib2/Temp/ptengtmp

@@ -12,9 +12,11 @@ log = log/log.$(cluster).$(process).log
 error = log/log.$(cluster).$(process).err
 output = log/log.$(cluster).$(process).out
 
-requirements = (OpSys == "LINUX" && Arch == "X86_64" && GPUMEM > 20000 )
-request_cpus = 1
-request_gpus = 1
+#requirements = (OpSys == "LINUX" && Arch == "X86_64" && GPUMEM > 20000 )
+#request_gpus = 1
+
+requirements = (OpSys == "LINUX" && Arch == "X86_64" )
+request_cpus = 4
 request_memory = 20GB
 request_disk = 5GB
 
