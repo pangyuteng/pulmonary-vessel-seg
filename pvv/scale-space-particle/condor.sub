@@ -1,0 +1,23 @@
+
+universe = docker
+docker_image = acilbwh/chestimagingplatform:latest bash
+docker_pull_policy = always
+
+executable = run.sh
+transfer_input_files = run.sh
+should_transfer_files = YES
+when_to_transfer_output = ON_EXIT
+
+log = log/log.$(cluster).$(process).log
+error = log/log.$(cluster).$(process).err
+output = log/log.$(cluster).$(process).out
+
+requirements = (OpSys == "LINUX" && Arch == "X86_64" && GPUMEM > 20000 )
+request_cpus = 1
+request_gpus = 1
+request_memory = 20GB
+request_disk = 5GB
+
+max_materialize = 10
+arguments = "$(myargs)"
+queue myargs from my.args
