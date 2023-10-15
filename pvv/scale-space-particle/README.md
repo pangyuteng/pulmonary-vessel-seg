@@ -35,8 +35,18 @@ python /ChestImagingPlatform/Scripts/cip_compute_vessel_particles.py -i CT.nrrd 
 
 ![](vtk-poly-attribute-scale-in-paraview.png)
 
+```
+https://stackoverflow.com/a/28358088/868736
+
+cat vesel12-batch.txt | xargs -n 2 -P 8 echo
+
+cat vesel12-batch.txt | xargs -n 2 -P 8 bash run.sh
 
 ```
+```
+for x in [f'{x:02d}' for x in range(24)]:
+    print(f'bash run.sh /radraid/pteng/tmp/vessel12/{x}/img.nii.gz /radraid/pteng/tmp/scale-space-particles/vessel12/{x}')
+
 
 git clone https://github.com/acil-bwh/ChestImagingPlatform.git
 cd ChestImagingPlatform
