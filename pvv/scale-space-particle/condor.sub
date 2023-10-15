@@ -12,11 +12,10 @@ log = log/log.$(cluster).$(process).log
 error = log/log.$(cluster).$(process).err
 output = log/log.$(cluster).$(process).out
 
-#requirements = (OpSys == "LINUX" && Arch == "X86_64" && GPUMEM > 20000)
-#request_gpus = 1
 #requirements = (OpSys == "LINUX" && Arch == "X86_64" )
-# testing using below machine since its built there.
-requirements = (Machine  == "REDLRADADM14958.ad.medctr.ucla.edu")
+# faster CPU are with those higher GPUMEM
+requirements = (OpSys == "LINUX" && Arch == "X86_64" && GPUMEM > 20000)
+
 request_cpus = 4
 request_gpus = 0
 request_memory = 20GB
