@@ -1,24 +1,3 @@
-```
-
-docker pull acilbwh/chestimagingplatform:latest
-
-
-docker run -it \
-    -v /dingo_data:/dingo_data \
-    -v /radraid:/radraid \
-    -v /cvibraid:/cvisbraid \
-    acilbwh/chestimagingplatform:latest bash
-
-# find chest ct dicom images
-
-ConvertDicom --dir dicom -o CT.nrrd
-GenerateMedianFilteredImage -i CT.nrrd -o CT-median.nrrd
-GeneratePartialLungLabelMap --ict CT-median.nrrd -o partialLungLabelMap.nrrd
-python /ChestImagingPlatform/Scripts/cip_compute_vessel_particles.py -i CT.nrrd -l partialLungLabelMap.nrrd -r WholeLung -r LeftLung -r RightLung -o particles.vtk --perm -s 0.625 --tmpDir=$workdir
-
-
-
-```
 
 ```
 
@@ -28,6 +7,35 @@ https://groups.google.com/g/chestimagingplatform-users/c/KO68D66yt0o
 
 
 ```
+
+
+```
+
+docker pull acilbwh/chestimagingplatform:latest
+docker build -t registry.cvib.ucla.edu/pteng:ssparticle .
+docker push registry.cvib.ucla.edu/pteng:ssparticle
+
+docker run -it \
+    -u $(id -u):$(id -g) \
+    -v /dingo_data:/dingo_data \
+    -v /radraid:/radraid \
+    -v /cvibraid:/cvisbraid \
+    registry.cvib.ucla.edu/pteng:ssparticle bash
+
+# find chest ct dicom images
+
+ConvertDicom --dir dicom -o CT.nrrd
+GenerateMedianFilteredImage -i CT.nrrd -o CT-median.nrrd
+GeneratePartialLungLabelMap --ict CT-median.nrrd -o partialLungLabelMap.nrrd
+python /ChestImagingPlatform/Scripts/cip_compute_vessel_particles.py -i CT.nrrd -l partialLungLabelMap.nrrd -r WholeLung -r LeftLung -r RightLung -o particles.vtk --perm -s 0.625 --tmpDir=$workdir
+
+
+```
+
+
+![](vtk-poly-attribute-scale-in-paraview.png)
+
+
 ```
 
 git clone https://github.com/acil-bwh/ChestImagingPlatform.git
@@ -37,14 +45,14 @@ git checkout 7a4413f
 ```
 ```
 
-docker build -t scale-space-particle .
+docker build -t ssp:build -f Dockerfile.build .
 
-docker run -it scale-space-particle bash
+docker run -it ssp:build bash
 
 apt-get update && apt-get install git vim curl jq build-essential cmake -yq
 
 docker run -it -v ${repo_path}:/opt/ChestImagingPlatform -w /opt/
-ChestImagingPlatform scale-space-particle  bash
+ChestImagingPlatform ssp:build  bash
 
 cd /opt/ChestImagingPlatform
 mkdir ChestImagingPlatform-build

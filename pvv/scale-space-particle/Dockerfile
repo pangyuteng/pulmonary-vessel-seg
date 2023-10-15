@@ -1,11 +1,6 @@
-FROM ubuntu:18.04
+FROM acilbwh/chestimagingplatform:latest
 
-RUN apt-get update && \
-    apt-get install -yq --no-install-recommends \
-    autotools-dev \
-    build-essential \
-    ca-certificates \
-    software-properties-common \
-    vim git wget curl \
-    make \
-    cmake 
+# "nothing to see here please move along"
+# maybe non-root will be able to access...
+RUN chmod 777 -R /root/miniconda2
+RUN chmod 777 -R /ChestImagingPlatform-build/CIP-build

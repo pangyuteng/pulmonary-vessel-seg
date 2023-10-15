@@ -1,7 +1,7 @@
 
 universe = docker
-docker_image = acilbwh/chestimagingplatform:latest
-docker_pull_policy = always
+docker_image = registry.cvib.ucla.edu/pteng:ssparticle
+#docker_pull_policy = always
 
 executable = run.sh
 transfer_input_files = run.sh
@@ -12,11 +12,13 @@ log = log/log.$(cluster).$(process).log
 error = log/log.$(cluster).$(process).err
 output = log/log.$(cluster).$(process).out
 
-#requirements = (OpSys == "LINUX" && Arch == "X86_64" && GPUMEM > 20000 )
+#requirements = (OpSys == "LINUX" && Arch == "X86_64" && GPUMEM > 20000)
 #request_gpus = 1
-
-requirements = (OpSys == "LINUX" && Arch == "X86_64" )
+#requirements = (OpSys == "LINUX" && Arch == "X86_64" )
+# testing using below machine since its built there.
+requirements = (Machine  == "REDLRADADM14958.ad.medctr.ucla.edu")
 request_cpus = 4
+request_gpus = 0
 request_memory = 20GB
 request_disk = 5GB
 
