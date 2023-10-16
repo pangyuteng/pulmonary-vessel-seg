@@ -22,5 +22,5 @@ writer.SetFileName(output_file)
 writer.Execute(image)
 
 '''
-python img_convert.py ok.mhd ok.nrrd
+python img_convert.py ok.nii.gz ok.nrrd NiftiImageIO
 '''
