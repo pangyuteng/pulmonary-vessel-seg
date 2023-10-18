@@ -1,0 +1,7 @@
+/radraid/pteng/tmp/vessel12/01/img.nii.gz /radraid/pteng/tmp/scale-space-particles/vessel12/01
+/radraid/pteng/tmp/vessel12/06/img.nii.gz /radraid/pteng/tmp/scale-space-particles/vessel12/06
+/radraid/pteng/tmp/vessel12/09/img.nii.gz /radraid/pteng/tmp/scale-space-particles/vessel12/09
+/radraid/pteng/tmp/vessel12/12/img.nii.gz /radraid/pteng/tmp/scale-space-particles/vessel12/12
+/radraid/pteng/tmp/vessel12/13/img.nii.gz /radraid/pteng/tmp/scale-space-particles/vessel12/13
+/radraid/pteng/tmp/vessel12/15/img.nii.gz /radraid/pteng/tmp/scale-space-particles/vessel12/15
+/radraid/pteng/tmp/vessel12/16/img.nii.gz /radraid/pteng/tmp/scale-space-particles/vessel12/16
