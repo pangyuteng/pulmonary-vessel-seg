@@ -82,3 +82,13 @@ cmake ..
 make -j 15
 
 ```
+```
+prelimiary thoughts if this is to be used in prod.
+
++ lack of knowledge in this code base.
++ failure to build – thus can’t utilize condor yet.
++ investigation is required to translate “scale” to “BV5,10,10+”.
++ preliminary success rate using vessel12 dataset is 17/23.
++ processing time per case is 4 to 8 hrs.
+
+```
